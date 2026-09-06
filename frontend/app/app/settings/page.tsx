@@ -16,7 +16,7 @@ export default function SettingsPage() {
         Assignments are private to your account. We do not sell documents and we do not use them for model training unless you opt in.
         Guest uploads are deleted automatically after a short retention period.
       </p>
-      <button onClick={deleteAccount} className="mt-8 rounded-md border border-[var(--crimson)] px-4 py-2 text-[var(--crimson)]">
+      <button type="button" onClick={deleteAccount} className="mt-8 rounded-md border border-[var(--crimson)] px-4 py-2 text-[var(--crimson)]">
         Delete account
       </button>
     </main>

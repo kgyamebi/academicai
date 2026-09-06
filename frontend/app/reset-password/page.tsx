@@ -25,7 +25,7 @@ function ResetInner() {
       <label className="block text-sm">New password
         <input name="password" type="password" minLength={8} required className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3" />
       </label>
-      <button className="w-full rounded-md bg-[var(--teal)] py-3 text-white">Update password</button>
+      <button type="submit" className="w-full rounded-md bg-[var(--teal)] py-3 text-white">Update password</button>
     </form>
   );
 }

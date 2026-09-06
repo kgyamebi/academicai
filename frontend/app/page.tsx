@@ -21,7 +21,7 @@ export default function HomePage() {
         <section className="mx-auto max-w-6xl px-4 py-16 md:py-24">
           <p className="text-sm uppercase tracking-[0.2em] text-[var(--teal)]">Academic writing analysis</p>
           <h1 className="mt-4 max-w-3xl font-serif text-4xl leading-tight md:text-6xl">{messages.heroTitle}</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--ink)]/75">{messages.heroSub}</p>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--ink-muted)]">{messages.heroSub}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/check" className="rounded-md bg-[var(--teal)] px-5 py-3 text-center text-white">
               {messages.primaryCta}
@@ -30,7 +30,7 @@ export default function HomePage() {
               {messages.secondaryCta}
             </Link>
           </div>
-          <p className="mt-6 max-w-2xl text-sm leading-6 text-[var(--ink)]/60">{messages.disclaimer}</p>
+          <p className="mt-6 max-w-2xl text-sm leading-6 text-[var(--ink-muted)]">{messages.disclaimer}</p>
         </section>
 
         <section className="border-y border-[var(--rule)] bg-[var(--paper-2)]">
@@ -55,7 +55,7 @@ export default function HomePage() {
               <li key={n} className="rounded-xl border border-[var(--rule)] bg-[var(--paper-2)] p-5">
                 <p className="font-serif text-2xl text-[var(--teal)]">{n}</p>
                 <h3 className="mt-2 font-serif text-xl">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-[var(--ink)]/75">{body}</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--ink-muted)]">{body}</p>
               </li>
             ))}
           </ol>

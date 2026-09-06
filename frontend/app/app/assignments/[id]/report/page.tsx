@@ -73,9 +73,9 @@ export default function ReportPage() {
   return (
     <main className="lg:grid lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
       <section>
-        <div className="mb-4 flex gap-2 lg:hidden">
+        <div className="mb-4 flex gap-2 lg:hidden" role="tablist" aria-label="Report sections">
           {(["score", "findings", "document", "coach"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`rounded-md px-3 py-1 text-sm ${tab === t ? "bg-[var(--teal)] text-white" : "border border-[var(--rule)]"}`}>
+            <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={`rounded-md px-3 py-1 text-sm ${tab === t ? "bg-[var(--teal)] text-white" : "border border-[var(--rule)]"}`}>
               {t}
             </button>
           ))}
@@ -83,7 +83,7 @@ export default function ReportPage() {
         <div className={tab === "score" || tab === "document" ? "" : "hidden lg:block"}>
           <ScoreRing score={report.overall_score} />
           <p className="mt-4 max-w-xl text-sm leading-6">{report.summary}</p>
-          <p className="mt-2 text-xs text-[var(--ink)]/60">{report.disclaimer}</p>
+          <p className="mt-2 text-xs text-[var(--ink-muted)]">{report.disclaimer}</p>
           <div className="mt-6 grid grid-cols-2 gap-2">
             {report.scores.map((s) => (
               <div key={s.category} className="rounded-md border border-[var(--rule)] bg-[var(--paper-2)] p-3">
@@ -96,12 +96,11 @@ export default function ReportPage() {
           <ul className="mt-3 space-y-1 text-sm">
             {report.structure_map.map((s) => (
               <li key={s.key}>
-                {s.label} {s.status === "present" ? "✓" : s.status === "warning" ? "⚠" : "✗"}
-                <span className="sr-only"> {s.status}</span>
+                {s.label}: {s.status}
               </li>
             ))}
           </ul>
-          <button onClick={downloadPdf} className="mt-6 rounded-md border border-[var(--rule)] px-4 py-2 text-sm">
+          <button type="button" onClick={downloadPdf} className="mt-6 rounded-md border border-[var(--rule)] px-4 py-2 text-sm">
             Download analysis report
           </button>
         </div>
@@ -113,6 +112,7 @@ export default function ReportPage() {
             {report.priority_actions.map((a) => <li key={a}>{a}</li>)}
           </ul>
           <button
+            type="button"
             className="mt-4 rounded-md bg-[var(--teal)] px-3 py-2 text-sm text-white"
             onClick={() => {
               const match = report.findings.find((f) => f.category === report.weakest_area.category) || report.findings[0];
@@ -134,7 +134,7 @@ export default function ReportPage() {
           <h2 className="font-serif text-xl">{selected ? selected.location : report.weakest_area.category}</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {(["explain", "suggest", "teach", "example"] as const).map((m) => (
-              <button key={m} onClick={() => setMode(m)} className={`rounded-md px-3 py-1 text-sm ${mode === m ? "bg-[var(--teal)] text-white" : "border border-[var(--rule)]"}`}>
+              <button key={m} type="button" aria-pressed={mode === m} onClick={() => setMode(m)} className={`rounded-md px-3 py-1 text-sm ${mode === m ? "bg-[var(--teal)] text-white" : "border border-[var(--rule)]"}`}>
                 {m === "teach" ? "Teach me" : m[0].toUpperCase() + m.slice(1)}
               </button>
             ))}

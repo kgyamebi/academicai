@@ -11,6 +11,7 @@ from app.api.v1 import admin, analysis, assignments, auth, billing, coach, dashb
 from app.config import get_settings
 from app.core.csrf import enforce_csrf
 from app.core.logging import configure_logging, get_logger
+from app.core.metrics import incr
 from app.db.session import Base, engine
 from app.deps import require_roles
 from app.models.user import User
@@ -69,10 +70,16 @@ async def security_headers(request: Request, call_next):
     except HTTPException as exc:
         return JSONResponse(status_code=exc.status_code, content={"error": exc.detail, "status": exc.status_code})
     response = await call_next(request)
+    incr("http.requests")
+    if response.status_code >= 500:
+        incr("http.5xx")
+    elif response.status_code >= 400:
+        incr("http.4xx")
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
     response.headers["Cache-Control"] = "no-store"
     if settings.is_production:
         response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"

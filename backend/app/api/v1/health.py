@@ -3,6 +3,7 @@ from redis import Redis
 from sqlalchemy import text
 
 from app.config import get_settings
+from app.core.metrics import snapshot
 from app.db.session import engine
 
 router = APIRouter(tags=["health"])
@@ -21,6 +22,13 @@ def health() -> dict:
 @router.get("/api/ready")
 def ready() -> dict:
     body = _status(deep=True)
+    return body
+
+
+@router.get("/api/metrics")
+def metrics() -> dict:
+    body = _status(deep=True)
+    body["counters"] = snapshot()
     return body
 
 

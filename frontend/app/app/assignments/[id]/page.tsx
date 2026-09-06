@@ -35,7 +35,7 @@ export default function AssignmentWorkspace() {
   return (
     <main className="space-y-8">
       <div>
-        <p className="text-sm text-[var(--ink)]/60">Assignment workspace</p>
+        <p className="text-sm text-[var(--ink-muted)]">Assignment workspace</p>
         <h1 className="font-serif text-3xl">{data.title}</h1>
         <p className="text-sm">{data.academic_level} · {data.citation_style}</p>
       </div>

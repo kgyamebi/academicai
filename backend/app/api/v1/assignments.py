@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.crypto import decrypt_field, encrypt_field
 from app.db.session import get_db
-from app.deps import get_current_user, owned_assignment
+from app.deps import get_current_user, owned_assignment, owned_document
 from app.models.analysis import AnalysisJob, AnalysisReport
 from app.models.assignment import Assignment, AssignmentQuestion, AssignmentVersion, Rubric, RubricCriterion
 from app.models.user import User
@@ -181,6 +181,10 @@ def create_version(
     db: Session = Depends(get_db),
 ):
     assignment = owned_assignment(assignment_id, user, db)
+    if payload.document_id:
+        document = owned_document(payload.document_id, user, db)
+        if document.assignment_id and document.assignment_id != assignment.id:
+            raise HTTPException(404, "Document not found.")
     current_max = max((v.version_number for v in assignment.versions), default=0)
     for v in assignment.versions:
         v.is_current = False

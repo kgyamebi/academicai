@@ -26,12 +26,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={path === item.href ? "page" : undefined}
               className={`rounded-md px-3 py-2 text-sm ${path === item.href ? "bg-[var(--teal)] text-white" : "hover:bg-black/5"}`}
             >
               {item.label}
             </Link>
           ))}
           <button
+            type="button"
             className="rounded-md px-3 py-2 text-left text-sm hover:bg-black/5"
             onClick={async () => {
               await signOut();

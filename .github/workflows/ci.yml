@@ -29,8 +29,9 @@ jobs:
           APP_SECRET_KEY: ci-secret
           DATABASE_URL: sqlite:///./ci.db
         run: |
-          pytest -q --cov=app --cov-report=term-missing --cov-fail-under=60
-          pytest -q tests/test_isolation.py tests/test_billing_critical.py tests/test_hardening.py --cov=app.services.billing --cov=app.services.credits --cov=app.deps --cov-fail-under=75
+          pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
+          pytest -q tests/test_isolation.py tests/test_billing_critical.py tests/test_hardening.py tests/test_security_cert.py --cov=app.services.billing --cov=app.services.credits --cov=app.deps --cov-fail-under=75
+          pytest -q tests/test_ai_quality_gate.py tests/test_a11y_static.py
       - name: Dependency audit
         run: pip install pip-audit && pip-audit -r requirements.txt || true
 

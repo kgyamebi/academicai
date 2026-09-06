@@ -137,3 +137,194 @@ def test_paystack_valid_signature_roundtrip(client, monkeypatch):
     response = client.post("/api/billing/webhooks/paystack", content=body, headers={"x-paystack-signature": sig})
     assert response.status_code == 200
     get_settings.cache_clear()
+
+
+def test_failed_then_successful_webhook_still_grants(client):
+    token = _register(client, "bill-order@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-order@example.com").one()
+    payment = Payment(
+        user_id=user.id,
+        provider="stripe",
+        amount_cents=199,
+        currency="USD",
+        status="pending",
+        purpose="subscription",
+        raw_payload={"plan": "student"},
+    )
+    db.add(payment)
+    db.commit()
+    from app.services.billing import mark_payment_failed
+
+    mark_payment_failed(db, payment, "evt_fail_first", {"type": "payment_intent.payment_failed"})
+    db.commit()
+    assert db.get(Payment, payment.id).status == "failed"
+    apply_successful_payment(db, db.get(Payment, payment.id), "evt_success_later", {"type": "checkout.session.completed"})
+    db.commit()
+    assert db.get(Payment, payment.id).status == "successful"
+    db.close()
+    billing = client.get("/api/billing", headers={"Authorization": f"Bearer {token}"})
+    assert billing.json()["plan"]["slug"] == "student"
+
+
+def test_success_then_late_failure_does_not_revoke(client):
+    _register(client, "bill-latefail@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-latefail@example.com").one()
+    payment = Payment(
+        user_id=user.id,
+        provider="stripe",
+        amount_cents=199,
+        currency="USD",
+        status="pending",
+        purpose="subscription",
+        raw_payload={"plan": "student"},
+    )
+    db.add(payment)
+    db.commit()
+    apply_successful_payment(db, payment, "evt_ok", {"ok": True})
+    db.commit()
+    from app.services.billing import mark_payment_failed
+
+    mark_payment_failed(db, db.get(Payment, payment.id), "evt_late_fail", {"failed": True})
+    db.commit()
+    assert db.get(Payment, payment.id).status == "successful"
+    db.close()
+
+
+def test_refund_claws_back_credits_once(client):
+    _register(client, "bill-refund@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-refund@example.com").one()
+    payment = Payment(
+        user_id=user.id,
+        provider="stripe",
+        amount_cents=299,
+        currency="USD",
+        status="pending",
+        purpose="credits",
+        raw_payload={"credits": 10, "pack": "credits_10"},
+    )
+    db.add(payment)
+    db.commit()
+    apply_successful_payment(db, payment, "evt_credit_ok", {"ok": True})
+    db.commit()
+    from app.services.billing import apply_refund
+    from app.services.credits import available_credits
+
+    user = db.query(User).filter(User.email == "bill-refund@example.com").one()
+    assert float(available_credits(db, user)) == 10
+    apply_refund(db, db.get(Payment, payment.id), "evt_refund", {"refund": True})
+    db.commit()
+    apply_refund(db, db.get(Payment, payment.id), "evt_refund", {"refund": True})
+    db.commit()
+    user = db.query(User).filter(User.email == "bill-refund@example.com").one()
+    assert db.get(Payment, payment.id).status == "refunded"
+    assert float(available_credits(db, user)) == 0
+    db.close()
+
+
+def test_partial_refund_claws_proportional_credits(client):
+    _register(client, "bill-partial@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-partial@example.com").one()
+    payment = Payment(
+        user_id=user.id,
+        provider="paystack",
+        amount_cents=1000,
+        currency="USD",
+        status="pending",
+        purpose="credits",
+        raw_payload={"credits": 10, "pack": "credits_10"},
+    )
+    db.add(payment)
+    db.commit()
+    apply_successful_payment(db, payment, "evt_partial_ok", {"ok": True})
+    db.commit()
+    from app.services.billing import apply_refund
+    from app.services.credits import available_credits
+
+    apply_refund(db, db.get(Payment, payment.id), "evt_partial", {"partial": True}, amount_cents=500)
+    db.commit()
+    user = db.query(User).filter(User.email == "bill-partial@example.com").one()
+    assert db.get(Payment, payment.id).status == "partially_refunded"
+    assert float(available_credits(db, user)) == 5
+    db.close()
+
+
+def test_cancelled_charge_does_not_grant(client):
+    _register(client, "bill-cancel@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-cancel@example.com").one()
+    payment = Payment(
+        user_id=user.id,
+        provider="flutterwave",
+        amount_cents=199,
+        currency="USD",
+        status="pending",
+        purpose="subscription",
+        raw_payload={"plan": "student"},
+    )
+    db.add(payment)
+    db.commit()
+    from app.services.billing import mark_payment_cancelled
+
+    mark_payment_cancelled(db, payment, "evt_cancel", {"cancelled": True})
+    db.commit()
+    assert db.get(Payment, payment.id).status == "cancelled"
+    db.close()
+
+
+def test_second_subscription_cancels_the_first(client):
+    token = _register(client, "bill-upgrade@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-upgrade@example.com").one()
+    first = Payment(
+        user_id=user.id,
+        provider="stripe",
+        amount_cents=199,
+        currency="USD",
+        status="pending",
+        purpose="subscription",
+        raw_payload={"plan": "student"},
+    )
+    second = Payment(
+        user_id=user.id,
+        provider="stripe",
+        amount_cents=499,
+        currency="USD",
+        status="pending",
+        purpose="subscription",
+        raw_payload={"plan": "pro"},
+    )
+    db.add_all([first, second])
+    db.commit()
+    apply_successful_payment(db, first, "evt_sub_1", {})
+    apply_successful_payment(db, second, "evt_sub_2", {})
+    db.commit()
+    from app.models.billing import Subscription
+
+    active = [s for s in db.query(Subscription).filter(Subscription.user_id == user.id) if s.status == "active"]
+    assert len(active) == 1
+    db.close()
+    billing = client.get("/api/billing", headers={"Authorization": f"Bearer {token}"})
+    assert billing.status_code == 200
+    assert billing.json()["plan"]["slug"] in {"pro", "researcher", "student"}
+
+
+def test_expired_credits_are_unusable(client):
+    from datetime import timedelta
+
+    from app.core.time import utcnow
+    from app.services.credits import available_credits, grant_credits
+
+    _register(client, "bill-expire@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-expire@example.com").one()
+    grant_credits(db, user, Decimal("8"))
+    wallet = user.credits[0]
+    wallet.expires_at = utcnow() - timedelta(days=1)
+    db.commit()
+    user = db.query(User).filter(User.email == "bill-expire@example.com").one()
+    assert float(available_credits(db, user)) == 0
+    db.close()

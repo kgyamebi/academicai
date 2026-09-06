@@ -26,15 +26,15 @@ export default function LoginPage() {
       <SiteHeader compact />
       <main className="mx-auto max-w-md px-4 py-16">
         <h1 className="font-serif text-3xl">Sign in</h1>
-        <form onSubmit={onSubmit} className="mt-8 space-y-4">
-          <label className="block text-sm">Email
-            <input name="email" type="email" required className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3" />
+        <form onSubmit={onSubmit} className="mt-8 space-y-4" noValidate>
+          <label className="block text-sm" htmlFor="email">Email
+            <input id="email" name="email" type="email" autoComplete="email" required aria-invalid={Boolean(error)} aria-describedby={error ? "login-error" : undefined} className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3" />
           </label>
-          <label className="block text-sm">Password
-            <input name="password" type="password" required className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3" />
+          <label className="block text-sm" htmlFor="password">Password
+            <input id="password" name="password" type="password" autoComplete="current-password" required aria-invalid={Boolean(error)} aria-describedby={error ? "login-error" : undefined} className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3" />
           </label>
-          {error && <p className="text-sm text-[var(--crimson)]" role="alert">{error}</p>}
-          <button className="w-full rounded-md bg-[var(--teal)] py-3 text-white">Continue</button>
+          {error && <p id="login-error" className="text-sm text-[var(--crimson)]" role="alert">{error}</p>}
+          <button type="submit" className="w-full rounded-md bg-[var(--teal)] py-3 text-white">Continue</button>
         </form>
         <p className="mt-4 text-sm"><Link href="/forgot-password" className="underline">Forgot password</Link></p>
         <p className="mt-2 text-sm">New here? <Link href="/register" className="underline">Create a free account</Link></p>

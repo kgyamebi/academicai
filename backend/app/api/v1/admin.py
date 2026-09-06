@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.deps import require_roles
-from app.models.admin import AdminAuditLog, FeatureFlag
+from app.models.admin import AdminAuditLog, FeatureFlag, SecurityEvent
 from app.models.analysis import AnalysisJob
 from app.models.billing import Payment, Plan
 from app.models.user import User
@@ -112,6 +112,31 @@ def upsert_flag(payload: dict, admin: User = Depends(require_roles("admin")), db
         flag.enabled = bool(payload.get("enabled", flag.enabled))
     db.commit()
     return {"ok": True}
+
+
+@router.get("/security-events")
+def security_events(
+    page: int = Query(1, ge=1),
+    admin: User = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+):
+    items = db.scalars(
+        select(SecurityEvent).order_by(SecurityEvent.created_at.desc()).offset((page - 1) * 50).limit(50)
+    ).all()
+    return {
+        "items": [
+            {
+                "id": str(event.id),
+                "event_type": event.event_type,
+                "severity": event.severity,
+                "user_id": str(event.user_id) if event.user_id else None,
+                "ip_address": event.ip_address,
+                "details": event.details,
+                "created_at": event.created_at.isoformat() if event.created_at else None,
+            }
+            for event in items
+        ]
+    }
 
 
 @router.get("/eval")

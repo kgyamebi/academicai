@@ -89,6 +89,23 @@ def refund_reservation(db: Session, job_id: UUID) -> None:
     reserved.status = "refunded"
 
 
+def clawback_credits(db: Session, user: User, amount: Decimal, operation: str = "refund") -> Credit:
+    wallet = _wallet(db, user.id, lock=True)
+    current = wallet.remaining or Decimal("0")
+    removed = min(current, max(Decimal("0"), amount))
+    wallet.remaining = current - removed
+    db.add(
+        CreditTransaction(
+            user_id=user.id,
+            credit_id=wallet.id,
+            amount=removed,
+            status="refunded",
+            operation=operation,
+        )
+    )
+    return wallet
+
+
 def grant_credits(db: Session, user: User, amount: Decimal, operation: str = "purchase") -> Credit:
     wallet = _wallet(db, user.id, lock=True)
     wallet.remaining = (wallet.remaining or Decimal("0")) + amount

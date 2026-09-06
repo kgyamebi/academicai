@@ -21,10 +21,10 @@ export default function ForgotPage() {
           <p className="mt-6 text-sm">If an account exists, a reset link has been sent.</p>
         ) : (
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
-            <label className="block text-sm">Email
-              <input name="email" type="email" required className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3" />
+            <label className="block text-sm" htmlFor="email">Email
+              <input id="email" name="email" type="email" autoComplete="email" required className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3" />
             </label>
-            <button className="w-full rounded-md bg-[var(--teal)] py-3 text-white">Send reset link</button>
+            <button type="submit" className="w-full rounded-md bg-[var(--teal)] py-3 text-white">Send reset link</button>
           </form>
         )}
       </main>

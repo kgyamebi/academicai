@@ -14,7 +14,7 @@ export default function PricingPage() {
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-4 py-16">
         <h1 className="font-serif text-4xl">Affordable plans for students</h1>
-        <p className="mt-3 max-w-2xl text-[var(--ink)]/70">Prices are configurable in the admin panel. Displayed local currency is for guidance; charging uses the payment provider that can serve your country.</p>
+        <p className="mt-3 max-w-2xl text-[var(--ink-muted)]">Prices are configurable in the admin panel. Displayed local currency is for guidance; charging uses the payment provider that can serve your country.</p>
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {plans.map(([name, price, limit, features]) => (
             <article key={name} className="rounded-xl border border-[var(--rule)] bg-[var(--paper-2)] p-6">

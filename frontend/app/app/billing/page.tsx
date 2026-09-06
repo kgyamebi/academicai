@@ -34,8 +34,8 @@ export default function BillingPage() {
       <p className="mt-3 text-sm">Current plan: {data.plan.name} · {data.subscription.checks_used}/{data.plan.checks_per_month} checks used</p>
       <p className="text-sm">Credits: {data.credits}</p>
       <div className="mt-6 flex gap-3">
-        <button onClick={() => subscribe("student")} className="rounded-md bg-[var(--teal)] px-4 py-2 text-white">Upgrade to Student ($1.99)</button>
-        <button onClick={() => subscribe("pro")} className="rounded-md border border-[var(--rule)] px-4 py-2">Pro Student ($3.99)</button>
+        <button type="button" onClick={() => subscribe("student")} className="rounded-md bg-[var(--teal)] px-4 py-2 text-white">Upgrade to Student ($1.99)</button>
+        <button type="button" onClick={() => subscribe("pro")} className="rounded-md border border-[var(--rule)] px-4 py-2">Pro Student ($3.99)</button>
       </div>
       {message && <p className="mt-4 text-sm">{message}</p>}
     </main>

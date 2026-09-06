@@ -113,6 +113,9 @@ def apply_successful_payment(db: Session, payment: Payment, provider_event_id: s
         return
     if payment.status == "successful":
         return
+    from app.core.metrics import incr
+
+    incr("billing.successful_payments")
     payment.status = "successful"
     payment.provider_payment_id = provider_event_id
     db.add(
@@ -129,10 +132,13 @@ def apply_successful_payment(db: Session, payment: Payment, provider_event_id: s
         plan_slug = (payment.raw_payload or {}).get("plan")
         plan = db.scalar(select(Plan).where(Plan.slug == plan_slug))
         if plan:
-            for sub in user.subscriptions:
-                if sub.status == "active":
-                    sub.status = "cancelled"
-                    sub.cancelled_at = utcnow()
+            active = db.scalars(
+                select(Subscription).where(Subscription.user_id == user.id, Subscription.status == "active")
+            ).all()
+            for sub in active:
+                sub.status = "cancelled"
+                sub.cancelled_at = utcnow()
+            db.flush()
             db.add(
                 Subscription(
                     user_id=user.id,
@@ -143,6 +149,7 @@ def apply_successful_payment(db: Session, payment: Payment, provider_event_id: s
                     current_period_end=utcnow() + timedelta(days=30),
                 )
             )
+            db.flush()
             send_email(user.email, "Subscription confirmed", f"Your {plan.name} plan is now active.")
     if payment.purpose == "credits" and user:
         from app.services.credits import grant_credits
@@ -155,6 +162,8 @@ def apply_successful_payment(db: Session, payment: Payment, provider_event_id: s
 def mark_payment_failed(db: Session, payment: Payment, provider_event_id: str, payload: dict) -> None:
     existing = db.scalar(select(PaymentTransaction).where(PaymentTransaction.provider_event_id == provider_event_id))
     if existing:
+        return
+    if payment.status in {"successful", "refunded", "partially_refunded"}:
         return
     payment.status = "failed"
     db.add(
@@ -170,6 +179,72 @@ def mark_payment_failed(db: Session, payment: Payment, provider_event_id: str, p
         sub = db.get(Subscription, payment.subscription_id)
         if sub:
             sub.status = "past_due"
+
+
+def mark_payment_cancelled(db: Session, payment: Payment, provider_event_id: str, payload: dict) -> None:
+    existing = db.scalar(select(PaymentTransaction).where(PaymentTransaction.provider_event_id == provider_event_id))
+    if existing:
+        return
+    if payment.status in {"successful", "refunded", "partially_refunded"}:
+        return
+    payment.status = "cancelled"
+    db.add(
+        PaymentTransaction(
+            payment_id=payment.id,
+            event_type="payment.cancelled",
+            provider_event_id=provider_event_id,
+            status="cancelled",
+            payload=payload,
+        )
+    )
+
+
+def apply_refund(
+    db: Session,
+    payment: Payment,
+    provider_event_id: str,
+    payload: dict,
+    *,
+    amount_cents: int | None = None,
+) -> None:
+    existing = db.scalar(select(PaymentTransaction).where(PaymentTransaction.provider_event_id == provider_event_id))
+    if existing:
+        return
+    if payment.status not in {"successful", "partially_refunded"}:
+        return
+    full_amount = payment.amount_cents or 0
+    refunded = amount_cents if amount_cents is not None else full_amount
+    partial = 0 < refunded < full_amount
+    payment.status = "partially_refunded" if partial else "refunded"
+    db.add(
+        PaymentTransaction(
+            payment_id=payment.id,
+            event_type="payment.refunded",
+            provider_event_id=provider_event_id,
+            status=payment.status,
+            payload=payload,
+        )
+    )
+    user = db.get(User, payment.user_id)
+    if payment.purpose == "credits" and user:
+        granted = Decimal(str((payment.raw_payload or {}).get("credits") or 0))
+        if granted > 0:
+            clawback = granted if not partial else (granted * Decimal(refunded) / Decimal(full_amount))
+            from app.services.credits import clawback_credits
+
+            clawback_credits(db, user, clawback, "refund")
+    if payment.purpose == "subscription" and user and not partial:
+        active = db.scalars(
+            select(Subscription).where(
+                Subscription.user_id == user.id,
+                Subscription.status == "active",
+                Subscription.provider == payment.provider,
+            )
+        ).all()
+        for sub in active:
+            sub.status = "cancelled"
+            sub.cancelled_at = utcnow()
+        db.flush()
 
 
 def record_webhook_event(db: Session, provider: str, event_id: str, event_type: str, payload: bytes) -> bool:

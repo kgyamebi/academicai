@@ -15,7 +15,7 @@ export default async function BlogIndex() {
           {data.items.map((p: { slug: string; title: string; excerpt: string }) => (
             <li key={p.slug}>
               <Link href={`/blog/${p.slug}`} className="font-serif text-2xl hover:underline">{p.title}</Link>
-              <p className="text-sm text-[var(--ink)]/70">{p.excerpt}</p>
+              <p className="text-sm text-[var(--ink-muted)]">{p.excerpt}</p>
             </li>
           ))}
         </ul>

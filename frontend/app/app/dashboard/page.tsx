@@ -46,7 +46,7 @@ export default function DashboardPage() {
           {data.recent_reports.map((r) => (
             <li key={r.id} className="rounded-lg border border-[var(--rule)] bg-[var(--paper-2)] p-4">
               <p className="font-medium">{r.score}/100</p>
-              <p className="text-sm text-[var(--ink)]/70">{r.summary}</p>
+              <p className="text-sm text-[var(--ink-muted)]">{r.summary}</p>
               <Link className="mt-2 inline-block text-sm underline" href={`/app/assignments`}>
                 Open workspace
               </Link>
@@ -62,7 +62,7 @@ export default function DashboardPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-[var(--rule)] bg-[var(--paper-2)] p-4">
-      <p className="text-xs uppercase tracking-wide text-[var(--ink)]/60">{label}</p>
+      <p className="text-xs uppercase tracking-wide text-[var(--ink-muted)]">{label}</p>
       <p className="mt-2 font-serif text-2xl">{value}</p>
     </div>
   );

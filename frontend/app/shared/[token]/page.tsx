@@ -47,7 +47,7 @@ export default function SharedReport() {
             <input name="password" type="password" required className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3" />
           </label>
           {error && <p className="text-sm text-[var(--crimson)]" role="alert">{error}</p>}
-          <button className="w-full rounded-md bg-[var(--teal)] py-3 text-white">Open report</button>
+          <button type="submit" className="w-full rounded-md bg-[var(--teal)] py-3 text-white">Open report</button>
         </form>
       </main>
     );
@@ -59,7 +59,7 @@ export default function SharedReport() {
       <h1 className="font-serif text-3xl">Shared analysis</h1>
       <div className="mt-6"><ScoreRing score={report.overall_score} /></div>
       <p className="mt-4 leading-7">{report.summary}</p>
-      <p className="mt-4 text-sm text-[var(--ink)]/60">{report.disclaimer}</p>
+      <p className="mt-4 text-sm text-[var(--ink-muted)]">{report.disclaimer}</p>
     </main>
   );
 }

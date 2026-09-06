@@ -7,7 +7,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-4">
         <div>
           <p className="font-serif text-lg">AcademicCheck AI</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--ink)]/70">{messages.tagline}</p>
+          <p className="mt-2 text-sm leading-6 text-[var(--ink-muted)]">{messages.tagline}</p>
         </div>
         <div>
           <p className="text-sm font-semibold">Product</p>
@@ -29,7 +29,7 @@ export function SiteFooter() {
         </div>
         <div>
           <p className="text-sm font-semibold">Trust</p>
-          <p className="mt-3 text-sm leading-6 text-[var(--ink)]/70">{messages.disclaimer}</p>
+          <p className="mt-3 text-sm leading-6 text-[var(--ink-muted)]">{messages.disclaimer}</p>
         </div>
       </div>
     </footer>

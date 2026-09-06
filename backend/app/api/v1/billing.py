@@ -10,11 +10,13 @@ from app.models.user import User
 from app.schemas.common import CheckoutIn, CreditPurchaseIn
 from app.services.billing import (
     CREDIT_PACKS,
+    apply_refund,
     apply_successful_payment,
     create_checkout,
     create_credit_checkout,
     list_plans,
     localize_price,
+    mark_payment_cancelled,
     mark_payment_failed,
     payment_from_metadata,
     record_webhook_event,
@@ -146,6 +148,11 @@ async def stripe_webhook(
         apply_successful_payment(db, payment, event_id, event)
     elif event_type in {"invoice.payment_failed", "payment_intent.payment_failed"} and payment:
         mark_payment_failed(db, payment, event_id, event)
+    elif event_type in {"charge.refunded", "charge.refund.updated", "refund.created"} and payment:
+        amount = obj.get("amount_refunded") or obj.get("amount")
+        apply_refund(db, payment, event_id, event, amount_cents=int(amount) if amount is not None else None)
+    elif event_type in {"checkout.session.expired", "checkout.session.async_payment_failed"} and payment:
+        mark_payment_cancelled(db, payment, event_id, event)
     db.commit()
     return {"received": True}
 
@@ -171,6 +178,8 @@ async def paystack_webhook(
         apply_successful_payment(db, payment, event_id, event)
     elif event_type in {"charge.failed", "charge.abandoned"} and payment:
         mark_payment_failed(db, payment, event_id, event)
+    elif event_type in {"refund.processed", "charge.refunded"} and payment:
+        apply_refund(db, payment, event_id, event)
     db.commit()
     return {"received": True}
 
@@ -196,8 +205,12 @@ async def flutterwave_webhook(
     status_value = str(data.get("status") or "").lower()
     if status_value == "successful" and payment:
         apply_successful_payment(db, payment, event_id, event)
-    elif status_value in {"failed", "cancelled"} and payment:
+    elif status_value == "failed" and payment:
         mark_payment_failed(db, payment, event_id, event)
+    elif status_value == "cancelled" and payment:
+        mark_payment_cancelled(db, payment, event_id, event)
+    elif status_value == "refunded" and payment:
+        apply_refund(db, payment, event_id, event)
     db.commit()
     return {"received": True}
 

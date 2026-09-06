@@ -31,7 +31,7 @@ export default function VersionsPage() {
           <li key={v.id} className="rounded-md border border-[var(--rule)] p-3">{v.name}</li>
         ))}
       </ul>
-      <button onClick={runCompare} className="mt-6 rounded-md bg-[var(--teal)] px-4 py-2 text-white">Compare drafts</button>
+      <button type="button" onClick={runCompare} className="mt-6 rounded-md bg-[var(--teal)] px-4 py-2 text-white">Compare drafts</button>
       {compare && (
         <pre className="mt-6 overflow-auto rounded-md bg-[var(--paper-2)] p-4 text-sm">{JSON.stringify(compare, null, 2)}</pre>
       )}

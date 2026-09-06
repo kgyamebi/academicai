@@ -23,7 +23,7 @@ export default function AssignmentsPage() {
             <Link href={`/app/assignments/${a.id}`} className="font-medium hover:underline">
               {a.title}
             </Link>
-            <p className="text-sm text-[var(--ink)]/60">{a.academic_level} · {a.citation_style}</p>
+            <p className="text-sm text-[var(--ink-muted)]">{a.academic_level} · {a.citation_style}</p>
           </li>
         ))}
         {items.length === 0 && <p className="text-sm">No assignments yet.</p>}

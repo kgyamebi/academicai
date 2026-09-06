@@ -110,7 +110,7 @@ export default function CheckPage() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl px-4 py-10">
         <h1 className="font-serif text-4xl">Check your assignment</h1>
-        <p className="mt-3 text-[var(--ink)]/70">
+        <p className="mt-3 text-[var(--ink-muted)]">
           No account required for a first look. Create a free account later to save the full report.
         </p>
         <form
@@ -177,11 +177,11 @@ export default function CheckPage() {
               {error}
             </p>
           )}
-          <button disabled={busy} className="w-full rounded-md bg-[var(--teal)] py-3 text-white disabled:opacity-60">
+          <button type="submit" disabled={busy} className="w-full rounded-md bg-[var(--teal)] py-3 text-white disabled:opacity-60">
             {busy ? "Analyzing…" : "Start analysis"}
           </button>
         </form>
-        <p className="mt-6 text-sm text-[var(--ink)]/60">
+        <p className="mt-6 text-sm text-[var(--ink-muted)]">
           Already have an account? <Link href="/login" className="underline">Sign in</Link> to keep your workspace.
         </p>
       </main>

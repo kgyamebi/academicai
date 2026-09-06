@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from app.services.analysis.citations import CitationReport, analyze_citations
+from app.services.analysis.classifiers import classify_thesis, has_reasoned_argument, needs_citation
 from app.services.analysis.question import QuestionAnalysis, analyze_question
 from app.services.documents.extractor import ExtractedDocument
 
@@ -314,29 +315,24 @@ def _thesis(document: ExtractedDocument, question: QuestionAnalysis) -> dict:
     strength = "missing"
     reasons = []
     if not statement:
-        reasons.append("No clear thesis statement was identified in the opening section.")
-        strength = "missing"
-    else:
-        words = statement.split()
-        q_overlap = _tokens(statement) & _tokens(question.raw_text + " " + question.topic)
-        if TOPIC_LABEL.search(statement) and not CONTESTABLE.search(statement):
-            strength = "weak"
+        # Classify the opening window as a whole so short drafts still get a label.
+        opening = " ".join(p.text for p in window if not p.is_heading)
+        strength = classify_thesis(opening, question.raw_text + " " + question.topic)
+        if strength == "missing":
+            reasons.append("No clear thesis statement was identified in the opening section.")
+        elif strength == "weak":
             reasons.append("The opening restates the topic instead of taking a contestable position.")
-        elif len(words) < 12:
-            strength = "weak"
-            reasons.append("The possible thesis is too short to be a specific academic claim.")
-        elif not q_overlap:
-            strength = "weak"
-            reasons.append("The possible thesis does not clearly answer the assignment question.")
-        elif THESIS_MARKERS.search(statement) or (
-            CONTESTABLE.search(statement) and q_overlap
-        ):
-            strength = "strong"
-            reasons.append("A specific, question-facing claim appears in the introduction.")
         else:
-            strength = "moderate"
-            reasons.append("A thesis-like sentence is present, but it may still be more descriptive than arguable.")
-        if len(words) > 80:
+            reasons.append("A specific, question-facing claim appears in the introduction.")
+    else:
+        strength = classify_thesis(statement, question.raw_text + " " + question.topic)
+        if strength == "weak":
+            reasons.append("The possible thesis may still be more of a topic label than a contestable claim.")
+        elif strength == "missing":
+            reasons.append("The possible thesis does not clearly answer the assignment question.")
+        else:
+            reasons.append("A specific, question-facing claim appears in the introduction.")
+        if len(statement.split()) > 80:
             strength = "moderate" if strength == "strong" else strength
             reasons.append("The thesis may be too broad or contain too many claims at once.")
     return {
@@ -578,7 +574,8 @@ def _paragraphs(body: list, thesis: str) -> list[Finding]:
 def _arguments(body: list) -> list[Finding]:
     findings = []
     claims = [p for p in body if CLAIM_MARKERS.search(p.text) or len(p.text.split()) > 60]
-    if len(claims) < 2 and body:
+    reasoned = any(has_reasoned_argument(p.text) for p in body)
+    if len(claims) < 2 and body and not reasoned:
         findings.append(
             Finding(
                 category="argument",
@@ -622,17 +619,19 @@ def _evidence(body: list, citation: CitationReport) -> list[Finding]:
     findings = []
     cited_paras = {c.paragraph_index for c in citation.citations}
     for p in body:
-        needs = bool(
+        needs = needs_citation(p.text) or bool(
             re.search(
-                r"\b(\d+%|\d{4}|study|research|gdp|inflation|unemployment|war|treaty|experiment)\b",
+                r"\b(\d+%|gdp|inflation|unemployment|war|treaty|experiment)\b",
                 p.text,
                 re.I,
             )
         )
         if not needs:
             continue
-        if p.index in cited_paras or EVIDENCE_MARKERS.search(p.text):
-            classification = "supported" if p.index in cited_paras else "needs_citation"
+        if p.index in cited_paras:
+            classification = "supported"
+        elif needs_citation(p.text):
+            classification = "needs_citation"
         else:
             classification = "potentially_unsupported"
         if classification != "supported":
@@ -1055,6 +1054,10 @@ def _rubric(criteria: list[dict], scores: list[CategoryScore]) -> dict:
         "relevance": "relevance",
         "thesis": "thesis",
         "content": "relevance",
+        "evaluation": "relevance",
+        "judgement": "relevance",
+        "analyze": "argument",
+        "analyse": "argument",
     }
     rows = []
     estimated = 0

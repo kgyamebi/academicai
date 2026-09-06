@@ -10,8 +10,8 @@ export function ScoreRing({ score, label }: { score: number; label?: string }) {
         <span className="font-serif text-2xl">{clamped}</span>
       </div>
       <div>
-        <p className="text-sm uppercase tracking-wide text-[var(--ink)]/60">{label || "Overall writing quality"}</p>
-        <p className="max-w-xs text-sm text-[var(--ink)]/70">AI-assisted diagnostic indicator — not an official grade.</p>
+        <p className="text-sm uppercase tracking-wide text-[var(--ink-muted)]">{label || "Overall writing quality"}</p>
+        <p className="max-w-xs text-sm text-[var(--ink-muted)]">AI-assisted diagnostic indicator — not an official grade.</p>
       </div>
     </div>
   );
