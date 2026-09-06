@@ -2,6 +2,7 @@ from sqlalchemy import func, select
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.crypto import decrypt_field
 from app.db.session import get_db
 from app.deps import get_current_user
 from app.models.analysis import AnalysisJob, AnalysisReport
@@ -52,7 +53,7 @@ def dashboard(user: User = Depends(get_current_user), db: Session = Depends(get_
         "plan_slug": plan.slug,
         "improvement_trend": scores,
         "recent_reports": [
-            {"id": str(r.id), "score": r.overall_score, "summary": r.summary, "created_at": r.created_at.isoformat()}
+            {"id": str(r.id), "score": r.overall_score, "summary": decrypt_field(r.summary), "created_at": r.created_at.isoformat()}
             for r in reports
         ],
         "recent_documents": [

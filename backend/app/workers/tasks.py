@@ -10,3 +10,9 @@ def run_analysis_job(job_id: str) -> None:
         process_job(db, UUID(job_id))
     finally:
         db.close()
+
+
+def record_poison_job(job_id: str, error: str) -> None:
+    from app.core.logging import get_logger
+
+    get_logger("queue.dlq").error("poison_analysis_job", job_id=job_id, error=error)

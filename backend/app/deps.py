@@ -6,6 +6,7 @@ from uuid import UUID
 from fastapi import Cookie, Depends, Header, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.cookies import ACCESS_COOKIE
 from app.core.security import decode_token
 from app.db.session import get_db
 from app.models.assignment import Assignment
@@ -17,13 +18,13 @@ def get_current_user(
     request: Request,
     db: Session = Depends(get_db),
     authorization: str | None = Header(default=None),
-    access_token: str | None = Cookie(default=None),
+    ac_access: str | None = Cookie(default=None, alias=ACCESS_COOKIE),
 ) -> User:
     token = None
     if authorization and authorization.lower().startswith("bearer "):
         token = authorization.split(" ", 1)[1]
-    elif access_token:
-        token = access_token
+    elif ac_access:
+        token = ac_access
     if not token:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Please sign in.")
     try:
@@ -43,12 +44,12 @@ def get_optional_user(
     request: Request,
     db: Session = Depends(get_db),
     authorization: str | None = Header(default=None),
-    access_token: str | None = Cookie(default=None),
+    ac_access: str | None = Cookie(default=None, alias=ACCESS_COOKIE),
 ) -> User | None:
-    if not authorization and not access_token:
+    if not authorization and not ac_access:
         return None
     try:
-        return get_current_user(request, db, authorization, access_token)
+        return get_current_user(request, db, authorization, ac_access)
     except HTTPException:
         return None
 

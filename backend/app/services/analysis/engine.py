@@ -33,8 +33,19 @@ COMMAND_COVERAGE = {
 }
 
 THESIS_MARKERS = re.compile(
-    r"\b(this (paper|essay|assignment|study|article)|i argue|this essay argues|"
-    r"the (main )?argument|it (will be )?argued|this dissertation)\b",
+    r"\b(this (paper|essay|assignment|study|article|dissertation) argues|"
+    r"i (argue|contend|claim)|this essay argues|it (will be )?argued|"
+    r"the (central|main) (claim|argument)|this dissertation argues)\b",
+    re.I,
+)
+TOPIC_LABEL = re.compile(
+    r"\b(this (essay|paper|assignment|article) (is about|will (discuss|talk|look|explore)|discusses)|"
+    r"interesting topic|i will (talk|discuss|write)|the topic of this)\b",
+    re.I,
+)
+CONTESTABLE = re.compile(
+    r"\b(should|must|argues?|contend|because|unless|rather than|not (only|merely)|"
+    r"more (important|effective)|limited|fails|succeeds|depends|outweigh)\b",
     re.I,
 )
 CLAIM_MARKERS = re.compile(
@@ -279,23 +290,25 @@ def _relevance(document: ExtractedDocument, question: QuestionAnalysis) -> dict:
 
 
 def _thesis(document: ExtractedDocument, question: QuestionAnalysis) -> dict:
-    intro = document.paragraphs[: max(2, len(document.paragraphs) // 5)]
+    window = document.paragraphs[: max(3, max(1, len(document.paragraphs) * 2 // 5))]
     candidates = []
-    for p in intro:
-        if p.is_heading:
+    for p in window:
+        if p.is_heading or "?" in p.text:
             continue
-        arguable = bool(
-            THESIS_MARKERS.search(p.text)
-            or re.search(r"\b(argue|argues|should|however|although|while|because)\b", p.text, re.I)
-        )
-        if arguable and len(p.text.split()) > 12 and "?" not in p.text:
-            if _tokens(p.text) & (_tokens(question.topic) | _tokens(question.raw_text) | {"argue", "argues"}):
-                candidates.append(p)
+        words = p.text.split()
+        if len(words) < 10:
+            continue
+        if TOPIC_LABEL.search(p.text) and not CONTESTABLE.search(p.text):
+            continue
+        arguable = bool(THESIS_MARKERS.search(p.text) or CONTESTABLE.search(p.text))
+        overlap = _tokens(p.text) & (_tokens(question.topic) | _tokens(question.raw_text))
+        if arguable and (overlap or THESIS_MARKERS.search(p.text)):
+            candidates.append((p, bool(THESIS_MARKERS.search(p.text)), len(overlap)))
     statement = ""
     location = None
     if candidates:
-        # Prefer the last substantial intro paragraph — common thesis placement.
-        best = candidates[-1]
+        candidates.sort(key=lambda item: (item[1], item[2], item[0].index))
+        best = candidates[-1][0]
         statement = best.text
         location = best.index
     strength = "missing"
@@ -305,19 +318,24 @@ def _thesis(document: ExtractedDocument, question: QuestionAnalysis) -> dict:
         strength = "missing"
     else:
         words = statement.split()
-        q_overlap = _tokens(statement) & _tokens(question.raw_text)
-        if len(words) < 12:
+        q_overlap = _tokens(statement) & _tokens(question.raw_text + " " + question.topic)
+        if TOPIC_LABEL.search(statement) and not CONTESTABLE.search(statement):
+            strength = "weak"
+            reasons.append("The opening restates the topic instead of taking a contestable position.")
+        elif len(words) < 12:
             strength = "weak"
             reasons.append("The possible thesis is too short to be a specific academic claim.")
         elif not q_overlap:
             strength = "weak"
             reasons.append("The possible thesis does not clearly answer the assignment question.")
-        elif not any(w in statement.lower() for w in ("however", "because", "should", "argues", "argue", "while", "although")):
-            strength = "moderate"
-            reasons.append("A thesis-like sentence is present, but it may still be more descriptive than arguable.")
-        else:
+        elif THESIS_MARKERS.search(statement) or (
+            CONTESTABLE.search(statement) and q_overlap
+        ):
             strength = "strong"
             reasons.append("A specific, question-facing claim appears in the introduction.")
+        else:
+            strength = "moderate"
+            reasons.append("A thesis-like sentence is present, but it may still be more descriptive than arguable.")
         if len(words) > 80:
             strength = "moderate" if strength == "strong" else strength
             reasons.append("The thesis may be too broad or contain too many claims at once.")

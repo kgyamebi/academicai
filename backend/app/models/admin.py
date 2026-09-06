@@ -48,3 +48,34 @@ class AdminAuditLog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     target_id: Mapped[str] = mapped_column(String(64), default="")
     details: Mapped[str] = mapped_column(Text, default="")
     ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
+class ShareAccessLog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "share_access_logs"
+
+    report_id: Mapped[UUID] = mapped_column(ForeignKey("analysis_reports.id", ondelete="CASCADE"), index=True)
+    action: Mapped[str] = mapped_column(String(32), default="view")
+    success: Mapped[bool] = mapped_column(Boolean, default=True)
+    ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
+
+
+class SecurityEvent(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "security_events"
+
+    user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    event_type: Mapped[str] = mapped_column(String(64), index=True)
+    ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    details: Mapped[str] = mapped_column(Text, default="")
+    severity: Mapped[str] = mapped_column(String(16), default="info")
+
+
+class WebhookEvent(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "webhook_events"
+
+    provider: Mapped[str] = mapped_column(String(32), index=True)
+    event_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    event_type: Mapped[str] = mapped_column(String(120), default="")
+    payload_hash: Mapped[str] = mapped_column(String(64), default="")
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

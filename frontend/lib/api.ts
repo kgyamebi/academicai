@@ -1,53 +1,42 @@
 import { apiUrl } from "./utils";
 
-const TOKEN_KEY = "ac_access";
-const REFRESH_KEY = "ac_refresh";
-
-export function getToken() {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setTokens(access: string, refresh: string) {
-  localStorage.setItem(TOKEN_KEY, access);
-  localStorage.setItem(REFRESH_KEY, refresh);
-}
-
-export function clearTokens() {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_KEY);
+function csrfToken() {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie.match(/(?:^|; )ac_csrf=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : "";
 }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
-  if (!(init.body instanceof FormData)) {
+  if (!(init.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  const token = getToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-  const response = await fetch(`${apiUrl()}${path}`, { ...init, headers });
+  const csrf = csrfToken();
+  if (csrf) headers.set("X-CSRF-Token", csrf);
+  const response = await fetch(`${apiUrl()}${path}`, { ...init, headers, credentials: "include" });
   if (response.status === 401 && typeof window !== "undefined" && !path.startsWith("/api/auth")) {
-    const refresh = localStorage.getItem(REFRESH_KEY);
-    if (refresh) {
-      const refreshed = await fetch(`${apiUrl()}/api/auth/refresh`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh_token: refresh }),
-      });
-      if (refreshed.ok) {
-        const data = await refreshed.json();
-        setTokens(data.access_token, data.refresh_token);
-        headers.set("Authorization", `Bearer ${data.access_token}`);
-        const retry = await fetch(`${apiUrl()}${path}`, { ...init, headers });
-        if (!retry.ok) throw await errorFrom(retry);
-        if (retry.status === 204) return {} as T;
-        return retry.json();
-      }
+    const refreshed = await fetch(`${apiUrl()}/api/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
+      credentials: "include",
+      body: JSON.stringify({}),
+    });
+    if (refreshed.ok) {
+      const retry = await fetch(`${apiUrl()}${path}`, { ...init, headers, credentials: "include" });
+      if (!retry.ok) throw await errorFrom(retry);
+      if (retry.status === 204) return {} as T;
+      return parseBody<T>(retry);
     }
-    clearTokens();
+    if (typeof window !== "undefined" && !path.startsWith("/api/auth")) {
+      /* session is gone; caller handles empty state */
+    }
   }
   if (!response.ok) throw await errorFrom(response);
   if (response.status === 204) return {} as T;
+  return parseBody<T>(response);
+}
+
+async function parseBody<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type") || "";
   if (contentType.includes("application/pdf")) {
     return (await response.blob()) as T;
@@ -65,9 +54,17 @@ async function errorFrom(response: Response) {
 }
 
 export async function ensureGuest() {
-  if (getToken()) return;
-  const data = await api<{ access_token: string; refresh_token: string }>("/api/auth/guest", { method: "POST" });
-  setTokens(data.access_token, data.refresh_token);
+  const me = await fetch(`${apiUrl()}/api/auth/me`, { credentials: "include" });
+  if (me.ok) return;
+  await api("/api/auth/guest", { method: "POST" });
+}
+
+export async function signOut() {
+  try {
+    await api("/api/auth/logout", { method: "POST", body: JSON.stringify({}) });
+  } catch {
+    /* still leave the app */
+  }
 }
 
 export async function track(event_name: string, path?: string) {
@@ -75,6 +72,7 @@ export async function track(event_name: string, path?: string) {
     await fetch(`${apiUrl()}/api/public/analytics`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ event_name, path, properties: {} }),
     });
   } catch {

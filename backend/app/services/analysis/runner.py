@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from app.core.crypto import decrypt_field, encrypt_field
 from app.core.logging import get_logger
+from app.core.time import utcnow
 from app.models.analysis import AIIndicatorReport, AnalysisFinding, AnalysisJob, AnalysisReport, AnalysisScore
 from app.models.assignment import Assignment
 from app.models.citation import Citation, Reference
@@ -34,7 +35,7 @@ def process_job(db: Session, job_id: UUID) -> None:
     job = db.get(AnalysisJob, job_id)
     if not job or job.status in {"cancelled", "completed"}:
         return
-    started = datetime.now(UTC)
+    started = utcnow()
     job.status = "processing"
     job.stage = "extracting"
     job.started_at = started
@@ -47,7 +48,7 @@ def process_job(db: Session, job_id: UUID) -> None:
         extracted = _document_to_extracted(db, document)
         job.stage = "analyzing_structure"
         db.commit()
-        question_text = assignment.question.raw_text if assignment and assignment.question else ""
+        question_text = decrypt_field(assignment.question.raw_text) if assignment and assignment.question else ""
         rubric_criteria = []
         if assignment and assignment.rubric:
             rubric_criteria = [
@@ -75,23 +76,34 @@ def process_job(db: Session, job_id: UUID) -> None:
             result, tokens, prompt_version = enhance_analysis(result, extracted.normalized_text)
         _persist_citations(db, document, result)
         report = _persist_report(db, job, result)
+        from app.models.user import User
+        from app.services.credits import consume_reservation
+        from app.services.entitlements import increment_usage
+
         job.status = "completed"
         job.stage = "completed"
-        job.completed_at = datetime.now(UTC)
+        job.completed_at = utcnow()
         job.token_usage = tokens
         job.prompt_version = prompt_version
         job.model = "heuristic+optional-llm"
         job.duration_ms = int((job.completed_at - started).total_seconds() * 1000)
         job.estimated_cost_usd = Decimal(tokens) * Decimal("0.000002")
+        consume_reservation(db, job.id)
+        owner = db.get(User, job.user_id)
+        if owner:
+            increment_usage(db, owner)
         db.commit()
         log.info("analysis_completed", job_id=str(job.id), report_id=str(report.id), score=result.overall_score)
     except Exception as exc:  # noqa: BLE001
         db.rollback()
         job = db.get(AnalysisJob, job_id)
         if job:
+            from app.services.credits import refund_reservation
+
             job.status = "failed"
             job.error = "We couldn’t analyze this document. Please try again or upload a different file."
-            job.completed_at = datetime.now(UTC)
+            job.completed_at = utcnow()
+            refund_reservation(db, job.id)
             db.commit()
         log.error("analysis_failed", job_id=str(job_id), error=str(exc))
 
@@ -104,12 +116,12 @@ def _document_to_extracted(db: Session, document: Document) -> ExtractedDocument
         DocumentSection.sort_order
     ).all()
     return ExtractedDocument(
-        text=document.extracted_text,
-        normalized_text=document.normalized_text or document.extracted_text,
+        text=decrypt_field(document.extracted_text),
+        normalized_text=decrypt_field(document.normalized_text or document.extracted_text),
         paragraphs=[
             ExtractedParagraph(
                 index=p.index,
-                text=p.text,
+                text=decrypt_field(p.text),
                 is_heading=p.is_heading,
                 heading_level=p.heading_level,
                 char_start=p.char_start,
@@ -180,7 +192,7 @@ def _persist_report(db: Session, job: AnalysisJob, result: AnalysisResult) -> An
         document_id=job.document_id,
         user_id=job.user_id,
         overall_score=result.overall_score,
-        summary=result.summary,
+        summary=encrypt_field(result.summary),
         strengths_json=json.dumps(result.strengths),
         weaknesses_json=json.dumps(result.weaknesses),
         priority_actions_json=json.dumps(result.priority_actions),
@@ -201,12 +213,12 @@ def _persist_report(db: Session, job: AnalysisJob, result: AnalysisResult) -> An
                 severity=f.severity,
                 location=f.location,
                 paragraph=f.paragraph,
-                original_text=f.original_text,
-                explanation=f.explanation,
-                suggestion=f.suggestion,
-                teaching_note=f.teaching_note,
-                example=f.example,
-                improved_sentence=f.improved_sentence,
+                original_text=encrypt_field(f.original_text),
+                explanation=encrypt_field(f.explanation),
+                suggestion=encrypt_field(f.suggestion),
+                teaching_note=encrypt_field(f.teaching_note),
+                example=encrypt_field(f.example),
+                improved_sentence=encrypt_field(f.improved_sentence),
                 confidence=f.confidence,
                 extra=f.extra,
             )

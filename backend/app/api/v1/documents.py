@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
+from app.core.crypto import decrypt_field, encrypt_field
 from app.core.rate_limit import check_rate_limit
 from app.db.session import get_db
 from app.deps import get_current_user, owned_assignment, owned_document
@@ -33,7 +34,7 @@ def _serialize(doc: Document) -> dict:
         "page_count": doc.page_count,
         "language": doc.language,
         "assignment_id": str(doc.assignment_id) if doc.assignment_id else None,
-        "excerpt": (doc.normalized_text or "")[:400],
+        "excerpt": decrypt_field(doc.normalized_text or "")[:400],
     }
 
 
@@ -69,8 +70,8 @@ async def upload_document(
         size_bytes=validated.size_bytes,
         storage_key=key,
         status="extracted",
-        extracted_text=extracted.text,
-        normalized_text=extracted.normalized_text,
+        extracted_text=encrypt_field(extracted.text),
+        normalized_text=encrypt_field(extracted.normalized_text),
         word_count=extracted.word_count,
         word_count_excl_references=extracted.word_count_excl_references,
         word_count_excl_headings=extracted.word_count_excl_headings,
@@ -120,8 +121,8 @@ def paste_document(
         size_bytes=len(content),
         storage_key=key,
         status="extracted",
-        extracted_text=extracted.text,
-        normalized_text=extracted.normalized_text,
+        extracted_text=encrypt_field(extracted.text),
+        normalized_text=encrypt_field(extracted.normalized_text),
         word_count=extracted.word_count,
         word_count_excl_references=extracted.word_count_excl_references,
         word_count_excl_headings=extracted.word_count_excl_headings,
@@ -146,7 +147,7 @@ def get_document(document_id: UUID, user: User = Depends(get_current_user), db: 
     document = owned_document(document_id, user, db)
     data = _serialize(document)
     data["paragraphs"] = [
-        {"id": str(p.id), "index": p.index, "text": p.text, "is_heading": p.is_heading}
+        {"id": str(p.id), "index": p.index, "text": decrypt_field(p.text), "is_heading": p.is_heading}
         for p in sorted(document.paragraphs, key=lambda x: x.index)
     ]
     return data
@@ -158,7 +159,7 @@ def _store_structure(db: Session, document_id, extracted) -> None:
             DocumentParagraph(
                 document_id=document_id,
                 index=p.index,
-                text=p.text,
+                text=encrypt_field(p.text),
                 heading_level=p.heading_level,
                 is_heading=p.is_heading,
                 char_start=p.char_start,

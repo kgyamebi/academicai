@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
-import { api, setTokens, track } from "@/lib/api";
+import { api, track } from "@/lib/api";
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
@@ -11,7 +11,7 @@ export default function RegisterPage() {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     try {
-      const data = await api<{ access_token: string; refresh_token: string }>("/api/auth/register", {
+      await api("/api/auth/register", {
         method: "POST",
         body: JSON.stringify({
           email: form.get("email"),
@@ -20,7 +20,6 @@ export default function RegisterPage() {
           country: form.get("country"),
         }),
       });
-      setTokens(data.access_token, data.refresh_token);
       track("signup", "/register");
       window.location.href = "/app/dashboard";
     } catch (err) {

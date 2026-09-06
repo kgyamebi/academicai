@@ -1,4 +1,12 @@
-from app.models.admin import AdminAuditLog, AnalyticsEvent, FeatureFlag, Notification
+from app.models.admin import (
+    AdminAuditLog,
+    AnalyticsEvent,
+    FeatureFlag,
+    Notification,
+    SecurityEvent,
+    ShareAccessLog,
+    WebhookEvent,
+)
 from app.models.analysis import (
     AIIndicatorReport,
     AnalysisFinding,
@@ -63,4 +71,7 @@ __all__ = [
     "AnalyticsEvent",
     "FeatureFlag",
     "AdminAuditLog",
+    "ShareAccessLog",
+    "WebhookEvent",
+    "SecurityEvent",
 ]

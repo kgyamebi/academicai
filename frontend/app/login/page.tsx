@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
-import { api, setTokens, track } from "@/lib/api";
+import { api, track } from "@/lib/api";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -11,11 +11,11 @@ export default function LoginPage() {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     try {
-      const data = await api<{ access_token: string; refresh_token: string }>("/api/auth/login", {
+      await api("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ email: form.get("email"), password: form.get("password") }),
       });
-      setTokens(data.access_token, data.refresh_token);
+      track("login", "/login");
       window.location.href = "/app/dashboard";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not sign in.");

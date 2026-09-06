@@ -16,11 +16,15 @@ export default function BillingPage() {
     api<Billing>("/api/billing").then(setData);
   }, []);
   async function subscribe(slug: string) {
-    const result = await api<{ message?: string }>("/api/billing/checkout", {
+    const result = await api<{ checkout_url?: string; message?: string }>("/api/billing/checkout", {
       method: "POST",
       body: JSON.stringify({ plan_slug: slug, provider: "stripe", currency: "USD" }),
     });
-    setMessage(result.message || "Checkout created. The plan upgrades only after a verified payment webhook.");
+    if (result.checkout_url) {
+      window.location.href = result.checkout_url;
+      return;
+    }
+    setMessage(result.message || "Checkout could not start. Payment keys may be missing.");
     track("subscription_started", "/app/billing");
   }
   if (!data) return <p>Loading billing…</p>;

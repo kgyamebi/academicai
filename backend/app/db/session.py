@@ -10,14 +10,19 @@ class Base(DeclarativeBase):
     pass
 
 
-settings = get_settings()
-engine = create_engine(
-    settings.database_url,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-    future=True,
-)
+def _engine():
+    settings = get_settings()
+    kwargs: dict = {"pool_pre_ping": True, "future": True}
+    if settings.database_url.startswith("sqlite"):
+        kwargs["connect_args"] = {"check_same_thread": False}
+    else:
+        kwargs["pool_size"] = 10
+        kwargs["max_overflow"] = 20
+        kwargs["pool_recycle"] = 300
+    return create_engine(settings.database_url, **kwargs)
+
+
+engine = _engine()
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, class_=Session)
 
 

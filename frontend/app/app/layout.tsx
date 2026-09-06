@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { clearTokens } from "@/lib/api";
+import { signOut } from "@/lib/api";
 
 const nav = [
   { href: "/app/dashboard", label: "Dashboard" },
@@ -33,8 +33,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           ))}
           <button
             className="rounded-md px-3 py-2 text-left text-sm hover:bg-black/5"
-            onClick={() => {
-              clearTokens();
+            onClick={async () => {
+              await signOut();
               window.location.href = "/";
             }}
           >

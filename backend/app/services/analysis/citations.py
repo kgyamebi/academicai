@@ -3,8 +3,14 @@ from __future__ import annotations
 import re
 from dataclasses import asdict, dataclass, field
 
-APA_PAREN = re.compile(r"\((?:[A-Z][A-Za-z'’\-]+(?:,\s*(?:&|and)\s*[A-Z][A-Za-z'’\-]+)?(?:\s+et\s+al\.)?),?\s*(?:19|20)\d{2}[a-z]?(?:,\s*p+\.?\s*\d+[-–]?\d*)?\)")
-APA_NARRATIVE = re.compile(r"\b[A-Z][A-Za-z'’\-]+(?:\s+et\s+al\.)?\s+\((?:19|20)\d{2}[a-z]?\)")
+APA_PAREN = re.compile(
+    r"\((?:[A-Z][A-Za-z'’\-]+(?:\s+(?:&|and)\s+[A-Z][A-Za-z'’\-]+)?(?:\s+et\s+al\.)?"
+    r"(?:,\s*(?:&|and)\s*[A-Z][A-Za-z'’\-]+)?),?\s*(?:19|20)\d{2}[a-z]?"
+    r"(?:,\s*p+\.?\s*\d+[-–]?\d*)?\)"
+)
+APA_NARRATIVE = re.compile(
+    r"\b[A-Z][A-Za-z'’\-]+(?:\s+(?:and|&)\s+[A-Z][A-Za-z'’\-]+)?(?:\s+et\s+al\.)?\s+\((?:19|20)\d{2}[a-z]?\)"
+)
 MLA_PAREN = re.compile(r"\([A-Z][A-Za-z'’\-]+(?:\s+and\s+[A-Z][A-Za-z'’\-]+)?\s+\d{1,4}\)")
 IEEE_PAREN = re.compile(r"\[(\d{1,3}(?:\s*[-–,]\s*\d{1,3})*)\]")
 DOI = re.compile(r"10\.\d{4,9}/[-._;()/:A-Za-z0-9]+")
@@ -178,11 +184,14 @@ def _extract_references(text: str, paragraphs: list) -> list[ParsedReference]:
 
 
 def _looks_like_reference(text: str) -> bool:
-    if DOI.search(text) or URL.search(text):
+    blob = text.strip()
+    if DOI.search(blob) or URL.search(blob):
         return True
-    if YEAR.search(text) and len(text) > 40 and "," in text:
+    if re.match(r"^[A-Z][A-Za-z'’\-]+,\s+[A-Z]", blob) and YEAR.search(blob):
         return True
-    if re.match(r"^\[\d+\]", text.strip()):
+    if YEAR.search(blob) and len(blob) > 40 and "," in blob:
+        return True
+    if re.match(r"^\[\d+\]", blob):
         return True
     return False
 

@@ -71,6 +71,8 @@ def validate_upload(filename: str, content: bytes, declared_mime: str | None = N
         if content.count(b"/Encrypt") > 40:
             raise DocumentSecurityError("This PDF appears malformed and was rejected.")
 
+    _scan_clamav(content)
+
     return ValidatedUpload(
         extension=extension,
         mime_type=mime,
@@ -98,3 +100,29 @@ def _assert_safe_zip(content: bytes) -> None:
                 raise DocumentSecurityError("Uncompressed document size exceeds safety limits.")
     except zipfile.BadZipFile as exc:
         raise DocumentSecurityError("The Word document could not be opened safely.") from exc
+
+
+def _scan_clamav(content: bytes) -> None:
+    host = get_settings().clamav_host
+    if not host:
+        return
+    import socket
+
+    hostname, _, port = host.partition(":")
+    try:
+        with socket.create_connection((hostname, int(port or 3310)), timeout=8) as sock:
+            sock.sendall(b"zINSTREAM\0")
+            offset = 0
+            chunk = 8192
+            while offset < len(content):
+                part = content[offset : offset + chunk]
+                sock.sendall(len(part).to_bytes(4, "big") + part)
+                offset += chunk
+            sock.sendall((0).to_bytes(4, "big"))
+            verdict = sock.recv(4096).decode("utf-8", errors="replace")
+    except OSError as exc:
+        if get_settings().is_production:
+            raise DocumentSecurityError("Virus scanning is unavailable. Upload rejected.") from exc
+        return
+    if "FOUND" in verdict:
+        raise DocumentSecurityError("The file failed a malware scan and was rejected.")

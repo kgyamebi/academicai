@@ -5,7 +5,9 @@ from datetime import UTC, datetime
 from sqlalchemy import select
 
 from app.core.logging import get_logger
-from app.core.security import hash_password
+from app.config import get_settings
+from app.core.security import hash_password, verify_password
+from app.core.time import utcnow
 from app.db.session import SessionLocal
 from app.models.admin import FeatureFlag
 from app.models.billing import Plan
@@ -73,32 +75,64 @@ PLANS = [
 def seed_if_needed() -> None:
     db = SessionLocal()
     try:
-        if db.scalar(select(Role).where(Role.name == "student")):
-            return
-        for name in ("guest", "student", "tutor", "admin", "institution"):
-            db.add(Role(name=name, description=name))
-        db.flush()
-        for item in PLANS:
-            db.add(Plan(**item))
-        _seed_content(db)
-        admin_role = db.scalar(select(Role).where(Role.name == "admin"))
-        if not db.scalar(select(User).where(User.email == "admin@academiccheck.ai")):
-            db.add(
-                User(
-                    email="admin@academiccheck.ai",
-                    password_hash=hash_password("ChangeMeAdmin123!"),
-                    full_name="AcademicCheck Admin",
-                    role_id=admin_role.id if admin_role else None,
-                    email_verified_at=datetime.now(UTC),
-                )
-            )
-        db.commit()
-        log.info("database_seeded")
+        if not db.scalar(select(Role).where(Role.name == "student")):
+            for name in ("guest", "student", "tutor", "admin", "institution"):
+                db.add(Role(name=name, description=name))
+            db.flush()
+            for item in PLANS:
+                db.add(Plan(**item))
+            _seed_content(db)
+            _bootstrap_admin(db)
+            db.commit()
+            log.info("database_seeded")
     except Exception as exc:  # noqa: BLE001
         db.rollback()
         log.error("seed_failed", error=str(exc))
     finally:
         db.close()
+    disable_insecure_default_admin()
+
+
+def disable_insecure_default_admin() -> None:
+    """Disable the published audit credential if it is still present."""
+    db = SessionLocal()
+    try:
+        user = db.scalar(select(User).where(User.email == "admin@academiccheck.ai"))
+        if user and user.password_hash and verify_password("ChangeMeAdmin123!", user.password_hash):
+            user.is_active = False
+            user.is_suspended = True
+            user.password_hash = None
+            db.commit()
+            log.warning("insecure_default_admin_disabled")
+    except Exception as exc:  # noqa: BLE001
+        db.rollback()
+        log.error("admin_disable_failed", error=str(exc))
+    finally:
+        db.close()
+
+
+def _bootstrap_admin(db) -> None:
+    settings = get_settings()
+    email = (settings.admin_bootstrap_email or "").strip().lower()
+    password = settings.admin_bootstrap_password or ""
+    if not email or not password:
+        return
+    if len(password) < 16 or password == "ChangeMeAdmin123!":
+        log.error("admin_bootstrap_rejected_weak_password")
+        return
+    admin_role = db.scalar(select(Role).where(Role.name == "admin"))
+    existing = db.scalar(select(User).where(User.email == email))
+    if existing:
+        return
+    db.add(
+        User(
+            email=email,
+            password_hash=hash_password(password),
+            full_name="AcademicCheck Admin",
+            role_id=admin_role.id if admin_role else None,
+            email_verified_at=utcnow(),
+        )
+    )
 
 
 def _seed_content(db) -> None:

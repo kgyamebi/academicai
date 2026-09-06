@@ -63,6 +63,9 @@ class AnalysisReport(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     word_count_json: Mapped[str] = mapped_column(Text, default="{}")
     rubric_json: Mapped[str] = mapped_column(Text, default="{}")
     share_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
+    share_password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    share_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    share_view_count: Mapped[int] = mapped_column(Integer, default=0)
     share_revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     disclaimer: Mapped[str] = mapped_column(
         Text,

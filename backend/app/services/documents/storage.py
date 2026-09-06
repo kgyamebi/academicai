@@ -34,18 +34,44 @@ def delete_bytes(storage_key: str) -> None:
         path.unlink()
 
 
-def _store_s3(content: bytes, key: str) -> str:
-    import httpx
+def signed_url(storage_key: str, expires_in: int = 300) -> str:
+    settings = get_settings()
+    if settings.storage_backend != "s3" or not settings.s3_access_key:
+        raise RuntimeError("Signed URLs require S3-compatible storage.")
+    client = _s3()
+    return client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": settings.s3_bucket, "Key": storage_key},
+        ExpiresIn=expires_in,
+    )
+
+
+def _s3():
+    import boto3
 
     settings = get_settings()
-    # Minimal S3-compatible PUT via presigned-style raw HTTP is provider-specific.
-    # Keep a clear adapter hook; local storage is the default.
-    raise RuntimeError(f"S3 storage adapter is configured but not fully wired for {settings.s3_bucket}/{key}")
+    kwargs = {
+        "aws_access_key_id": settings.s3_access_key,
+        "aws_secret_access_key": settings.s3_secret_key,
+        "region_name": settings.s3_region or "auto",
+    }
+    if settings.s3_endpoint_url:
+        kwargs["endpoint_url"] = settings.s3_endpoint_url
+    return boto3.client("s3", **kwargs)
+
+
+def _store_s3(content: bytes, key: str) -> str:
+    settings = get_settings()
+    _s3().put_object(Bucket=settings.s3_bucket, Key=key, Body=content, ServerSideEncryption="AES256")
+    return key
 
 
 def _read_s3(key: str) -> bytes:
-    raise RuntimeError("S3 storage adapter is not fully wired in this environment.")
+    settings = get_settings()
+    obj = _s3().get_object(Bucket=settings.s3_bucket, Key=key)
+    return obj["Body"].read()
 
 
 def _delete_s3(key: str) -> None:
-    raise RuntimeError("S3 storage adapter is not fully wired in this environment.")
+    settings = get_settings()
+    _s3().delete_object(Bucket=settings.s3_bucket, Key=key)

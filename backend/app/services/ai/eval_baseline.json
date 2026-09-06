@@ -1,0 +1,8 @@
+{
+  "question_analyzer": 1.0,
+  "thesis_analyzer": 0.7324,
+  "citation_extractor": 0.9388,
+  "argument_analyzer": 0.6667,
+  "evidence_analyzer": 0.7619,
+  "rubric_checker": 0.5714
+}

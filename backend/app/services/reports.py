@@ -9,6 +9,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
+from app.core.crypto import decrypt_field
 from app.models.analysis import AnalysisReport
 
 
@@ -24,7 +25,7 @@ def build_pdf_report(report: AnalysisReport, assignment_title: str) -> bytes:
     story.append(Paragraph(datetime.now(UTC).strftime("%d %B %Y"), styles["Normal"]))
     story.append(Spacer(1, 0.2 * inch))
     story.append(Paragraph(f"Overall diagnostic score: {report.overall_score}/100", styles["Heading2"]))
-    story.append(Paragraph(_esc(report.summary), styles["BodyText"]))
+    story.append(Paragraph(_esc(decrypt_field(report.summary)), styles["BodyText"]))
     story.append(Spacer(1, 0.15 * inch))
     story.append(Paragraph("Category scores", styles["Heading2"]))
     for score in report.scores:
@@ -49,12 +50,12 @@ def build_pdf_report(report: AnalysisReport, assignment_title: str) -> bytes:
     for finding in report.findings[:40]:
         story.append(
             Paragraph(
-                f"<b>{_esc(finding.category.title())} — {finding.severity}</b>: {_esc(finding.explanation)}",
+                f"<b>{_esc(finding.category.title())} — {finding.severity}</b>: {_esc(decrypt_field(finding.explanation))}",
                 styles["BodyText"],
             )
         )
         if finding.suggestion:
-            story.append(Paragraph(f"Suggestion: {_esc(finding.suggestion)}", styles["BodyText"]))
+            story.append(Paragraph(f"Suggestion: {_esc(decrypt_field(finding.suggestion))}", styles["BodyText"]))
     rubric = _loads(report.rubric_json)
     if rubric:
         story.append(Paragraph("Rubric analysis", styles["Heading2"]))

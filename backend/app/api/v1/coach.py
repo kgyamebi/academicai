@@ -5,6 +5,7 @@ import json
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
+from app.core.crypto import decrypt_field
 from app.core.rate_limit import check_rate_limit
 from app.db.session import get_db
 from app.deps import get_current_user, owned_assignment
@@ -34,7 +35,7 @@ def coach(payload: CoachIn, request: Request, user: User = Depends(get_current_u
     )
     context = {
         "title": assignment.title,
-        "question": assignment.question.raw_text if assignment.question else "",
+        "question": decrypt_field(assignment.question.raw_text) if assignment.question else "",
         "level": assignment.academic_level,
         "score": report.overall_score if report else None,
         "priorities": json.loads(report.priority_actions_json) if report else [],

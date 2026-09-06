@@ -4,8 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { FindingCard } from "@/components/FindingCard";
 import { ScoreRing } from "@/components/ScoreRing";
-import { api, getToken, track } from "@/lib/api";
-import { apiUrl } from "@/lib/utils";
+import { api, track } from "@/lib/api";
 
 type Report = {
   id: string;
@@ -63,11 +62,7 @@ export default function ReportPage() {
   if (!report) return <p>Loading report…</p>;
 
   async function downloadPdf() {
-    const token = getToken();
-    const res = await fetch(`${apiUrl()}/api/reports/${report!.id}/pdf`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    const blob = await res.blob();
+    const blob = await api<Blob>(`/api/reports/${report!.id}/pdf`);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

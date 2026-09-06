@@ -3,6 +3,7 @@ import hmac
 import secrets
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
+from uuid import UUID, uuid4
 
 import bcrypt
 import jwt
@@ -72,6 +73,4 @@ def constant_time_equals(left: str, right: str) -> bool:
 
 
 def new_id() -> UUID:
-    from uuid import uuid4
-
     return uuid4()

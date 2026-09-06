@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -9,9 +9,13 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.core.security import create_token, decode_token, hash_password, hash_token, verify_password
+from app.core.time import is_past, utcnow
 from app.models.billing import Plan, Subscription
 from app.models.user import Role, SessionToken, User
 from app.services.emailer import send_email
+
+LOCKOUT_ATTEMPTS = 8
+LOCKOUT_MINUTES = 15
 
 
 def get_role(db: Session, name: str) -> Role:
@@ -47,13 +51,48 @@ def register_user(db: Session, email: str, password: str, full_name: str, countr
     return user
 
 
-def authenticate(db: Session, email: str, password: str) -> User:
+def authenticate(
+    db: Session,
+    email: str,
+    password: str,
+    *,
+    ip: str | None = None,
+    user_agent: str | None = None,
+) -> User:
     user = db.scalar(select(User).where(User.email == email.lower(), User.deleted_at.is_(None)))
-    if not user or user.is_guest or not user.password_hash or not verify_password(password, user.password_hash):
+    if not user or user.is_guest or not user.password_hash:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password.")
+    from app.services.security_events import record_security_event
+
+    if user.locked_until and not is_past(user.locked_until):
+        record_security_event(db, "login_locked", user_id=user.id, ip_address=ip, user_agent=user_agent, severity="warning")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "This account is temporarily locked. Try again later.")
     if user.is_suspended or not user.is_active:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "This account is not active.")
-    user.last_login_at = datetime.now(UTC)
+    if not verify_password(password, user.password_hash):
+        user.failed_login_count = (user.failed_login_count or 0) + 1
+        if user.failed_login_count >= LOCKOUT_ATTEMPTS:
+            user.locked_until = utcnow() + timedelta(minutes=LOCKOUT_MINUTES)
+            record_security_event(db, "account_lockout", user_id=user.id, ip_address=ip, severity="warning")
+        record_security_event(db, "login_failed", user_id=user.id, ip_address=ip, user_agent=user_agent, severity="warning")
+        db.flush()
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Incorrect email or password.")
+    previous_sessions = list(user.sessions)
+    known_ips = {s.ip_address for s in previous_sessions if s.ip_address}
+    if ip and known_ips and ip not in known_ips:
+        record_security_event(
+            db,
+            "login_new_ip",
+            user_id=user.id,
+            ip_address=ip,
+            user_agent=user_agent,
+            details="Sign-in from a new IP address.",
+            severity="warning",
+        )
+    user.failed_login_count = 0
+    user.locked_until = None
+    user.last_login_at = utcnow()
+    record_security_event(db, "login_success", user_id=user.id, ip_address=ip, user_agent=user_agent)
     return user
 
 
@@ -68,7 +107,7 @@ def issue_session(db: Session, user: User, user_agent: str | None, ip: str | Non
             token_type="refresh",
             user_agent=user_agent,
             ip_address=ip,
-            expires_at=datetime.now(UTC) + timedelta(days=settings.refresh_token_days),
+            expires_at=utcnow() + timedelta(days=settings.refresh_token_days),
         )
     )
     return {
@@ -87,11 +126,18 @@ def refresh_session(db: Session, refresh_token: str) -> dict:
     if payload.get("typ") != "refresh":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid session.")
     row = db.scalar(select(SessionToken).where(SessionToken.token_hash == hash_token(refresh_token)))
-    if not row or row.revoked_at or row.expires_at < datetime.now(UTC):
+    if not row:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Session expired. Please sign in again.")
+    if row.revoked_at:
+        _revoke_all_sessions(db, row.user_id)
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Session expired. Please sign in again.")
+    if is_past(row.expires_at):
+        row.revoked_at = utcnow()
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Session expired. Please sign in again.")
     user = db.get(User, UUID(payload["sub"]))
-    if not user or user.deleted_at or user.is_suspended:
+    if not user or user.deleted_at or user.is_suspended or not user.is_active:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Account unavailable.")
+    row.revoked_at = utcnow()
     return issue_session(db, user, row.user_agent, row.ip_address)
 
 
@@ -100,12 +146,16 @@ def logout(db: Session, refresh_token: str | None) -> None:
         return
     row = db.scalar(select(SessionToken).where(SessionToken.token_hash == hash_token(refresh_token)))
     if row:
-        row.revoked_at = datetime.now(UTC)
+        row.revoked_at = utcnow()
+
+
+def revoke_all_sessions(db: Session, user_id: UUID) -> None:
+    _revoke_all_sessions(db, user_id)
 
 
 def create_guest(db: Session, ip: str | None) -> tuple[User, dict]:
     user = User(
-        email=f"guest-{datetime.now(UTC).timestamp()}@guest.academiccheck.local",
+        email=f"guest-{utcnow().timestamp()}@guest.academiccheck.local",
         is_guest=True,
         full_name="Guest",
         role=get_role(db, "guest"),
@@ -140,6 +190,9 @@ def reset_password(db: Session, token: str, new_password: str) -> None:
     if not user:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "This reset link is invalid or expired.")
     user.password_hash = hash_password(new_password)
+    user.failed_login_count = 0
+    user.locked_until = None
+    _revoke_all_sessions(db, user.id)
 
 
 def verify_email(db: Session, token: str) -> None:
@@ -151,7 +204,7 @@ def verify_email(db: Session, token: str) -> None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "This verification link is invalid or expired.")
     user = db.get(User, UUID(payload["sub"]))
     if user:
-        user.email_verified_at = datetime.now(UTC)
+        user.email_verified_at = utcnow()
 
 
 def serialize_user(user: User) -> dict:
@@ -169,9 +222,7 @@ def serialize_user(user: User) -> dict:
 
 
 def _ensure_free_subscription(db: Session, user: User) -> None:
-    existing = db.scalar(
-        select(Subscription).where(Subscription.user_id == user.id, Subscription.status == "active")
-    )
+    existing = db.scalar(select(Subscription).where(Subscription.user_id == user.id, Subscription.status == "active"))
     if existing:
         return
     plan = db.scalar(select(Plan).where(Plan.slug == "free"))
@@ -183,7 +234,13 @@ def _ensure_free_subscription(db: Session, user: User) -> None:
             plan_id=plan.id,
             status="active",
             provider="internal",
-            current_period_start=datetime.now(UTC),
-            current_period_end=datetime.now(UTC) + timedelta(days=30),
+            current_period_start=utcnow(),
+            current_period_end=utcnow() + timedelta(days=30),
         )
     )
+
+
+def _revoke_all_sessions(db: Session, user_id: UUID) -> None:
+    now = utcnow()
+    for row in db.scalars(select(SessionToken).where(SessionToken.user_id == user_id, SessionToken.revoked_at.is_(None))):
+        row.revoked_at = now

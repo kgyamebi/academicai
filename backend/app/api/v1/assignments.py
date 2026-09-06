@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.crypto import decrypt_field, encrypt_field
 from app.db.session import get_db
 from app.deps import get_current_user, owned_assignment
 from app.models.analysis import AnalysisJob, AnalysisReport
@@ -28,7 +29,7 @@ def _serialize(assignment: Assignment) -> dict:
         "notes": assignment.notes,
         "status": assignment.status,
         "created_at": assignment.created_at.isoformat() if assignment.created_at else None,
-        "question": assignment.question.raw_text if assignment.question else "",
+        "question": decrypt_field(assignment.question.raw_text) if assignment.question else "",
         "question_analysis": json.loads(assignment.question.analysis_json)
         if assignment.question and assignment.question.analysis_json
         else {},
@@ -88,7 +89,7 @@ def create_assignment(payload: AssignmentCreateIn, user: User = Depends(get_curr
         db.add(
             AssignmentQuestion(
                 assignment_id=assignment.id,
-                raw_text=payload.question,
+                raw_text=encrypt_field(payload.question),
                 command_words=", ".join(parsed.command_words),
                 topic=parsed.topic,
                 scope=parsed.scope,
@@ -138,7 +139,7 @@ def update_assignment(
     if payload.question is not None:
         parsed = analyze_question(payload.question, assignment.academic_level)
         if assignment.question:
-            assignment.question.raw_text = payload.question
+            assignment.question.raw_text = encrypt_field(payload.question)
             assignment.question.command_words = ", ".join(parsed.command_words)
             assignment.question.topic = parsed.topic
             assignment.question.scope = parsed.scope
@@ -148,7 +149,7 @@ def update_assignment(
             db.add(
                 AssignmentQuestion(
                     assignment_id=assignment.id,
-                    raw_text=payload.question,
+                    raw_text=encrypt_field(payload.question),
                     command_words=", ".join(parsed.command_words),
                     topic=parsed.topic,
                     interpretation=parsed.interpretation,

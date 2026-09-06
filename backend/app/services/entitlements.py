@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
+from app.core.time import as_utc, is_past, utcnow
 from app.models.analysis import AnalysisJob
 from app.models.billing import Plan, Subscription
 from app.models.user import User
@@ -117,10 +118,14 @@ def assert_can_analyze(db: Session, user: User, word_count: int, analysis_type: 
     used = _checks_used_this_period(db, user)
     limit = plan.checks_per_month if not user.is_guest else get_settings().guest_max_checks
     if used >= limit:
-        raise HTTPException(
-            status.HTTP_402_PAYMENT_REQUIRED,
-            "You have used the checks included in your current plan. Upgrade or wait for the next period.",
-        )
+        from app.services.credits import available_credits, required_credits
+
+        needed = required_credits(analysis_type)
+        if needed <= 0 or available_credits(db, user) < needed:
+            raise HTTPException(
+                status.HTTP_402_PAYMENT_REQUIRED,
+                "You have used the checks included in your current plan. Upgrade, buy credits, or wait for the next period.",
+            )
     feats = features_for(plan)
     if analysis_type in {"full", "academic"} and not feats.get("full_analysis") and not user.is_guest:
         if analysis_type == "full" and plan.slug == "free":
@@ -131,20 +136,28 @@ def assert_can_analyze(db: Session, user: User, word_count: int, analysis_type: 
     return plan
 
 
+def monthly_quota_exhausted(db: Session, user: User) -> bool:
+    plan = plan_for(db, user)
+    used = _checks_used_this_period(db, user)
+    limit = plan.checks_per_month if not user.is_guest else get_settings().guest_max_checks
+    return used >= limit
+
+
 def increment_usage(db: Session, user: User) -> None:
     sub, _plan = current_subscription(db, user)
-    if sub:
-        if sub.current_period_end and sub.current_period_end < datetime.now(UTC):
-            sub.checks_used = 0
-            sub.current_period_start = datetime.now(UTC)
-            sub.current_period_end = datetime.now(UTC)
-        sub.checks_used = (sub.checks_used or 0) + 1
+    if not sub:
+        return
+    if is_past(sub.current_period_end):
+        sub.checks_used = 0
+        sub.current_period_start = utcnow()
+        sub.current_period_end = utcnow() + timedelta(days=30)
+    sub.checks_used = (sub.checks_used or 0) + 1
 
 
 def _checks_used_this_period(db: Session, user: User) -> int:
     sub, _plan = current_subscription(db, user)
     if sub and sub.current_period_start:
-        start = sub.current_period_start
+        start = as_utc(sub.current_period_start)
         return db.scalar(
             select(func.count(AnalysisJob.id)).where(
                 AnalysisJob.user_id == user.id,
@@ -152,7 +165,7 @@ def _checks_used_this_period(db: Session, user: User) -> int:
                 AnalysisJob.status.in_(("queued", "processing", "completed")),
             )
         ) or 0
-    start = datetime.now(UTC).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    start = utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     return db.scalar(
         select(func.count(AnalysisJob.id)).where(
             AnalysisJob.user_id == user.id,

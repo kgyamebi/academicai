@@ -112,3 +112,25 @@ def upsert_flag(payload: dict, admin: User = Depends(require_roles("admin")), db
         flag.enabled = bool(payload.get("enabled", flag.enabled))
     db.commit()
     return {"ok": True}
+
+
+@router.get("/eval")
+def evaluation_dashboard(admin: User = Depends(require_roles("admin"))):
+    from app.services.ai.eval import run_all
+
+    metrics = run_all()
+    return {
+        "items": [
+            {
+                "name": m.name,
+                "precision": round(m.precision, 3),
+                "recall": round(m.recall, 3),
+                "f1": round(m.f1, 3),
+                "true_positives": m.true_positives,
+                "false_positives": m.false_positives,
+                "false_negatives": m.false_negatives,
+                "support": m.support,
+            }
+            for m in metrics
+        ]
+    }

@@ -41,7 +41,16 @@ class VerifyIn(BaseModel):
 
 
 class RefreshIn(BaseModel):
-    refresh_token: str
+    refresh_token: str | None = None
+
+
+class ShareCreateIn(BaseModel):
+    password: str | None = Field(default=None, min_length=8, max_length=128)
+    hours: int | None = Field(default=None, ge=1, le=720)
+
+
+class ShareUnlockIn(BaseModel):
+    password: str | None = None
 
 
 class AssignmentCreateIn(BaseModel):
