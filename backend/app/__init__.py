@@ -1,0 +1,1 @@
+"""AcademicCheck AI backend."""

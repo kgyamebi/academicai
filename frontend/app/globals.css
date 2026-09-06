@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #172033;
+  --paper: #f6f3ec;
+  --paper-2: #fffdf8;
+  --rule: #ddd6c8;
+  --teal: #1d4e4e;
+  --teal-2: #2a6b6b;
+  --amber: #9a6700;
+  --crimson: #8b2e2e;
+  --forest: #21543a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), "Segoe UI", sans-serif;
+}
+
+.font-serif {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
+
+.prose-academic h1,
+.prose-academic h2,
+.prose-academic h3 {
+  font-family: var(--font-serif), Georgia, serif;
+  color: var(--ink);
+}
+
+.prose-academic p {
+  line-height: 1.7;
+}

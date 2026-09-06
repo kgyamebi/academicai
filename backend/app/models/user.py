@@ -1,0 +1,65 @@
+from datetime import datetime
+from typing import TYPE_CHECKING
+from uuid import UUID
+
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.db.session import Base
+from app.models.mixins import SoftDeleteMixin, TimestampMixin, UUIDPrimaryKeyMixin
+
+if TYPE_CHECKING:
+    from app.models.assignment import Assignment
+    from app.models.billing import Credit, Subscription
+
+
+class Role(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "roles"
+
+    name: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    description: Mapped[str] = mapped_column(Text, default="")
+
+    users: Mapped[list["User"]] = relationship(back_populates="role")
+
+
+class User(Base, UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin):
+    __tablename__ = "users"
+
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    full_name: Mapped[str] = mapped_column(String(200), default="")
+    country: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    locale: Mapped[str] = mapped_column(String(16), default="en")
+    preferred_currency: Mapped[str] = mapped_column(String(8), default="USD")
+    academic_level: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    institution_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_guest: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_suspended: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    role_id: Mapped[UUID | None] = mapped_column(ForeignKey("roles.id"), nullable=True, index=True)
+    training_opt_in: Mapped[bool] = mapped_column(Boolean, default=False)
+    marketing_opt_in: Mapped[bool] = mapped_column(Boolean, default=False)
+    deletion_requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    role: Mapped["Role | None"] = relationship(back_populates="users")
+    sessions: Mapped[list["SessionToken"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    assignments: Mapped[list["Assignment"]] = relationship(back_populates="user")
+    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user")
+    credits: Mapped[list["Credit"]] = relationship(back_populates="user")
+
+
+class SessionToken(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    __tablename__ = "sessions"
+    __table_args__ = (UniqueConstraint("token_hash", name="uq_sessions_token_hash"),)
+
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), index=True)
+    token_type: Mapped[str] = mapped_column(String(32), default="refresh")
+    user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    ip_address: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    user: Mapped["User"] = relationship(back_populates="sessions")

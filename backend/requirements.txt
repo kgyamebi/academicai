@@ -1,0 +1,28 @@
+fastapi>=0.115
+uvicorn[standard]>=0.34
+pydantic>=2.11
+pydantic-settings>=2.9
+email-validator>=2.2
+sqlalchemy>=2.0.40
+alembic>=1.15
+psycopg[binary]>=3.2.10
+redis>=5.2
+rq>=2.3
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.2
+pyjwt>=2.10
+python-multipart>=0.0.20
+httpx>=0.28
+pymupdf>=1.25
+python-docx>=1.1
+reportlab>=4.4
+langdetect>=1.0.9
+orjson>=3.10
+structlog>=25.2
+tenacity>=9.1
+bleach>=6.2
+python-magic-bin==0.4.14; sys_platform == "win32"
+python-magic>=0.4.27; sys_platform != "win32"
+pytest>=8.3
+pytest-asyncio>=0.26
+ruff>=0.11
