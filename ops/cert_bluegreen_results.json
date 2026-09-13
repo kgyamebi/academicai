@@ -1,0 +1,17 @@
+{
+  "measured_at": "2026-09-07T10:53:39Z",
+  "edge": "http://127.0.0.1:8030",
+  "blue": 8031,
+  "green": 8032,
+  "green_switch_200s": 20,
+  "automatic_rollback": true,
+  "recovered_blue_200s": 30,
+  "errors_after_rollback": 0,
+  "pass": true,
+  "not_run": [
+    "cloud_lb",
+    "kubernetes",
+    "canary_percent",
+    "migration_rollback"
+  ]
+}

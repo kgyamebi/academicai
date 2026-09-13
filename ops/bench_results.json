@@ -1,0 +1,148 @@
+{
+  "measured_at": "2026-09-06T21:08:21Z",
+  "host": "local sqlite / TestClient",
+  "database": {
+    "engine": "sqlite",
+    "inserts": {
+      "assignments_10000": {
+        "added": 10000,
+        "elapsed_s": 0.79
+      },
+      "assignments_50000": {
+        "added": 40000,
+        "elapsed_s": 3.772
+      },
+      "assignments_100000": {
+        "added": 50000,
+        "elapsed_s": 5.672
+      },
+      "findings_100000": {
+        "added": 100000,
+        "elapsed_s": 13.124
+      },
+      "findings_500000": {
+        "added": 400000,
+        "elapsed_s": 81.19
+      }
+    },
+    "queries": {
+      "assignment_list_10000": {
+        "n": 15,
+        "p50_ms": 0.477,
+        "p95_ms": 0.878,
+        "p99_ms": 0.878,
+        "max_ms": 2.778
+      },
+      "assignment_list_50000": {
+        "n": 15,
+        "p50_ms": 0.503,
+        "p95_ms": 0.608,
+        "p99_ms": 0.608,
+        "max_ms": 0.893
+      },
+      "assignment_list_100000": {
+        "n": 15,
+        "p50_ms": 0.674,
+        "p95_ms": 0.886,
+        "p99_ms": 0.886,
+        "max_ms": 1.366
+      },
+      "findings_page_100000": {
+        "n": 15,
+        "p50_ms": 0.448,
+        "p95_ms": 0.575,
+        "p99_ms": 0.575,
+        "max_ms": 1.544
+      },
+      "findings_page_500000": {
+        "n": 15,
+        "p50_ms": 0.441,
+        "p95_ms": 1.0,
+        "p99_ms": 1.0,
+        "max_ms": 1.069
+      }
+    },
+    "not_run": [
+      "findings_5_000_000",
+      "findings_10_000_000",
+      "postgres_explain"
+    ]
+  },
+  "workers": {
+    "workers_1": {
+      "jobs": 4,
+      "elapsed_s": 0.016,
+      "jobs_per_min": 14689.9,
+      "avg_completion_s": 0.004
+    },
+    "workers_5": {
+      "jobs": 20,
+      "elapsed_s": 0.071,
+      "jobs_per_min": 16889.2,
+      "avg_completion_s": 0.004
+    },
+    "workers_10": {
+      "jobs": 40,
+      "elapsed_s": 0.137,
+      "jobs_per_min": 17574.2,
+      "avg_completion_s": 0.003
+    },
+    "workers_25": {
+      "jobs": 100,
+      "elapsed_s": 0.428,
+      "jobs_per_min": 14025.6,
+      "avg_completion_s": 0.004
+    },
+    "not_run": [
+      "workers_50",
+      "workers_100",
+      "queue_lag_with_redis"
+    ]
+  },
+  "ai_cache": {
+    "hits": 1000,
+    "lookups": 1000,
+    "elapsed_ms": 3.732,
+    "per_lookup_us": 0.373
+  },
+  "http": {
+    "sequential_200": {
+      "p50_ms": 20.306,
+      "p95_ms": 33.969,
+      "p99_ms": 64.68,
+      "error_rate": 0.0
+    },
+    "concurrent_testclient": {
+      "50": {
+        "in_flight": 50,
+        "p50_ms": 336.156,
+        "p95_ms": 467.62,
+        "p99_ms": 494.609,
+        "error_rate": 0.0,
+        "note": "Starlette TestClient in one process \u2014 not a multi-node 10k-user result"
+      },
+      "100": {
+        "in_flight": 100,
+        "p50_ms": 547.902,
+        "p95_ms": 767.153,
+        "p99_ms": 931.238,
+        "error_rate": 0.0,
+        "note": "Starlette TestClient in one process \u2014 not a multi-node 10k-user result"
+      },
+      "250": {
+        "in_flight": 250,
+        "p50_ms": 1074.794,
+        "p95_ms": 1584.043,
+        "p99_ms": 1714.904,
+        "error_rate": 0.0,
+        "note": "Starlette TestClient in one process \u2014 not a multi-node 10k-user result"
+      }
+    },
+    "not_run": [
+      "1000_concurrent_users",
+      "10000_concurrent_users",
+      "50000_concurrent_users",
+      "k6_against_staging"
+    ]
+  }
+}

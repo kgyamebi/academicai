@@ -1,0 +1,30 @@
+{
+  "measured_at": "2026-09-07T09:14:54Z",
+  "backend": "local-disk",
+  "runs": {
+    "1000": {
+      "write_s": 5.173,
+      "read_s": 16.659,
+      "delete_s": 2.876,
+      "write_files_per_s": 193.3,
+      "read_ok": 1000,
+      "failure_rate": 0.0
+    },
+    "10000": {
+      "write_s": 65.285,
+      "read_s": 115.746,
+      "delete_s": 36.455,
+      "write_files_per_s": 153.2,
+      "read_ok": 10000,
+      "failure_rate": 0.0
+    }
+  },
+  "not_run": [
+    "files_100000",
+    "files_500000",
+    "files_1000000",
+    "s3",
+    "r2",
+    "signed_url_load"
+  ]
+}

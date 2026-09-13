@@ -1,0 +1,28 @@
+{
+  "measured_at": "2026-09-10T05:52:21Z",
+  "heuristic": {
+    "1000": {
+      "n": 1000,
+      "errors": 0,
+      "elapsed_s": 3.414,
+      "per_min": 17572.9,
+      "pass": true
+    },
+    "10000": {
+      "n": 10000,
+      "errors": 0,
+      "elapsed_s": 34.19,
+      "per_min": 17549.0,
+      "pass": true
+    }
+  },
+  "live_provider": {
+    "status": "not_run",
+    "reason": "Requires live API spend (OpenAI/Anthropic/Gemini). Sandbox/test-mode provider 1k\u201310k is not free.",
+    "gate": "HAL-16/HAL-17"
+  },
+  "not_reached": [
+    "live_llm_1000",
+    "live_llm_10000"
+  ]
+}

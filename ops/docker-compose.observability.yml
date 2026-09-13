@@ -1,0 +1,49 @@
+# Local throwaway Observability stack — validates scrape + dashboards.
+# Does NOT replace hosted Grafana/PagerDuty (HAL-10/11).
+# Usage:
+#   docker compose -f ops/docker-compose.observability.yml up -d
+#   # Point PROMETHEUS_SCRAPE_TARGET at a running API (default host.docker.internal:8000)
+#   python ops/validate_observability_stack.py
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: academiccheck-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus/prometheus.local.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+    restart: "no"
+
+  grafana:
+    image: grafana/grafana:11.1.4
+    container_name: academiccheck-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: academiccheck
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: "no"
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+    container_name: academiccheck-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "127.0.0.1:16686:16686"
+      - "127.0.0.1:4318:4318"
+    restart: "no"

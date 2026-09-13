@@ -1,0 +1,27 @@
+{
+  "backup": "C:\\Users\\user\\AppData\\Local\\Temp\\tmp12kxl7zl\\sample.sql.gz.enc",
+  "ok": true,
+  "checks": [
+    {
+      "name": "exists",
+      "ok": true,
+      "detail": "size_bytes=134"
+    },
+    {
+      "name": "decrypt",
+      "ok": true,
+      "detail": "sample.sql.gz"
+    },
+    {
+      "name": "gzip",
+      "ok": true,
+      "detail": "gzip_ok bytes=4138"
+    },
+    {
+      "name": "database_counts",
+      "ok": true,
+      "detail": "skipped (no --database-url); artifact-only verification"
+    }
+  ],
+  "sha256": "6d1beeda7cd55bc5878291c0061a8ecaa57480eca1a6372464ce280b004fff73"
+}

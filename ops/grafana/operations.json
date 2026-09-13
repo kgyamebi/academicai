@@ -1,0 +1,34 @@
+{
+  "title": "AcademicCheck operations (spec only — not deployed)",
+  "uid": "academiccheck-ops",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Platform (unassigned). Purpose: combined ready/latency/5xx/queue. Alerts: A-READY, A-5XX, A-LAT, A-QUEUE. Runbooks: docs/RUNBOOK_LIBRARY/high-error-rate.md, high-latency.md, queue-backlog.md.",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Ready",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_ready", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Queue depth",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "academiccheck_queue_depth", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP p95 latency (ms, process-local)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "academiccheck_http_latency_ms{quantile=\"0.95\"}", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP 5xx counter",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [{ "expr": "academiccheck_http_5xx", "refId": "A" }]
+    }
+  ]
+}

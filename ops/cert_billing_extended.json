@@ -1,0 +1,58 @@
+{
+  "generated_at": "2026-09-09T22:12:00Z",
+  "live_money": false,
+  "billing_score": 94,
+  "gate": 99,
+  "production_certified": false,
+  "new_tests_passed": 35,
+  "mutation_killed": true,
+  "steps": {
+    "1_dunning": {
+      "result": "PASS",
+      "file": "backend/tests/test_billing_dunning.py",
+      "policy": "MAX_ATTEMPTS=3 then cancel; past_due recovers in place; retry key dunning:{sub_id}:{attempts}"
+    },
+    "2_proration": {
+      "result": "PASS",
+      "file": "backend/tests/test_billing_proration.py",
+      "policy": "upgrade charges unused_new-unused_old integer cents ROUND_HALF_EVEN; downgrade deferred; day 17/30 student 199→pro 399 charge 87 cents"
+    },
+    "3_disputes": {
+      "result": "PASS",
+      "file": "backend/tests/test_billing_disputes.py",
+      "policy": "open→disputed+suspended, credits stay; won restores; lost refunds/cancels",
+      "processors": ["stripe", "paystack", "flutterwave"]
+    },
+    "4_currency": {
+      "result": "PASS",
+      "file": "backend/tests/test_billing_currency.py",
+      "policy": "ledger always USD cents; display Decimal HALF_EVEN; JPY/KRW/VND zero-decimal"
+    },
+    "5_cross_processor": {
+      "result": "PASS",
+      "file": "backend/tests/test_billing_cross_processor.py",
+      "policy": "logical_purchase_id de-dupes entitlement across processors; second success is ack-only"
+    },
+    "6_chaos": {
+      "result": "PASS",
+      "file": "backend/tests/test_billing_chaos.py",
+      "policy": "write-before-ack replay idempotent; timeout→charge.unknown pending; burst dedup"
+    },
+    "7_fuzz_mutation": {
+      "result": "PASS",
+      "files": ["backend/tests/test_billing_fsm_fuzz.py", "ops/cert_billing_mutation.py"],
+      "artifact": "ops/cert_billing_mutation.json"
+    },
+    "8_audit": {
+      "result": "PASS",
+      "file": "backend/tests/test_billing_audit.py",
+      "policy": "SHA-256 hash chain + DB triggers reject UPDATE/DELETE"
+    }
+  },
+  "still_blocked_live_money": [
+    "HAL-01 live ~$1 success",
+    "HAL-02 live decline",
+    "HAL-03 live Dashboard refund",
+    "HAL-04 provider cancel on account delete"
+  ]
+}

@@ -105,8 +105,18 @@ def _extract_pdf(content: bytes) -> tuple[str, int]:
         doc.close()
         raise DocumentSecurityError("Password-protected PDFs are not supported.")
     parts: list[str] = []
-    for page in doc:
-        parts.append(page.get_text("text") or "")
+    try:
+        for page in doc:
+            try:
+                parts.append(page.get_text("text") or "")
+            except Exception as exc:
+                doc.close()
+                raise DocumentSecurityError("We could not read this PDF. It may be damaged or password-protected.") from exc
+    except DocumentSecurityError:
+        raise
+    except Exception as exc:
+        doc.close()
+        raise DocumentSecurityError("We could not read this PDF. It may be damaged or password-protected.") from exc
     pages = doc.page_count
     doc.close()
     return "\n\n".join(parts), pages
@@ -119,17 +129,19 @@ def _extract_docx(content: bytes) -> tuple[str, int]:
         doc = DocxDocument(io.BytesIO(content))
     except Exception as exc:
         raise DocumentSecurityError("We could not read this Word document.") from exc
-    blocks: list[str] = []
-    for para in doc.paragraphs:
-        style = (para.style.name if para.style is not None else "") or ""
-        text = para.text.strip()
-        if not text:
-            continue
-        if style.lower().startswith("heading"):
+    try:
+        blocks: list[str] = []
+        for para in doc.paragraphs:
+            style = (para.style.name if para.style is not None else "") or ""
+            text = para.text.strip()
+            if not text:
+                continue
             blocks.append(text)
-        else:
-            blocks.append(text)
-    return "\n\n".join(blocks), max(1, len(doc.paragraphs) // 12)
+        return "\n\n".join(blocks), max(1, len(doc.paragraphs) // 12)
+    except DocumentSecurityError:
+        raise
+    except Exception as exc:
+        raise DocumentSecurityError("We could not read this Word document.") from exc
 
 
 def _normalize(text: str) -> str:

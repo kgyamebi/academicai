@@ -17,6 +17,7 @@ ENV/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
 htmlcov/
 .coverage
 coverage.xml
@@ -25,6 +26,9 @@ coverage.xml
 node_modules/
 .next/
 out/
+test-results/
+playwright-report/
+blob-report/
 .turbo/
 dist/
 *.tsbuildinfo
@@ -35,7 +39,21 @@ tmp/
 *.log
 backend/dev.db
 backend/test_academiccheck.db
+backend/a11y_playwright.db
+frontend/a11y/artifacts/lighthouse_*.json
+backend/bench_scale.db
+backend/bench_http.db
 backend/test_storage/
+
+# Production DR dumps (never commit)
+backups/
+backups/prod-dr/
+
+# Live billing harness sessions (may contain payment ids / emails)
+ops/live_billing_sessions/
+ops/evidence/
+ops/_backup_verify_work/
+test_academiccheck.db
 
 # IDE
 .idea/

@@ -1,0 +1,27 @@
+{
+  "measured_at": "2026-09-10T07:35:58Z",
+  "base": "http://127.0.0.1:18080",
+  "profiles": {
+    "100": {
+      "profile_vus": "100",
+      "exit_code": 99,
+      "elapsed_s": 157.21,
+      "metrics": {
+        "p95_ms": 6308.0459614999945,
+        "p99_ms": null,
+        "error_rate": null
+      },
+      "slo_p95_500ms": false,
+      "slo_error_lt_1pct": false,
+      "stdout_tail": "/100 VUs, 929 complete and 0 interrupted iterations\n100    [  94% ] 100/100 VUs  1m25.0s/1m30.0s\n\nrunning (1m28.4s), 100/100 VUs, 945 complete and 0 interrupted iterations\n100    [  96% ] 100/100 VUs  1m26.0s/1m30.0s\n\nrunning (1m29.4s), 100/100 VUs, 955 complete and 0 interrupted iterations\n100    [  97% ] 100/100 VUs  1m27.1s/1m30.0s\n\nrunning (1m30.4s), 100/100 VUs, 976 complete and 0 interrupted iterations\n100    [  98% ] 100/100 VUs  1m28.0s/1m30.0s\n\nrunning (1m31.3s), 100/100 VUs, 1026 complete and 0 interrupted iterations\n100    [  99% ] 100/100 VUs  1m29.0s/1m30.0s\n\nrunning (1m32.3s), 100/100 VUs, 1057 complete and 0 interrupted iterations\n100    [ 100% ] 100/100 VUs  1m30.0s/1m30.0s\n\nrunning (1m33.3s), 085/100 VUs, 1072 complete and 0 interrupted iterations\n100  \u00e2\u2020\u201c [ 100% ] 100/100 VUs  1m30s\n\nrunning (1m34.4s), 039/100 VUs, 1118 complete and 0 interrupted iterations\n100  \u00e2\u2020\u201c [ 100% ] 100/100 VUs  1m30s\n\nrunning (1m35.3s), 006/100 VUs, 1151 complete and 0 interrupted iterations\n100  \u00e2\u2020\u201c [ 100% ] 100/100 VUs  1m30s\n\nrunning (1m36.1s), 000/100 VUs, 1157 complete and 0 interrupted iterations\n100  \u00e2\u0153\u201c [ 100% ] 000/100 VUs  1m30s\n\n\n  \u00e2\u2013\u02c6 THRESHOLDS \n\n    http_req_duration\n    \u00e2\u0153\u2014 'p(95)<500' p(95)=6.3s\n\n    http_req_failed\n    \u00e2\u0153\u2014 'rate<0.01' rate=5.04%\n\n\n  \u00e2\u2013\u02c6 TOTAL RESULTS \n\n    checks_total.......: 3471   36.116428/s\n    checks_succeeded...: 94.95% 3296 out of 3471\n    checks_failed......: 5.04%  175 out of 3471\n\n    \u00e2\u0153\u2014 dashboard 200\n      \u00e2\u2020\u00b3  91% \u00e2\u20ac\u201d \u00e2\u0153\u201c 1062 / \u00e2\u0153\u2014 95\n    \u00e2\u0153\u2014 assignments 200\n      \u00e2\u2020\u00b3  93% \u00e2\u20ac\u201d \u00e2\u0153\u201c 1081 / \u00e2\u0153\u2014 76\n    \u00e2\u0153\u2014 faqs 200\n      \u00e2\u2020\u00b3  99% \u00e2\u20ac\u201d \u00e2\u0153\u201c 1153 / \u00e2\u0153\u2014 4\n\n    HTTP\n    http_req_duration..............: avg=2.01s min=29.19ms med=1.26s max=25.15s p(90)=4.69s  p(95)=6.3s  \n      { expected_response:true }...: avg=1.78s min=29.19ms med=1.18s max=25.15s p(90)=4s     p(95)=5.42s \n    http_req_failed................: 5.04%  175 out of 3472\n    http_reqs......................: 3472   36.126833/s\n\n    EXECUTION\n    iteration_duration.............: avg=6.61s min=1.22s   med=5.21s max=32.04s p(90)=12.11s p(95)=15.37s\n    iterations.....................: 1157   12.038809/s\n    vus............................: 6      min=0           max=100\n    vus_max........................: 100    min=100         max=100\n\n    NETWORK\n    data_received..................: 3.6 MB 37 kB/s\n    data_sent......................: 1.0 MB 11 kB/s\n\n\n\n\nrunning (1m36.1s), 000/100 VUs, 1157 complete and 0 interrupted iterations\n100  \u00e2\u0153\u201c [ 100% ] 000/100 VUs  1m30s\n",
+      "stderr_tail": "time=\"2026-09-10T07:38:33Z\" level=error msg=\"thresholds on metrics 'http_req_duration, http_req_failed' have been crossed\"\n",
+      "hardware_start_failed": false
+    }
+  },
+  "not_reached": [
+    {
+      "tier": "50000",
+      "reason": "not_executed"
+    }
+  ]
+}

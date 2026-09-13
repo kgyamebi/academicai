@@ -1,31 +1,46 @@
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { ButtonLink } from "@/components/ui/Button";
 
-const plans = [
-  ["Free", "$0", "2 checks / month · 2,000 words", "Basic grammar, structure, question analysis, basic academic feedback"],
-  ["Student", "$1.99", "20 checks / month · 10,000 words", "Full analysis, thesis, argument, evidence, citation and reference checking"],
-  ["Pro Student", "$3.99", "60 checks / month · larger documents", "Rubric, version comparison, Coach, AI-writing indicators, PDF reports, history"],
-  ["Power", "$7.99", "200 checks / month · large documents", "Multiple projects, priority processing, extended history"],
-];
-
+/** Public free launch — paid plans are informational only; no checkout. */
 export default function PricingPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-4 py-16">
-        <h1 className="font-serif text-4xl">Affordable plans for students</h1>
-        <p className="mt-3 max-w-2xl text-[var(--ink-muted)]">Prices are configurable in the admin panel. Displayed local currency is for guidance; charging uses the payment provider that can serve your country.</p>
-        <div className="mt-10 grid gap-4 md:grid-cols-2">
-          {plans.map(([name, price, limit, features]) => (
-            <article key={name} className="rounded-xl border border-[var(--rule)] bg-[var(--paper-2)] p-6">
-              <h2 className="font-serif text-2xl">{name}</h2>
-              <p className="mt-2 text-3xl">{price}<span className="text-base">/month</span></p>
-              <p className="mt-2 text-sm">{limit}</p>
-              <p className="mt-4 text-sm leading-6">{features}</p>
-            </article>
-          ))}
-        </div>
-        <p className="mt-8 text-sm">Institution plans are custom: multiple users, admin analytics, branding, SSO and central billing.</p>
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-16 md:py-20">
+        <p className="ac-enter text-sm font-medium tracking-wide text-[var(--teal)]">Access</p>
+        <h1 className="ac-enter ac-enter-delay-1 mt-3 font-serif text-4xl md:text-5xl">
+          Free public launch
+        </h1>
+        <p className="ac-enter ac-enter-delay-2 mt-4 text-[var(--ink-muted)] leading-7">
+          AcademicCheck AI is launching free for students. Paid plans are paused — there is no checkout and no
+          subscription flow in this release. Limits may apply so the service stays reliable for everyone.
+        </p>
+
+        <article className="ac-enter ac-enter-delay-3 mt-10 rounded-[var(--radius-lg)] border border-[var(--teal)] bg-[var(--paper-2)] p-6 md:p-8">
+          <h2 className="font-serif text-2xl">What you get today</h2>
+          <ul className="mt-4 space-y-3 text-sm leading-7 text-[var(--ink)]">
+            <li>Guest and registered checks against your assignment question</li>
+            <li>Academic Performance Overview with Top 3 Critical Fixes</li>
+            <li>Dashboard progress, coach guidance, and PDF download where enabled</li>
+            <li>Integrity-first feedback — not an official grade</li>
+          </ul>
+          <div className="mt-8">
+            <ButtonLink href="/check" variant="primary" className="px-6">
+              Start a free check
+            </ButtonLink>
+          </div>
+        </article>
+
+        <p className="mt-10 text-sm leading-7 text-[var(--ink-muted)]">
+          Future paid tiers (when enabled) will unlock higher monthly limits and advanced options. We will never charge
+          from the frontend alone, and we will not invent “limited time” pressure.
+        </p>
+        <p className="mt-4 text-sm">
+          <a href="/help/pricing" className="font-medium text-[var(--teal)] underline-offset-4 hover:underline">
+            Pricing FAQ
+          </a>
+        </p>
       </main>
       <SiteFooter />
     </>

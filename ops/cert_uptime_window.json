@@ -1,0 +1,13 @@
+{
+  "measured_at": "2026-09-07T10:55:12Z",
+  "window_s": 60,
+  "samples": 46,
+  "live_200": 46,
+  "ready_200": 46,
+  "live_availability": 1.0,
+  "ready_availability": 1.0,
+  "days_7": "not_measured",
+  "days_30": "not_measured",
+  "days_90": "not_measured",
+  "slo_99_95_supported": false
+}

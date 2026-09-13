@@ -1,0 +1,126 @@
+{
+  "measured_at": "2026-09-07T08:38:21Z",
+  "engine": "postgresql-16",
+  "host": "docker postgres:16-alpine on 127.0.0.1:55432",
+  "pool": {
+    "pool_size": 10,
+    "max_overflow": 20,
+    "storm": {
+      "n": 40,
+      "errors": 0,
+      "p95_ms": 257.501,
+      "max_ms": 323.211
+    }
+  },
+  "counts": {
+    "users": 1,
+    "assignments": 100000,
+    "documents": 1,
+    "reports": 1,
+    "findings": 1000000,
+    "citations": 100000,
+    "references": 50000,
+    "analytics_events": 100000,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "inserts": {
+    "assignments_10000": {
+      "added": 10000,
+      "elapsed_s": 2.224
+    },
+    "assignments_100000": {
+      "added": 90000,
+      "elapsed_s": 13.207
+    },
+    "findings_1000000": {
+      "added": 1000000,
+      "elapsed_s": 145.298,
+      "total": 1000000
+    },
+    "citations": {
+      "added": 100000,
+      "elapsed_s": 14.239,
+      "total": 100000
+    },
+    "references": {
+      "added": 50000,
+      "elapsed_s": 6.493,
+      "total": 50000
+    },
+    "analytics_events": {
+      "added": 100000,
+      "elapsed_s": 14.323,
+      "total": 100000
+    }
+  },
+  "queries": {
+    "assignment_list_100k": {
+      "n": 15,
+      "p50_ms": 4.491,
+      "p95_ms": 7.842,
+      "p99_ms": 7.842,
+      "max_ms": 16.153
+    },
+    "findings_page": {
+      "n": 15,
+      "p50_ms": 4.441,
+      "p95_ms": 6.331,
+      "p99_ms": 6.331,
+      "max_ms": 7.234
+    },
+    "report_list": {
+      "n": 15,
+      "p50_ms": 3.984,
+      "p95_ms": 7.069,
+      "p99_ms": 7.069,
+      "max_ms": 8.813
+    },
+    "citation_page": {
+      "n": 15,
+      "p50_ms": 4.638,
+      "p95_ms": 7.359,
+      "p99_ms": 7.359,
+      "max_ms": 7.435
+    },
+    "reference_page": {
+      "n": 15,
+      "p50_ms": 36.284,
+      "p95_ms": 61.115,
+      "p99_ms": 61.115,
+      "max_ms": 61.328
+    },
+    "analytics_group": {
+      "n": 10,
+      "p50_ms": 71.506,
+      "p95_ms": 83.437,
+      "p99_ms": 83.437,
+      "max_ms": 151.717
+    }
+  },
+  "explain_analyze": {
+    "assignment_list": "Limit  (cost=2.69..3.88 rows=20 width=46) (actual time=0.108..0.117 rows=20 loops=1)\n  Buffers: shared hit=4\n  ->  Index Scan Backward using ix_assignments_user_updated_active on assignments  (cost=0.29..5983.48 rows=100000 width=46) (actual time=0.089..0.110 rows=60 loops=1)\n        Index Cond: (user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid)\n        Buffers: shared hit=4\nPlanning Time: 0.172 ms\nExecution Time: 0.229 ms",
+    "findings_page": "Limit  (cost=4.93..7.18 rows=40 width=38) (actual time=0.104..0.122 rows=40 loops=1)\n  Buffers: shared hit=5\n  ->  Index Scan using ix_analysis_findings_report_created on analysis_findings  (cost=0.42..56322.86 rows=1000000 width=38) (actual time=0.068..0.111 rows=120 loops=1)\n        Index Cond: (report_id = '819e65c6-bf8c-48ae-a28b-7d809c281170'::uuid)\n        Buffers: shared hit=5\nPlanning Time: 0.137 ms\nExecution Time: 0.171 ms",
+    "report_list": "Limit  (cost=1.02..1.03 rows=1 width=28) (actual time=0.071..0.073 rows=1 loops=1)\n  Buffers: shared hit=1\n  ->  Sort  (cost=1.02..1.03 rows=1 width=28) (actual time=0.069..0.070 rows=1 loops=1)\n        Sort Key: created_at DESC\n        Sort Method: quicksort  Memory: 25kB\n        Buffers: shared hit=1\n        ->  Seq Scan on analysis_reports  (cost=0.00..1.01 rows=1 width=28) (actual time=0.023..0.024 rows=1 loops=1)\n              Filter: (user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid)\n              Buffers: shared hit=1\nPlanning Time: 0.190 ms\nExecution Time: 0.162 ms",
+    "citation_page": "Limit  (cost=7.80..11.50 rows=40 width=31) (actual time=0.191..0.253 rows=40 loops=1)\n  Buffers: shared hit=123\n  ->  Index Scan using citations_pkey on citations  (cost=0.42..9234.41 rows=100000 width=31) (actual time=0.053..0.240 rows=120 loops=1)\n        Filter: (document_id = '515d4519-e472-4bc3-b164-4b54d93be9b7'::uuid)\n        Buffers: shared hit=123\nPlanning Time: 0.126 ms\nExecution Time: 0.308 ms",
+    "reference_page": "Limit  (cost=3117.48..3117.58 rows=40 width=66) (actual time=59.419..59.431 rows=40 loops=1)\n  Buffers: shared hit=912\n  ->  Sort  (cost=3117.48..3242.48 rows=50000 width=66) (actual time=59.417..59.422 rows=40 loops=1)\n        Sort Key: sort_order\n        Sort Method: top-N heapsort  Memory: 30kB\n        Buffers: shared hit=912\n        ->  Seq Scan on \"references\"  (cost=0.00..1537.00 rows=50000 width=66) (actual time=0.023..30.890 rows=50000 loops=1)\n              Filter: (document_id = '515d4519-e472-4bc3-b164-4b54d93be9b7'::uuid)\n              Buffers: shared hit=912\nPlanning Time: 0.174 ms\nExecution Time: 59.551 ms",
+    "analytics_group": "HashAggregate  (cost=3022.00..3022.01 rows=1 width=23) (actual time=100.679..100.681 rows=1 loops=1)\n  Group Key: event_name\n  Batches: 1  Memory Usage: 24kB\n  Buffers: shared hit=1272\n  ->  Seq Scan on analytics_events  (cost=0.00..2522.00 rows=100000 width=15) (actual time=0.029..37.314 rows=100000 loops=1)\n        Filter: (user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid)\n        Buffers: shared hit=1272\nPlanning Time: 0.302 ms\nExecution Time: 100.739 ms"
+  },
+  "leading_seq_scan_only": {
+    "assignment_list": false,
+    "findings_page": false,
+    "report_list": true,
+    "citation_page": false,
+    "reference_page": true,
+    "analytics_group": true
+  },
+  "p95_query_target_ms": 100,
+  "p95_pass": true,
+  "partitioned": false,
+  "read_replica": "not_provisioned",
+  "not_run": [
+    "findings_5000000",
+    "findings_10000000"
+  ]
+}

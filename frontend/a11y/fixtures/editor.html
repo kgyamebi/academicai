@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Editor</title></head>
+  <body>
+    <a href="#main-content">Skip to main content</a>
+    <main id="main-content" tabindex="-1">
+      <h1>Revise a paragraph</h1>
+      <p id="editor-help">Use the formatting toolbar, then type in the assignment draft.</p>
+      <div role="toolbar" aria-label="Text formatting" aria-controls="assignment-editor">
+        <button type="button" aria-pressed="false" aria-keyshortcuts="Control+B">Bold</button>
+        <button type="button" aria-pressed="true" aria-keyshortcuts="Control+I">Italic</button>
+        <button type="button" aria-pressed="false">Heading</button>
+        <button type="button" aria-pressed="false">List</button>
+        <button type="button" aria-pressed="false">Quote</button>
+      </div>
+      <p aria-live="polite">Italic on.</p>
+      <div id="assignment-editor">
+        <div role="textbox" aria-multiline="true" aria-label="Assignment draft" aria-describedby="editor-help" contenteditable="true">Draft text</div>
+      </div>
+    </main>
+  </body>
+</html>

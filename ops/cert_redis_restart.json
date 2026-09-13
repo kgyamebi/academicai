@@ -1,0 +1,10 @@
+{
+  "measured_at": "2026-09-09T20:20:00Z",
+  "restart_drill": "docker restart redis",
+  "ping_after_restart": true,
+  "aof_enabled": true,
+  "aof_current_size": 44365563,
+  "ok": true,
+  "sentinel_failover": "UNPROVEN",
+  "note": "Restart with volume retained; volume-loss AOF rebuild still UNPROVEN"
+}

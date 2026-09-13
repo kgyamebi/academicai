@@ -26,17 +26,28 @@ TOPIC_LABEL = re.compile(
 CONTESTABLE = re.compile(
     r"\b(should|must|argues?|contend|because|unless|rather than|not (only|merely)|"
     r"more (important|effective)|limited|fails|succeeds|depends|outweigh|"
-    r"only insofar|determines outcomes)\b",
+    r"only insofar|determines( outcomes)?|judged by)\b",
     re.I,
 )
 CLAIM_MARKERS = re.compile(
     r"\b(therefore|thus|this shows|this suggests|it is clear|demonstrates|argues that|"
-    r"this means|consequently|as a result|because|so that)\b",
+    r"this means|consequently|as a result|because|so that|this demonstrates|"
+    r"however,|although|critics argue|in contrast)\b",
+    re.I,
+)
+REASON_MARKERS = re.compile(
+    r"\b(therefore|thus|consequently|as a result|because|this shows|this suggests|"
+    r"this means|this demonstrates|so that|it is clear)\b",
     re.I,
 )
 DESCRIPTIVE_ONLY = re.compile(
     r"\b(there (is|are)|this section|the next (chapter|section)|lists definitions|"
-    r"background material|many books|literature on)\b",
+    r"background material|many books|literature on|handbooks that mention|"
+    r"catalogue titles|list of dates)\b",
+    re.I,
+)
+COUNTER_MARKERS = re.compile(
+    r"\b(however|although|critics argue|on the other hand|nevertheless|whereas|in contrast)\b",
     re.I,
 )
 SPECIFIC_CLAIM = re.compile(
@@ -45,7 +56,8 @@ SPECIFIC_CLAIM = re.compile(
     re.I,
 )
 CITATION = re.compile(
-    r"\(([A-Z][A-Za-z'’\-]+(?:,\s*(?:&|and)\s*[A-Z][A-Za-z'’\-]+)?),?\s*(?:19|20)\d{2}"
+    r"\(([A-Z][A-Za-z'’\-]+(?:\s+(?:and|&)\s+[A-Z][A-Za-z'’\-]+)?(?:\s+et\s+al\.)?"
+    r"(?:,\s*(?:&|and)\s*[A-Z][A-Za-z'’\-]+)?),?\s*(?:19|20)\d{2}"
     r"|[A-Z][A-Za-z'’\-]+(?:\s+(?:and|&)\s+[A-Z][A-Za-z'’\-]+)?(?:\s+et\s+al\.)?\s+\((?:19|20)\d{2}"
 )
 STOP = {
@@ -77,18 +89,57 @@ def classify_thesis(draft: str, question: str) -> str:
 
 def has_reasoned_argument(text: str) -> bool:
     blob = text or ""
-    if CLAIM_MARKERS.search(blob) and not (DESCRIPTIVE_ONLY.search(blob) and not CLAIM_MARKERS.search(blob)):
+    if not blob.strip():
+        return False
+    if DESCRIPTIVE_ONLY.search(blob) and not REASON_MARKERS.search(blob):
+        return False
+    if REASON_MARKERS.search(blob):
         return True
-    return bool(CLAIM_MARKERS.search(blob))
+    if COUNTER_MARKERS.search(blob) and (CONTESTABLE.search(blob) or "," in blob):
+        return True
+    return False
+
+
+def has_counterargument(text: str) -> bool:
+    return bool(COUNTER_MARKERS.search(text or ""))
+
+
+def argument_structure(text: str) -> dict[str, bool]:
+    """Heuristic flags for annotation, not a 98-certified argument graph."""
+    blob = text or ""
+    reasoning = bool(REASON_MARKERS.search(blob))
+    counter = has_counterargument(blob)
+    rebuttal = bool(re.search(r"\b(however|nevertheless|although)\b.{0,120}\b(because|therefore|thus)\b", blob, re.I))
+    return {
+        "claim": bool(CLAIM_MARKERS.search(blob) or CONTESTABLE.search(blob)),
+        "reasoning": reasoning,
+        "supporting_evidence": bool(SPECIFIC_CLAIM.search(blob) or CITATION.search(blob)),
+        "counterargument": counter,
+        "rebuttal": rebuttal,
+        "logical_gap": bool(DESCRIPTIVE_ONLY.search(blob) and not reasoning),
+    }
 
 
 def needs_citation(text: str) -> bool:
+    return classify_evidence(text) == "needs_citation"
+
+
+def classify_evidence(text: str) -> str:
+    """supported | needs_citation | potentially_unsupported | cannot_determine"""
     blob = text or ""
-    if not SPECIFIC_CLAIM.search(blob):
-        return False
-    if CITATION.search(blob):
-        return False
-    return True
+    if not blob.strip():
+        return "cannot_determine"
+    cited = bool(CITATION.search(blob))
+    specific = bool(SPECIFIC_CLAIM.search(blob))
+    if specific and cited:
+        return "supported"
+    if specific and not cited:
+        return "needs_citation"
+    if cited and not specific:
+        return "supported"
+    if re.search(r"\b(always|never|proves that|everyone knows)\b", blob, re.I):
+        return "potentially_unsupported"
+    return "cannot_determine"
 
 
 def rubric_covered(criteria: list[dict], scores: dict[str, int]) -> set[str]:

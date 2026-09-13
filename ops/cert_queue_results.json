@@ -1,0 +1,19 @@
+{
+  "measured_at": "2026-09-07T09:20:04Z",
+  "redis": "redis://127.0.0.1:56379/0",
+  "workers_started": 5,
+  "workers_registered": 5,
+  "jobs": 1000,
+  "enqueue_s": 68.971,
+  "elapsed_s": 286.817,
+  "throughput_jobs_per_min": 209.2,
+  "statuses": {
+    "completed": 1000
+  },
+  "lost": 0,
+  "duplicate_ids": 0,
+  "stuck": 0,
+  "dlq_depth": 0,
+  "pass_no_loss_dup_stuck": true,
+  "not_run": [5000, 10000, 50000]
+}

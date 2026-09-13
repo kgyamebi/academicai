@@ -1,0 +1,22 @@
+{
+  "title": "AcademicCheck workers (spec only — not deployed)",
+  "uid": "academiccheck-workers",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Backend (unassigned). Purpose: registered RQ workers (2s cache). Alerts: A-WORKER. Runbook: docs/RUNBOOK_LIBRARY/worker-failure.md. SIGKILL can leave a stuck job (ops/cert_worker_death.json).",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Registered workers",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_workers", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jobs failed counter",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 0 },
+      "targets": [{ "expr": "academiccheck_jobs_failed", "refId": "A" }]
+    }
+  ]
+}

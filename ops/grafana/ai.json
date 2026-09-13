@@ -1,0 +1,25 @@
+{
+  "title": "AcademicCheck AI systems (spec only — not deployed)",
+  "uid": "academiccheck-ai",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: AI (unassigned). Purpose: provider circuits vs heuristic fallback. Alerts: A-AI. Runbook: docs/RUNBOOK_LIBRARY/ai-provider-failure.md. Heuristic analysis continues when the LLM circuit is open.",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "AI circuit open counter",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_ai_circuit_open", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Provider fail vs ok counters",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 0 },
+      "targets": [
+        { "expr": "academiccheck_ai_provider_fail", "refId": "A" },
+        { "expr": "academiccheck_ai_provider_ok", "refId": "B" }
+      ]
+    }
+  ]
+}

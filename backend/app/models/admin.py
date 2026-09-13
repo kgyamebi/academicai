@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -21,6 +21,7 @@ class Notification(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 class AnalyticsEvent(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "analytics_events"
+    __table_args__ = (Index("ix_analytics_events_user_event", "user_id", "event_name"),)
 
     user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
     event_name: Mapped[str] = mapped_column(String(80), index=True)

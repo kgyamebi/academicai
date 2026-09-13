@@ -1,9 +1,7 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import CheckPage from "@/app/check/page";
+import { CheckExperience } from "@/components/CheckExperience";
 
 export default function AssignmentCheckPage() {
-  useParams();
-  return <CheckPage />;
+  return <CheckExperience embedded />;
 }

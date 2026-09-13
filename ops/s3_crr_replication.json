@@ -1,0 +1,40 @@
+{
+  "Description": "AcademicCheck AI backup bucket cross-region replication. Apply with a live AWS account only.",
+  "ReplicationConfiguration": {
+    "Role": "arn:aws:iam::ACCOUNT_ID:role/academiccheck-s3-crr",
+    "Rules": [
+      {
+        "ID": "academiccheck-backups-to-dr-region",
+        "Status": "Enabled",
+        "Priority": 1,
+        "Filter": {
+          "Prefix": "backups/"
+        },
+        "DeleteMarkerReplication": {
+          "Status": "Enabled"
+        },
+        "Destination": {
+          "Bucket": "arn:aws:s3:::academiccheck-backups-dr",
+          "StorageClass": "STANDARD_IA",
+          "EncryptionConfiguration": {
+            "ReplicaKmsKeyID": "arn:aws:kms:DR_REGION:ACCOUNT_ID:key/REPLICA_KEY_ID"
+          },
+          "Metrics": {
+            "Status": "Enabled",
+            "EventThreshold": {
+              "Minutes": 15
+            }
+          }
+        }
+      }
+    ]
+  },
+  "SourceBucket": "academiccheck-backups",
+  "SourceRegion": "PRIMARY_REGION",
+  "DestinationBucket": "academiccheck-backups-dr",
+  "DestinationRegion": "DR_REGION",
+  "VersioningRequired": true,
+  "ObjectLockRecommended": true,
+  "live_account_required": true,
+  "local_emulator_cannot_prove_crr": true
+}

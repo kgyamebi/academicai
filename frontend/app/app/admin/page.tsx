@@ -11,8 +11,8 @@ export default function AdminPage() {
       .then(setData)
       .catch((e) => setError(e.message));
   }, []);
-  if (error) return <p>Admin access is restricted. {error}</p>;
-  if (!data) return <p>Loading admin…</p>;
+  if (error) return <main><h1 className="font-serif text-3xl">Admin</h1><p role="alert">Admin access is restricted. {error}</p></main>;
+  if (!data) return <main><h1 className="font-serif text-3xl">Admin</h1><p aria-live="polite">Loading admin…</p></main>;
   return (
     <main>
       <h1 className="font-serif text-3xl">Admin</h1>

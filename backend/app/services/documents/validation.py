@@ -15,6 +15,37 @@ ALLOWED = {
     ".md": {"text/markdown", "text/plain", "application/octet-stream"},
 }
 
+_DANGEROUS_STEMS = {
+    "exe",
+    "bat",
+    "cmd",
+    "com",
+    "pif",
+    "scr",
+    "js",
+    "jse",
+    "vbs",
+    "vbe",
+    "ps1",
+    "msi",
+    "dll",
+    "jar",
+    "sh",
+    "html",
+    "htm",
+    "wsf",
+    "cpl",
+}
+
+_DOCX_FORBIDDEN = (
+    "vbaproject",
+    "vbadata",
+    "oleobject",
+    "word/embeddings/",
+    "word/macrosheets/",
+    "word/activex/",
+)
+
 SIGNATURES = {
     ".pdf": (b"%PDF",),
     ".docx": (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
@@ -34,10 +65,21 @@ class ValidatedUpload:
 
 
 def _ext(filename: str) -> str:
-    name = (filename or "").lower().strip()
+    raw = filename or ""
+    if "\x00" in raw:
+        raise DocumentSecurityError("The file name is not allowed.")
+    name = raw.lower().strip().replace("\\", "/")
+    if "/" in name or name.startswith("."):
+        raise DocumentSecurityError("The file name is not allowed.")
     if "." not in name:
         raise DocumentSecurityError("File must have an extension.")
-    return "." + name.rsplit(".", 1)[-1]
+    parts = [p for p in name.split(".") if p]
+    if len(parts) < 2:
+        raise DocumentSecurityError("File must have an extension.")
+    for stem in parts[1:-1]:
+        if stem in _DANGEROUS_STEMS:
+            raise DocumentSecurityError("This filename is not allowed.")
+    return "." + parts[-1]
 
 
 def validate_upload(filename: str, content: bytes, declared_mime: str | None = None) -> ValidatedUpload:
@@ -68,10 +110,14 @@ def validate_upload(filename: str, content: bytes, declared_mime: str | None = N
     if extension == ".docx":
         _assert_safe_zip(content)
     if extension == ".pdf":
-        if content.count(b"/Encrypt") > 40:
-            raise DocumentSecurityError("This PDF appears malformed and was rejected.")
+        _assert_safe_pdf(content)
 
-    _scan_clamav(content)
+    from app.services.documents.malware import MalwareRejected, quarantine_scan_release
+
+    try:
+        quarantine_scan_release(content, suffix=extension)
+    except MalwareRejected as exc:
+        raise DocumentSecurityError(str(exc)) from exc
 
     return ValidatedUpload(
         extension=extension,
@@ -88,9 +134,11 @@ def _assert_safe_zip(content: bytes) -> None:
                 raise DocumentSecurityError("This document contains too many internal files and was rejected.")
             uncompressed = 0
             for info in zf.infolist():
-                name = info.filename.replace("\\", "/")
+                name = info.filename.replace("\\", "/").lower()
                 if name.startswith("/") or ".." in name.split("/"):
                     raise DocumentSecurityError("The document contained an unsafe path and was rejected.")
+                if any(forbidden in name for forbidden in _DOCX_FORBIDDEN):
+                    raise DocumentSecurityError("Documents with macros or embedded objects are not allowed.")
                 uncompressed += info.file_size
                 if info.file_size > 80 * 1024 * 1024:
                     raise DocumentSecurityError("A file inside the document is too large.")
@@ -102,27 +150,11 @@ def _assert_safe_zip(content: bytes) -> None:
         raise DocumentSecurityError("The Word document could not be opened safely.") from exc
 
 
-def _scan_clamav(content: bytes) -> None:
-    host = get_settings().clamav_host
-    if not host:
-        return
-    import socket
-
-    hostname, _, port = host.partition(":")
-    try:
-        with socket.create_connection((hostname, int(port or 3310)), timeout=8) as sock:
-            sock.sendall(b"zINSTREAM\0")
-            offset = 0
-            chunk = 8192
-            while offset < len(content):
-                part = content[offset : offset + chunk]
-                sock.sendall(len(part).to_bytes(4, "big") + part)
-                offset += chunk
-            sock.sendall((0).to_bytes(4, "big"))
-            verdict = sock.recv(4096).decode("utf-8", errors="replace")
-    except OSError as exc:
-        if get_settings().is_production:
-            raise DocumentSecurityError("Virus scanning is unavailable. Upload rejected.") from exc
-        return
-    if "FOUND" in verdict:
-        raise DocumentSecurityError("The file failed a malware scan and was rejected.")
+def _assert_safe_pdf(content: bytes) -> None:
+    if content.count(b"/Encrypt") > 40:
+        raise DocumentSecurityError("This PDF appears malformed and was rejected.")
+    lowered = content.lower()
+    if b"/javascript" in lowered or b"/launch" in lowered or b"/richmedia" in lowered:
+        raise DocumentSecurityError("This PDF contains active content and was rejected.")
+    if content.count(b"/EmbeddedFile") > 8:
+        raise DocumentSecurityError("This PDF contains too many embedded files and was rejected.")

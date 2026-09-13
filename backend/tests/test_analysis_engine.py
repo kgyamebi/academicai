@@ -62,3 +62,33 @@ def test_citation_mismatch_detected():
     result = run_analysis(extracted, QUESTION, "undergraduate", "apa7")
     assert result.citation.citations
     assert result.citation.mismatches or "Jones" in " ".join(result.citation.mismatches)
+
+
+def test_introduction_conclusion_and_coherence_findings():
+    extracted = extract_document(ESSAY.encode(), ".txt")
+    result = run_analysis(extracted, QUESTION, "undergraduate", "apa7")
+    categories = {f.category for f in result.findings}
+    assert "introduction" in categories or any(s.get("key") == "introduction" for s in result.structure_map)
+    assert "conclusion" in categories or any(s.get("key") == "conclusion" for s in result.structure_map)
+    assert result.weakest_area.get("category")
+    assert result.weakest_area.get("score") is not None
+
+
+def test_missing_introduction_is_flagged():
+    text = """
+Trade and growth
+
+Trade openness is associated with faster export growth (Rodrik, 2011). This essay never opens with context.
+
+Conclusion
+
+Globalization effects differ by policy capacity.
+
+References
+
+Rodrik, D. (2011). The globalization paradox. W. W. Norton.
+"""
+    extracted = extract_document(text.encode(), ".txt")
+    result = run_analysis(extracted, QUESTION, "undergraduate", "apa7")
+    intro_findings = [f for f in result.findings if f.category in {"introduction", "structure"}]
+    assert intro_findings or any(s.get("status") in {"missing", "warning"} for s in result.structure_map)

@@ -1,0 +1,30 @@
+# Isolated restore target ONLY.
+# - Not attached to production networks.
+# - Bound to 127.0.0.1 so it is not reachable from other hosts by default.
+# - Uses a dedicated volume; destroy after the drill.
+#
+# Usage:
+#   docker compose -f ops/docker-compose.dr-restore.yml up -d
+#   export RESTORE_DATABASE_URL=postgresql://dr_restore:dr_restore_only@127.0.0.1:55433/academiccheck_restore
+
+services:
+  dr-restore-postgres:
+    image: postgres:16
+    container_name: academiccheck-dr-restore
+    environment:
+      POSTGRES_USER: dr_restore
+      POSTGRES_PASSWORD: dr_restore_only
+      POSTGRES_DB: academiccheck_restore
+    ports:
+      - "127.0.0.1:55433:5432"
+    volumes:
+      - dr_restore_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dr_restore -d academiccheck_restore"]
+      interval: 5s
+      retries: 20
+    restart: "no"
+
+volumes:
+  dr_restore_pgdata:
+    name: academiccheck_dr_restore_pgdata

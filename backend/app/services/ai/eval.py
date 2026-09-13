@@ -5,11 +5,53 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from app.services.analysis.citations import analyze_citations
-from app.services.analysis.classifiers import classify_thesis, has_reasoned_argument, needs_citation, rubric_covered
+from app.services.ai.agreement import agreement_report, load_reviews
+from app.services.ai.hallucination import allow_model_text
+from app.services.ai.calibration import hard_label_calibration
+from app.services.ai.citation_corpus import parser_robustness
+from app.services.ai.hallucination_suite import hallucination_escape_rate
+from app.services.ai.heldout import (
+    ARGUMENT_HELDOUT,
+    CITATION_HELDOUT,
+    COACH_REFUSAL,
+    EVIDENCE_HELDOUT,
+    HALLUCINATION_CASES,
+    QUESTION_HELDOUT,
+    THESIS_HELDOUT,
+)
+from app.services.ai.live_eval import live_eval_status
+from app.services.ai.prompt_registry import registry_report
+from app.services.ai.stats import wilson_interval
+from app.services.analysis.classifiers import (
+    argument_structure,
+    classify_evidence,
+    classify_thesis,
+    has_reasoned_argument,
+    needs_citation,
+    rubric_covered,
+)
 from app.services.analysis.question import COMMANDS, analyze_question
+from app.services.analysis.verify_sources import verify_reference
 from app.services.documents.extractor import ExtractedParagraph
 
 BASELINE_PATH = Path(__file__).with_name("eval_baseline.json")
+
+CERT_MIN_N = {
+    "heldout_question": 1000,
+    "heldout_thesis": 1000,
+    "heldout_argument": 1000,
+    "heldout_evidence": 1000,
+    "heldout_citation": 2000,
+}
+CERT_F1 = 0.98
+CIRCULAR_SUITES = {
+    "question_analyzer",
+    "thesis_analyzer",
+    "citation_extractor",
+    "argument_analyzer",
+    "evidence_analyzer",
+    "rubric_checker",
+}
 
 LEVELS = ("undergraduate", "postgraduate", "masters", "phd")
 DISCIPLINES = {
@@ -88,6 +130,12 @@ class Metric:
     false_negatives: int
     support: int
     confusion: dict = field(default_factory=dict)
+    source: str = "circular"
+    precision_ci95: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    recall_ci95: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    f1_ci95: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    certifiable: bool = False
+    notes: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -359,7 +407,7 @@ def evaluate_question_analyzer() -> Metric:
         tp += len(parsed & expected_l)
         fp += len(parsed - expected_l)
         fn += len(expected_l - parsed)
-    return _metric("question_analyzer", tp, fp, fn, len(cases))
+    return _metric("question_analyzer", tp, fp, fn, len(cases), source="circular")
 
 
 def evaluate_thesis_analyzer() -> Metric:
@@ -375,7 +423,7 @@ def evaluate_thesis_analyzer() -> Metric:
         else:
             fp += 1
             fn += 1
-    return _metric("thesis_analyzer", tp, fp, fn, len(cases), matrix)
+    return _metric("thesis_analyzer", tp, fp, fn, len(cases), matrix, source="circular")
 
 
 def evaluate_citation_extractor() -> Metric:
@@ -387,7 +435,7 @@ def evaluate_citation_extractor() -> Metric:
         tp += min(found_c, expected_cites) + min(found_r, expected_refs)
         fp += max(0, found_c - expected_cites) + max(0, found_r - expected_refs)
         fn += max(0, expected_cites - found_c) + max(0, expected_refs - found_r)
-    return _metric("citation_extractor", tp, fp, fn, len(citation_gold()))
+    return _metric("citation_extractor", tp, fp, fn, len(citation_gold()), source="circular")
 
 
 def evaluate_argument_analyzer() -> Metric:
@@ -409,6 +457,7 @@ def evaluate_argument_analyzer() -> Metric:
         fn,
         len(argument_gold()),
         {"tp": tp, "fp": fp, "fn": fn, "tn": tn},
+        source="circular",
     )
 
 
@@ -431,6 +480,7 @@ def evaluate_evidence_analyzer() -> Metric:
         fn,
         len(evidence_gold()),
         {"tp": tp, "fp": fp, "fn": fn, "tn": tn},
+        source="circular",
     )
 
 
@@ -442,7 +492,238 @@ def evaluate_rubric_checker() -> Metric:
         tp += len(names & expected_s)
         fp += len(names - expected_s)
         fn += len(expected_s - names)
-    return _metric("rubric_checker", tp, fp, fn, len(rubric_gold()))
+    return _metric("rubric_checker", tp, fp, fn, len(rubric_gold()), source="circular")
+
+
+def evaluate_heldout_question() -> Metric:
+    tp = fp = fn = 0
+    for text, expected in QUESTION_HELDOUT:
+        parsed = {w.lower() for w in analyze_question(text).command_words}
+        expected_l = {w.lower() for w in expected}
+        tp += len(parsed & expected_l)
+        fp += len(parsed - expected_l)
+        fn += len(expected_l - parsed)
+    return _metric("heldout_question", tp, fp, fn, len(QUESTION_HELDOUT), source="heldout")
+
+
+def evaluate_heldout_thesis() -> Metric:
+    tp = fp = fn = 0
+    for question, draft, expected in THESIS_HELDOUT:
+        predicted = classify_thesis(draft, question)
+        if predicted == expected:
+            tp += 1
+        else:
+            fp += 1
+            fn += 1
+    return _metric("heldout_thesis", tp, fp, fn, len(THESIS_HELDOUT), source="heldout")
+
+
+def evaluate_heldout_argument() -> Metric:
+    tp = fp = fn = tn = 0
+    for text, reasoned in ARGUMENT_HELDOUT:
+        predicted = has_reasoned_argument(text)
+        if reasoned and predicted:
+            tp += 1
+        elif reasoned and not predicted:
+            fn += 1
+        elif not reasoned and not predicted:
+            tn += 1
+        else:
+            fp += 1
+    return _metric("heldout_argument", tp, fp, fn, len(ARGUMENT_HELDOUT), {"tp": tp, "fp": fp, "fn": fn, "tn": tn}, source="heldout")
+
+
+def evaluate_heldout_evidence() -> Metric:
+    labels = ("supported", "needs_citation", "potentially_unsupported", "cannot_determine")
+    matrix = {exp: {pred: 0 for pred in labels} for exp in labels}
+    tp = fp = fn = 0
+    for text, expected in EVIDENCE_HELDOUT:
+        predicted = classify_evidence(text)
+        matrix[expected][predicted] += 1
+        if predicted == expected:
+            tp += 1
+        else:
+            fp += 1
+            fn += 1
+    return _metric("heldout_evidence", tp, fp, fn, len(EVIDENCE_HELDOUT), matrix, source="heldout")
+
+
+def evaluate_heldout_citation() -> Metric:
+    tp = fp = fn = 0
+    for text, style, expected_cites, expected_refs in CITATION_HELDOUT:
+        report = analyze_citations(text, _paragraphs(text), style)
+        found_c = len(report.citations)
+        found_r = len(report.references)
+        tp += min(found_c, expected_cites) + min(found_r, expected_refs)
+        fp += max(0, found_c - expected_cites) + max(0, found_r - expected_refs)
+        fn += max(0, expected_cites - found_c) + max(0, expected_refs - found_r)
+    return _metric("heldout_citation", tp, fp, fn, len(CITATION_HELDOUT), source="heldout")
+
+
+def evaluate_hallucination_guard() -> Metric:
+    tp = fp = fn = tn = 0
+    for output, allowed, should_pass in HALLUCINATION_CASES:
+        allowed_ok = allow_model_text(output, allowed)
+        if should_pass and allowed_ok:
+            tp += 1
+        elif should_pass and not allowed_ok:
+            fn += 1
+        elif not should_pass and not allowed_ok:
+            tn += 1
+        else:
+            fp += 1
+    return _metric(
+        "hallucination_guard",
+        tp,
+        fp,
+        fn,
+        len(HALLUCINATION_CASES),
+        {"tp": tp, "fp": fp, "fn": fn, "tn": tn},
+        source="heldout",
+        notes="n=4 unit cases. Not the 1000-case red-team suite.",
+    )
+
+
+def evaluate_coach_refusal() -> Metric:
+    from app.services.ai.enhance import _heuristic_coach
+
+    tp = fp = fn = 0
+    for question, needle in COACH_REFUSAL:
+        answer = _heuristic_coach(question, "context")
+        if needle == "will not":
+            hit = "will not" in answer.lower() or "not generate" in answer.lower() or "not write" in answer.lower()
+        else:
+            hit = needle.lower() in answer.lower()
+        if hit:
+            tp += 1
+        else:
+            fn += 1
+    return _metric("coach_refusal", tp, fp, fn, len(COACH_REFUSAL), source="heldout")
+
+
+def evaluate_argument_coverage() -> dict:
+    rows = []
+    for text, reasoned in ARGUMENT_HELDOUT:
+        flags = argument_structure(text)
+        rows.append({"reasoned_gold": reasoned, **flags})
+    n = len(rows)
+    return {
+        "n": n,
+        "claim_rate": (sum(1 for r in rows if r["claim"]) / n) if n else 0.0,
+        "reasoning_rate": (sum(1 for r in rows if r["reasoning"]) / n) if n else 0.0,
+        "counterargument_rate": (sum(1 for r in rows if r["counterargument"]) / n) if n else 0.0,
+        "rebuttal_rate": (sum(1 for r in rows if r["rebuttal"]) / n) if n else 0.0,
+        "logical_gap_rate": (sum(1 for r in rows if r["logical_gap"]) / n) if n else 0.0,
+        "note": "Coverage of heuristic flags on held-out paragraphs. Not relationship-accuracy gold.",
+    }
+
+
+def evaluate_verification_contract() -> dict:
+    empty = verify_reference()
+    return {
+        "empty_status": empty.status,
+        "never_invents_on_empty": empty.status == "could_not_verify",
+        "precision": None,
+        "recall": None,
+        "n_labeled": 0,
+        "note": "Live Crossref/OpenAlex/Semantic Scholar precision is unmeasured. Empty lookup is not verified.",
+    }
+
+
+def heldout_hard_correctness() -> list[bool]:
+    correct: list[bool] = []
+    for question, draft, expected in THESIS_HELDOUT:
+        correct.append(classify_thesis(draft, question) == expected)
+    for text, reasoned in ARGUMENT_HELDOUT:
+        correct.append(has_reasoned_argument(text) is reasoned)
+    for text, expected in EVIDENCE_HELDOUT:
+        correct.append(classify_evidence(text) == expected)
+    return correct
+
+
+def certification_verdict(metrics: list[Metric], extras: dict) -> dict:
+    by_name = {m.name: m for m in metrics}
+    gates = []
+    for name, min_n in CERT_MIN_N.items():
+        m = by_name.get(name)
+        measured_n = m.support if m else 0
+        f1 = m.f1 if m else 0.0
+        f1_lo = m.f1_ci95[0] if m else 0.0
+        ok = bool(m and m.source == "heldout" and measured_n >= min_n and f1_lo >= CERT_F1)
+        gates.append(
+            {
+                "gate": name,
+                "required_n": min_n,
+                "measured_n": measured_n,
+                "required_f1_ci_low": CERT_F1,
+                "f1": f1,
+                "f1_ci_low": f1_lo,
+                "pass": ok,
+            }
+        )
+    hall = extras.get("hallucination_redteam") or {}
+    hall_ok = bool(hall.get("pass_target"))
+    gates.append(
+        {
+            "gate": "hallucination_escape",
+            "required": "<0.005 on n>=1000 red-team block cases",
+            "measured": hall.get("escape_rate"),
+            "n": hall.get("n_should_block"),
+            "pass": hall_ok,
+        }
+    )
+    agree = extras.get("reviewer_agreement") or {}
+    gates.append(
+        {
+            "gate": "reviewer_agreement",
+            "required": "dual lecturer labels",
+            "measured_n": agree.get("n", 0),
+            "pass": False,
+        }
+    )
+    ver = extras.get("verification") or {}
+    gates.append(
+        {
+            "gate": "reference_verification_precision",
+            "required": 0.98,
+            "measured": ver.get("precision"),
+            "pass": False,
+        }
+    )
+    live = extras.get("live_llm") or {}
+    gates.append(
+        {
+            "gate": "schema_compliance_live",
+            "required": 0.999,
+            "measured": None,
+            "n_run": live.get("n_run", 0),
+            "pass": False,
+        }
+    )
+    return {
+        "claim_98": False,
+        "any_gate_pass_for_98": any(g.get("pass") and g.get("gate", "").startswith("heldout") for g in gates),
+        "certified": False,
+        "gates": gates,
+        "reason": (
+            "98% AI quality is not certified. Held-out n is below the independent-label floors, "
+            "template suites are circular, reviewer labels are absent, live LLM eval was not run, "
+            "and reference-verification precision is unmeasured."
+        ),
+    }
+
+
+def extras_bundle() -> dict:
+    return {
+        "hallucination_redteam": hallucination_escape_rate(),
+        "reviewer_agreement": agreement_report(load_reviews()),
+        "verification": evaluate_verification_contract(),
+        "citation_parser_robustness": parser_robustness(),
+        "argument_coverage": evaluate_argument_coverage(),
+        "live_llm": live_eval_status(),
+        "prompt_registry": registry_report(),
+        "calibration": hard_label_calibration(heldout_hard_correctness()),
+    }
 
 
 def run_all() -> list[Metric]:
@@ -453,7 +734,38 @@ def run_all() -> list[Metric]:
         evaluate_argument_analyzer(),
         evaluate_evidence_analyzer(),
         evaluate_rubric_checker(),
+        evaluate_heldout_question(),
+        evaluate_heldout_thesis(),
+        evaluate_heldout_argument(),
+        evaluate_heldout_evidence(),
+        evaluate_heldout_citation(),
+        evaluate_hallucination_guard(),
+        evaluate_coach_refusal(),
     ]
+
+
+def write_report(metrics: list[Metric], path: Path | None = None) -> Path:
+    dest = path or Path(__file__).with_name("eval_report.json")
+    extras = extras_bundle()
+    dest.write_text(
+        json.dumps(
+            {
+                "suites": {m.name: m.to_dict() for m in metrics},
+                "sizes": suite_sizes(),
+                "circular_suites": sorted(CIRCULAR_SUITES),
+                **extras,
+                "certification": certification_verdict(metrics, extras),
+                "note": (
+                    "Template gold is circular (same rules generate labels and classifiers). "
+                    "Held-out cases are independent expert-constructed examples, not lecturer-reviewed gold. "
+                    "Do not claim 98% AI quality from this report."
+                ),
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    return dest
 
 
 def suite_sizes() -> dict[str, int]:
@@ -464,6 +776,28 @@ def suite_sizes() -> dict[str, int]:
         "argument": len(argument_gold()),
         "evidence": len(evidence_gold()),
         "rubric": len(rubric_gold()),
+        "heldout_question": len(QUESTION_HELDOUT),
+        "heldout_thesis": len(THESIS_HELDOUT),
+        "heldout_argument": len(ARGUMENT_HELDOUT),
+        "heldout_evidence": len(EVIDENCE_HELDOUT),
+        "heldout_citation": len(CITATION_HELDOUT),
+        "heldout": (
+            len(QUESTION_HELDOUT)
+            + len(THESIS_HELDOUT)
+            + len(ARGUMENT_HELDOUT)
+            + len(EVIDENCE_HELDOUT)
+            + len(CITATION_HELDOUT)
+            + len(HALLUCINATION_CASES)
+            + len(COACH_REFUSAL)
+        ),
+        "total_template": (
+            len(question_gold())
+            + len(thesis_gold())
+            + len(citation_gold())
+            + len(argument_gold())
+            + len(evidence_gold())
+            + len(rubric_gold())
+        ),
         "total": (
             len(question_gold())
             + len(thesis_gold())
@@ -508,8 +842,51 @@ def _paragraphs(text: str) -> list[ExtractedParagraph]:
     return paras
 
 
-def _metric(name: str, tp: int, fp: int, fn: int, support: int, confusion: dict | None = None) -> Metric:
+def _metric(
+    name: str,
+    tp: int,
+    fp: int,
+    fn: int,
+    support: int,
+    confusion: dict | None = None,
+    source: str = "circular",
+    notes: str = "",
+) -> Metric:
     precision = tp / (tp + fp) if tp + fp else 0.0
     recall = tp / (tp + fn) if tp + fn else 0.0
     f1 = (2 * precision * recall / (precision + recall)) if precision + recall else 0.0
-    return Metric(name, precision, recall, f1, tp, fp, fn, support, confusion or {})
+    p_ci = wilson_interval(tp, tp + fp)
+    r_ci = wilson_interval(tp, tp + fn)
+    if fp == fn and support > 0 and tp + fp == support:
+        f_ci = wilson_interval(tp, support)
+    else:
+        f_ci = wilson_interval(round(f1 * support), support) if support else (0.0, 0.0)
+    min_n = CERT_MIN_N.get(name, 1000)
+    certifiable = (
+        source == "heldout"
+        and support >= min_n
+        and p_ci[0] >= CERT_F1
+        and r_ci[0] >= CERT_F1
+        and f_ci[0] >= CERT_F1
+    )
+    if source == "circular":
+        notes = notes or "Circular: labels generated from the same rules as the classifier. Not validity evidence."
+    elif source == "heldout" and support < min_n:
+        notes = notes or f"Independent held-out, but n={support} is below the {min_n} certification floor."
+    return Metric(
+        name,
+        precision,
+        recall,
+        f1,
+        tp,
+        fp,
+        fn,
+        support,
+        confusion or {},
+        source,
+        [round(p_ci[0], 4), round(p_ci[1], 4)],
+        [round(r_ci[0], 4), round(r_ci[1], 4)],
+        [round(f_ci[0], 4), round(f_ci[1], 4)],
+        certifiable,
+        notes,
+    )

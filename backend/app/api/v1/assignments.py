@@ -5,10 +5,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.crypto import decrypt_field, encrypt_field
-from app.db.session import get_db
+from app.core.pagination import decode_cursor, enforce_shallow_offset, keyset_before, next_cursor_from
+from app.db.session import get_db, get_db_read
 from app.deps import get_current_user, owned_assignment, owned_document
 from app.models.analysis import AnalysisJob, AnalysisReport
 from app.models.assignment import Assignment, AssignmentQuestion, AssignmentVersion, Rubric, RubricCriterion
@@ -26,15 +27,16 @@ def _serialize(assignment: Assignment) -> dict:
         "academic_level": assignment.academic_level,
         "citation_style": assignment.citation_style,
         "discipline": assignment.discipline,
-        "notes": assignment.notes,
+        "notes": decrypt_field(assignment.notes),
         "status": assignment.status,
         "created_at": assignment.created_at.isoformat() if assignment.created_at else None,
+        "updated_at": assignment.updated_at.isoformat() if assignment.updated_at else None,
         "question": decrypt_field(assignment.question.raw_text) if assignment.question else "",
         "question_analysis": json.loads(assignment.question.analysis_json)
         if assignment.question and assignment.question.analysis_json
         else {},
         "rubric": {
-            "raw_text": assignment.rubric.raw_text,
+            "raw_text": decrypt_field(assignment.rubric.raw_text),
             "criteria": [
                 {"id": str(c.id), "name": c.name, "weight_percent": c.weight_percent, "max_points": c.max_points}
                 for c in assignment.rubric.criteria
@@ -60,15 +62,123 @@ def _serialize(assignment: Assignment) -> dict:
 def list_assignments(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=50),
+    cursor: str | None = Query(None),
     user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_read),
 ):
-    q = select(Assignment).where(Assignment.user_id == user.id, Assignment.deleted_at.is_(None))
-    total = db.scalar(select(func.count()).select_from(q.subquery())) or 0
-    items = db.scalars(
-        q.order_by(Assignment.updated_at.desc()).offset((page - 1) * page_size).limit(page_size)
-    ).all()
-    return {"items": [_serialize(a) for a in items], "total": total, "page": page, "page_size": page_size}
+    filters = [Assignment.user_id == user.id, Assignment.deleted_at.is_(None)]
+    if cursor:
+        ts, row_id = decode_cursor(cursor)
+        filters.append(keyset_before(Assignment.updated_at, Assignment.id, ts, row_id))
+    else:
+        enforce_shallow_offset(page, page_size)
+    total = db.scalar(select(func.count(Assignment.id)).where(*filters[:2])) or 0
+    stmt = (
+        select(Assignment)
+        .options(
+            selectinload(Assignment.question),
+            selectinload(Assignment.rubric).selectinload(Rubric.criteria),
+            selectinload(Assignment.versions),
+        )
+        .where(*filters)
+        .order_by(Assignment.updated_at.desc(), Assignment.id.desc())
+        .limit(page_size)
+    )
+    if not cursor:
+        stmt = stmt.offset((page - 1) * page_size)
+    items = db.scalars(stmt).all()
+    progress = _assignment_progress(db, user.id, [a.id for a in items])
+    return {
+        "items": [{**_serialize(a), **progress.get(a.id, _empty_progress())} for a in items],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "next_cursor": next_cursor_from(items, page_size=page_size, ts_attr="updated_at"),
+    }
+
+
+def _empty_progress() -> dict:
+    return {
+        "latest_score": None,
+        "best_score": None,
+        "previous_score": None,
+        "improvement_delta": None,
+        "weakest_area": None,
+        "last_analysis_at": None,
+        "latest_report_id": None,
+        "score_timeline": [],
+    }
+
+
+def _assignment_progress(db: Session, user_id: UUID, assignment_ids: list) -> dict:
+    """Additive progress fields for Academic Progress workspace — no new product features."""
+    if not assignment_ids:
+        return {}
+    reports = list(
+        db.scalars(
+            select(AnalysisReport)
+            .where(
+                AnalysisReport.user_id == user_id,
+                AnalysisReport.assignment_id.in_(assignment_ids),
+            )
+            .order_by(AnalysisReport.created_at.asc())
+        )
+    )
+    by_assignment: dict = {aid: [] for aid in assignment_ids}
+    for r in reports:
+        if r.assignment_id in by_assignment:
+            by_assignment[r.assignment_id].append(r)
+
+    latest_ids = []
+    out: dict = {}
+    for aid, rows in by_assignment.items():
+        if not rows:
+            out[aid] = _empty_progress()
+            continue
+        scores = [int(r.overall_score) for r in rows]
+        latest = rows[-1]
+        previous = rows[-2] if len(rows) >= 2 else None
+        latest_ids.append(latest.id)
+        out[aid] = {
+            "latest_score": scores[-1],
+            "best_score": max(scores),
+            "previous_score": int(previous.overall_score) if previous else None,
+            "improvement_delta": (scores[-1] - scores[-2]) if len(scores) >= 2 else None,
+            "weakest_area": None,
+            "last_analysis_at": latest.created_at.isoformat() if latest.created_at else None,
+            "latest_report_id": str(latest.id),
+            "score_timeline": scores[-8:],
+        }
+
+    if latest_ids:
+        from app.models.analysis import AnalysisScore
+
+        dim_labels = {
+            "relevance": "Question Relevance",
+            "thesis": "Thesis",
+            "argument": "Argument",
+            "evidence": "Evidence",
+            "structure": "Structure",
+            "academic_writing": "Writing",
+            "grammar": "Writing",
+            "citations": "Citations",
+            "references": "Citations",
+        }
+        for rid, cat, sc in db.execute(
+            select(AnalysisScore.report_id, AnalysisScore.category, AnalysisScore.score).where(
+                AnalysisScore.report_id.in_(latest_ids)
+            )
+        ):
+            for aid, payload in out.items():
+                if payload.get("latest_report_id") == str(rid):
+                    cur = payload.get("_weak_tuple")
+                    if cur is None or sc < cur[1]:
+                        payload["_weak_tuple"] = (dim_labels.get(cat, cat.replace("_", " ").title()), sc)
+        for payload in out.values():
+            weak = payload.pop("_weak_tuple", None)
+            if weak:
+                payload["weakest_area"] = weak[0]
+    return out
 
 
 @router.post("")
@@ -80,7 +190,7 @@ def create_assignment(payload: AssignmentCreateIn, user: User = Depends(get_curr
         citation_style=payload.citation_style,
         discipline=payload.discipline,
         target_word_count=payload.target_word_count,
-        notes=payload.notes,
+        notes=encrypt_field(payload.notes),
     )
     db.add(assignment)
     db.flush()
@@ -135,7 +245,7 @@ def update_assignment(
     if payload.citation_style is not None:
         assignment.citation_style = payload.citation_style
     if payload.notes is not None:
-        assignment.notes = payload.notes
+        assignment.notes = encrypt_field(payload.notes)
     if payload.question is not None:
         parsed = analyze_question(payload.question, assignment.academic_level)
         if assignment.question:
@@ -180,7 +290,12 @@ def create_version(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    from app.services.auth import assert_email_verified
+
     assignment = owned_assignment(assignment_id, user, db)
+    # Extra drafts / version history is a privileged workflow for verified accounts.
+    if len(assignment.versions) >= 1:
+        assert_email_verified(user)
     if payload.document_id:
         document = owned_document(payload.document_id, user, db)
         if document.assignment_id and document.assignment_id != assignment.id:
@@ -194,7 +309,7 @@ def create_version(
         name=payload.name,
         version_number=current_max + 1,
         is_current=True,
-        notes=payload.notes,
+        notes=encrypt_field(payload.notes or ""),
     )
     db.add(version)
     db.commit()
@@ -224,10 +339,11 @@ def _save_rubric(db: Session, assignment_id: UUID, raw_text: str, criteria: list
     assignment = db.get(Assignment, assignment_id)
     rubric = assignment.rubric if assignment else None
     if not rubric:
-        rubric = Rubric(assignment_id=assignment_id, raw_text=raw_text or "")
+        rubric = Rubric(assignment_id=assignment_id, raw_text=encrypt_field(raw_text or ""))
         db.add(rubric)
         db.flush()
-    rubric.raw_text = raw_text or rubric.raw_text
+    if raw_text:
+        rubric.raw_text = encrypt_field(raw_text)
     for existing in list(rubric.criteria):
         db.delete(existing)
     parsed = criteria or _parse_rubric_text(raw_text)
@@ -236,7 +352,7 @@ def _save_rubric(db: Session, assignment_id: UUID, raw_text: str, criteria: list
             RubricCriterion(
                 rubric_id=rubric.id,
                 name=str(item.get("name") or f"Criterion {i+1}"),
-                description=str(item.get("description") or ""),
+                description=encrypt_field(str(item.get("description") or "")),
                 weight_percent=int(item.get("weight_percent") or 0),
                 max_points=int(item.get("max_points") or item.get("weight_percent") or 0),
                 sort_order=i,

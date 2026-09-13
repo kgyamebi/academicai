@@ -1,0 +1,25 @@
+{
+  "measured_at": "2026-09-07T09:22:43Z",
+  "instances": [
+    8015,
+    8016
+  ],
+  "lb": "client_round_robin_not_nginx",
+  "requests": 400,
+  "p50_ms": 583.232,
+  "p95_ms": 1094.74,
+  "p99_ms": 1575.188,
+  "error_rate": 0.0,
+  "status_counts": {
+    "200": 400
+  },
+  "not_run": [
+    "instances_5",
+    "instances_10",
+    "instances_50",
+    "nginx",
+    "traefik",
+    "cloud_lb",
+    "sticky_sessions"
+  ]
+}

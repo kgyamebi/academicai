@@ -3,7 +3,9 @@
 Target RPO: 5 minutes with managed PostgreSQL PITR enabled.  
 Target RTO: 60 minutes for a staging restore drill.
 
-These targets are **design goals**. They are not certified until the drill below is executed against a managed instance and the validation report is filled with real counts.
+These targets are **design goals**. They are not certified until the drill below is executed against a **managed** instance.
+
+Local Docker evidence (not a cloud SLA): five `pg_restore` cycles, fingerprints matched, RTO **21.317 s**, `managed_postgres: false`. See `docs/DISASTER_RECOVERY_REPORT.md` and `ops/cert_restore_audit.json`.
 
 ## Provision
 

@@ -1,0 +1,15 @@
+[Unit]
+Description=AcademicCheck AI scheduled Postgres backup + offsite upload
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/academiccheck
+EnvironmentFile=-/opt/academiccheck/.env.backup
+ExecStart=/usr/bin/bash /opt/academiccheck/ops/backup_postgres.sh
+# After local dump, upload if S3 credentials are present (MinIO or live).
+ExecStartPost=/usr/bin/python3 /opt/academiccheck/ops/cert_offsite_minio.py
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

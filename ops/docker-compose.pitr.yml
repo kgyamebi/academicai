@@ -1,0 +1,40 @@
+# Isolated Postgres for WAL archive + PITR drills. Does not replace cert/prod data.
+name: academiccheck-pitr
+services:
+  pitr-postgres:
+    image: postgres:16-alpine
+    container_name: academiccheck-pitr-pg
+    environment:
+      POSTGRES_USER: pitr
+      POSTGRES_PASSWORD: pitr
+      POSTGRES_DB: pitr
+    ports:
+      - "127.0.0.1:55434:5432"
+    volumes:
+      - pitr_pg_data:/var/lib/postgresql/data
+      - pitr_wal_archive:/wal_archive
+      - pitr_basebackup:/basebackup
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_timeout=1
+      - -c
+      - archive_command=test ! -f /wal_archive/%f && cp %p /wal_archive/%f
+      - -c
+      - max_wal_senders=3
+      - -c
+      - wal_keep_size=64MB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pitr -d pitr"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  pitr_pg_data:
+  pitr_wal_archive:
+  pitr_basebackup:

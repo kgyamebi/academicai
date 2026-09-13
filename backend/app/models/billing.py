@@ -29,7 +29,10 @@ class Plan(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     is_public: Mapped[bool] = mapped_column(Boolean, default=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
 
-    subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="plan")
+    subscriptions: Mapped[list["Subscription"]] = relationship(
+        back_populates="plan",
+        foreign_keys="Subscription.plan_id",
+    )
 
 
 class Subscription(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -45,9 +48,13 @@ class Subscription(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     cancel_at_period_end: Mapped[bool] = mapped_column(Boolean, default=False)
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     checks_used: Mapped[int] = mapped_column(Integer, default=0)
+    dunning_attempts: Mapped[int] = mapped_column(Integer, default=0)
+    pending_plan_id: Mapped[UUID | None] = mapped_column(ForeignKey("plans.id"), nullable=True)
+    disputed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="subscriptions")
-    plan: Mapped["Plan"] = relationship(back_populates="subscriptions")
+    plan: Mapped["Plan"] = relationship(back_populates="subscriptions", foreign_keys=[plan_id])
+    pending_plan: Mapped["Plan | None"] = relationship(foreign_keys=[pending_plan_id])
 
 
 class Payment(Base, UUIDPrimaryKeyMixin, TimestampMixin):
@@ -99,3 +106,16 @@ class CreditTransaction(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     tokens: Mapped[int] = mapped_column(Integer, default=0)
     estimated_cost_usd: Mapped[Decimal] = mapped_column(Numeric(10, 6), default=Decimal("0"))
     notes: Mapped[str] = mapped_column(Text, default="")
+
+
+class FinancialAuditEntry(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    """Append-only financial event log. Application code must only INSERT."""
+
+    __tablename__ = "financial_audit_entries"
+
+    event_type: Mapped[str] = mapped_column(String(64), index=True)
+    entity_type: Mapped[str] = mapped_column(String(32))
+    entity_id: Mapped[str] = mapped_column(String(64), index=True)
+    payload_hash: Mapped[str] = mapped_column(String(64), default="")
+    prev_hash: Mapped[str] = mapped_column(String(64), default="")
+    entry_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)

@@ -1,26 +1,35 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #172033;
-  --ink-muted: #314057;
-  --paper: #f6f3ec;
-  --paper-2: #fffdf8;
-  --rule: #ddd6c8;
-  --teal: #1d4e4e;
-  --teal-2: #2a6b6b;
-  --amber: #9a6700;
-  --crimson: #8b2e2e;
-  --forest: #21543a;
+  /* Scholar Studio */
+  --ink: #0b1220;
+  --ink-muted: #5c6b7a;
+  --paper: #f4f6f8;
+  --paper-2: #ffffff;
+  --rule: #e2e8f0;
+  --teal: #0f766e;
+  --teal-2: #0d9488;
+  --teal-soft: #ecfdf8;
+  --amber: #b45309;
+  --crimson: #b91c1c;
+  --forest: #166534;
+  --shadow-1: 0 1px 0 rgba(15, 23, 42, 0.04);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-sans), "Segoe UI", sans-serif;
+  font-feature-settings: "ss01" on, "kern" on;
 }
 
 .font-serif {
@@ -44,6 +53,136 @@ body {
   border: 0;
 }
 
+.ac-hit {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Surfaces */
+.ac-surface {
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+}
+
+.ac-field {
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+  padding: 0.75rem 0.875rem;
+  color: var(--ink);
+  transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+
+.ac-field:hover {
+  border-color: #cbd5e1;
+}
+
+.ac-field:focus {
+  outline: none;
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px var(--teal-soft);
+}
+
+/* Motion */
+@keyframes ac-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ac-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ac-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.ac-enter {
+  animation: ac-fade-up 480ms var(--ease-out) both;
+}
+
+.ac-enter-delay-1 {
+  animation-delay: 80ms;
+}
+
+.ac-enter-delay-2 {
+  animation-delay: 160ms;
+}
+
+.ac-enter-delay-3 {
+  animation-delay: 240ms;
+}
+
+.ac-reveal {
+  animation: ac-fade-up 420ms var(--ease-out) both;
+}
+
+.ac-press:active {
+  transform: translateY(1px);
+}
+
+.ac-pulse {
+  box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.45);
+  animation: ac-pulse-ring 1.6s var(--ease-out) infinite;
+}
+
+@keyframes ac-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(15, 118, 110, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0);
+  }
+}
+
+.ac-skeleton {
+  background: linear-gradient(90deg, #e8edf2 0%, #f7f9fb 50%, #e8edf2 100%);
+  background-size: 200% 100%;
+  animation: ac-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Hero atmosphere — cool paper plane, not purple */
+.ac-hero-plane {
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(15, 118, 110, 0.08), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 10% 80%, rgba(15, 23, 42, 0.05), transparent 50%),
+    linear-gradient(180deg, #eef2f5 0%, var(--paper) 55%, var(--paper) 100%);
+}
+
+.ac-hero-grid {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 85%);
+}
+
 .prose-academic h1,
 .prose-academic h2,
 .prose-academic h3 {
@@ -53,4 +192,31 @@ body {
 
 .prose-academic p {
   line-height: 1.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ac-enter,
+  .ac-enter-delay-1,
+  .ac-enter-delay-2,
+  .ac-enter-delay-3,
+  .ac-reveal,
+  .ac-pulse {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    box-shadow: none;
+  }
 }

@@ -1,0 +1,5 @@
+{
+  "base": "http://localhost:3001",
+  "minScore": 0.9,
+  "summary": []
+}

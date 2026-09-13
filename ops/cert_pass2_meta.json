@@ -1,0 +1,29 @@
+{
+  "pass": 2,
+  "measured_at": "2026-09-07T19:01:18Z",
+  "pytest": {
+    "suites": [
+      "tests/test_billing_critical.py",
+      "tests/test_seo_sitemap.py",
+      "tests/test_analysis_engine.py"
+    ],
+    "result": "25 passed",
+    "log": "ops/cert_pass2_pytest.txt"
+  },
+  "code_changes": [
+    "backend/app/services/billing.py — renewal extend, fail/refund counters, billing analytics",
+    "backend/app/services/credits.py — expiry CreditTransaction + flush + wallet_matches_ledger",
+    "backend/app/api/v1/billing.py — checkout rate limit, webhook duplicate counter, cancel analytics",
+    "backend/app/api/v1/citations.py — citation_check_used AnalyticsEvent",
+    "backend/app/services/analysis/runner.py — analysis-complete email for registered users",
+    "backend/app/core/rate_limit.py — checkout bucket",
+    "frontend/app/help/page.tsx — FAQ list + FAQPage JSON-LD"
+  ],
+  "live_psp": false,
+  "coverage_remeasured": false,
+  "score_deltas": {
+    "billing": {"old": 88, "new": 89, "reason": "pytest renewal + expiry ledger + checkout velocity + analytics"},
+    "testing": {"old": 79, "new": 79, "reason": "full TOTAL coverage not remeasured this pass"},
+    "overall": {"old": 87, "new": 87, "reason": "Bucket B blockers unchanged; no average inflation"}
+  }
+}

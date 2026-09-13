@@ -41,6 +41,22 @@ def main() -> int:
         }
     for key, value in rows.items():
         print(f"{key}={value}")
+
+    if os.environ.get("VALIDATE_RELATIONSHIPS", "1") == "1" and not url.startswith("sqlite"):
+        orphans = {}
+        with engine.connect() as conn:
+            checks = {
+                "documents_missing_user": "SELECT COUNT(*) FROM documents d LEFT JOIN users u ON d.user_id = u.id WHERE u.id IS NULL",
+                "assignments_missing_user": "SELECT COUNT(*) FROM assignments a LEFT JOIN users u ON a.user_id = u.id WHERE u.id IS NULL",
+                "reports_missing_job": "SELECT COUNT(*) FROM analysis_reports r LEFT JOIN analysis_jobs j ON r.job_id = j.id WHERE j.id IS NULL",
+                "payments_missing_user": "SELECT COUNT(*) FROM payments p LEFT JOIN users u ON p.user_id = u.id WHERE u.id IS NULL",
+            }
+            for name, sql in checks.items():
+                orphans[name] = int(conn.execute(text(sql)).scalar() or 0)
+                print(f"orphan_{name}={orphans[name]}")
+        if any(orphans.values()):
+            print("FAIL: relationship orphans after restore")
+            return 1
     return 0
 
 

@@ -1,0 +1,24 @@
+{
+  "measured_at": "2026-09-10T07:36:33Z",
+  "cdn_standin": "http://127.0.0.1:18081",
+  "origin": {
+    "status": 200,
+    "cache_control": "public, max-age=60, stale-while-revalidate=60",
+    "cdn_cache_control": "public, max-age=60",
+    "surrogate_key": "public-meta",
+    "bytes": 1249
+  },
+  "live_cdn_account": false,
+  "not_reached": [],
+  "nginx_cache": {
+    "first_status": 200,
+    "first_x_cache": "MISS",
+    "second_status": 200,
+    "second_x_cache": "HIT",
+    "hit_on_second": true
+  },
+  "private_live": {
+    "cache_control": "no-store",
+    "no_store": true
+  }
+}

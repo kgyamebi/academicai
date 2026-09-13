@@ -1,0 +1,12 @@
+{
+  "description": "One JSON object per held-out document. Leave this file empty of rows until real reviewers label.",
+  "required": ["id", "suite", "reviewer_a", "reviewer_b", "ai", "uncertain"],
+  "properties": {
+    "id": "stable case id",
+    "suite": "question|thesis|argument|evidence|citation|rubric",
+    "reviewer_a": "label string",
+    "reviewer_b": "label string",
+    "ai": "AcademicCheck label",
+    "uncertain": "boolean — true if either reviewer marked uncertainty"
+  }
+}

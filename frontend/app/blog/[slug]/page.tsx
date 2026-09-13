@@ -23,7 +23,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   return (
     <>
       <SiteHeader />
-      <main className="prose-academic mx-auto max-w-3xl px-4 py-16">
+      <main id="main-content" tabIndex={-1} className="prose-academic mx-auto max-w-3xl px-4 py-16">
         <article className="whitespace-pre-wrap leading-7">{post.body_markdown}</article>
       </main>
       <SiteFooter />

@@ -1,29 +1,48 @@
 # AI quality evaluation
 
-Measured 6 Sep 2026 on the in-repo gold set.
+Measured 7 Sep 2026. Artifact: `backend/app/services/ai/eval_report.json`.
 
-| Suite | Cases | Precision | Recall | F1 | CI floor |
+## Template gold (circular — not lecturer gold)
+
+| Suite | Cases | Precision | Recall | F1 | 95% F1 CI low | Source |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Question analyzer | 4320 | 1.000 | 1.000 | 1.000 | 0.999 | circular |
+| Thesis analyzer | 4032 | 1.000 | 1.000 | 1.000 | 0.999 | circular |
+| Citation extractor | 55 | 1.000 | 1.000 | 1.000 | 0.935 | circular |
+| Argument analyzer | 3648 | 1.000 | 1.000 | 1.000 | 0.999 | circular |
+| Evidence analyzer | 2880 | 0.993 | 1.000 | 0.997 | 0.994 | circular |
+| Rubric checker | 96 | 1.000 | 1.000 | 1.000 | 0.962 | circular |
+| **Template total** | **15031** | | | | | |
+
+Do not read 1.00 F1 as solved AI. Labels come from the same rules as the classifiers.
+
+## Held-out gold (independent expert-constructed — still not lecturer-reviewed)
+
+| Suite | Cases | Precision | Recall | F1 | 95% F1 CI low |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Question analyzer | 3240 | 1.000 | 1.000 | 1.000 | 0.90 |
-| Thesis analyzer | 3360 | 1.000 | 1.000 | 1.000 | 0.95 |
-| Citation extractor | 55 | — | — | 0.963 | 0.90 |
-| Argument analyzer | 3040 | 1.000 | 1.000 | 1.000 | 0.95 |
-| Evidence analyzer | 2400 | — | — | 0.996 | 0.95 |
-| Rubric checker | 80 | 1.000 | 1.000 | 1.000 | 0.95 |
-| **Total** | **10375** | | | | |
+| Held-out question | 35 | 1.000 | 1.000 | 1.000 | **0.901** |
+| Held-out thesis | 20 | 1.000 | 1.000 | 1.000 | **0.839** |
+| Held-out argument | 17 | 1.000 | 1.000 | 1.000 | **0.816** |
+| Held-out evidence (4-way) | 18 | 1.000 | 1.000 | 1.000 | **0.824** |
+| Held-out citation | 22 | 1.000 | 1.000 | 1.000 | **0.851** |
+| Hallucination guard (units) | 4 | 1.000 | 1.000 | 1.000 | 0.510 |
+| Coach refusal | 4 | 1.000 | 1.000 | 1.000 | 0.510 |
+| **Held-out labeled total** | **120** | | | | |
 
-Gold covers undergraduate, postgraduate, masters, and PhD stems across humanities, business, engineering, healthcare, and economics.
+Certification requires n≥1000 (citations ≥2000) **and** CI lower bound ≥0.98. None of these suites pass.
 
-## What these numbers are
+Evidence confusion matrix (held-out): diagonal 5 / 7 / 2 / 4 for supported / needs_citation / potentially_unsupported / cannot_determine. False positive rate 0, false negative rate 0 **on n=18 only**.
 
-Labels are **expert-constructed from writing-centre rules** that the production classifiers implement (`classify_thesis`, `has_reasoned_argument`, `needs_citation`, `rubric_covered`). CI fails if F1 drops more than 0.03 from `eval_baseline.json` or falls below the floors above.
+## Other measurements
 
-Confusion matrices are attached to each `Metric` (`strong/weak/missing` for thesis; tp/fp/fn/tn for argument and evidence).
+- Hallucination red-team: 0/1210 escaped (combinatorial). Live LLM: not run.
+- Citation parser robustness: 2440 unlabeled, 0 failures. Not an F1 score.
+- Reviewer agreement: n=0.
+- Reference verification precision/recall: null.
+- Live providers: unproven.
 
-## What these numbers are not
+## Certification
 
-- Not third-party human review
-- Not a measurement of the optional LLM enhancement path
-- Not proof that a lecturer would assign the same labels
+**Evidence-backed AI quality: 87 / 100.** Gate 98. **Fail. Do not claim 98%.**
 
-Do not treat 1.00 F1 as “the AI is solved.” It means the deterministic analyzers are consistent with the stated rules on this gold set.
+See `docs/AI_CERTIFICATION.md` and `docs/AI_CERTIFICATION_READINESS.md`.

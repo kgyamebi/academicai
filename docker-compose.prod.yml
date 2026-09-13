@@ -1,4 +1,5 @@
 # Production-shaped stack. Do not use SQLite. Set secrets via environment, not this file.
+# Postgres/Redis/PgBouncer publish no host ports — only reachable on the compose network.
 services:
   postgres:
     image: postgres:16
@@ -8,6 +9,8 @@ services:
       POSTGRES_DB: academiccheck
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # WAL copies must outlive the container. Replay of these files is still unrun (DR-02).
+      - postgres_wal_archive:/backups
     command:
       - postgres
       - -c
@@ -20,6 +23,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       retries: 10
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -30,6 +34,25 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       retries: 10
+    restart: unless-stopped
+
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.23.1-p1
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/academiccheck
+      AUTH_TYPE: scram-sha-256
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 200
+      DEFAULT_POOL_SIZE: 20
+      LISTEN_PORT: 6432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 6432 || exit 1"]
+      interval: 10s
+      retries: 10
+    restart: unless-stopped
 
   api:
     build:
@@ -40,10 +63,38 @@ services:
       APP_ENV: production
       REQUIRE_QUEUE: "true"
       COOKIE_SECURE: "true"
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/academiccheck
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/academiccheck
       REDIS_URL: redis://redis:6379/0
+      # Keep app pool below PgBouncer DEFAULT_POOL_SIZE (20) across api workers + worker replicas.
+      DB_POOL_SIZE: "5"
+      DB_MAX_OVERFLOW: "5"
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-resend}
+      EMAIL_API_KEY: ${EMAIL_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_TLS: ${SMTP_TLS:-required}
+      SMTP_TIMEOUT_SECONDS: ${SMTP_TIMEOUT_SECONDS:-15}
+      SMTP_REQUIRE_AUTH: ${SMTP_REQUIRE_AUTH:-true}
+      SMTP_EHLO_HOSTNAME: ${SMTP_EHLO_HOSTNAME:-}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_ENVELOPE_FROM: ${EMAIL_ENVELOPE_FROM:-}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
+      EMAIL_ASYNC: ${EMAIL_ASYNC:-true}
+      EMAIL_SMTP_PROBE_ON_STARTUP: ${EMAIL_SMTP_PROBE_ON_STARTUP:-true}
+      EMAIL_VALIDATE_MX: ${EMAIL_VALIDATE_MX:-true}
+      APP_WEB_URL: ${APP_WEB_URL}
+      APP_API_URL: ${APP_API_URL}
+      APP_CORS_ORIGINS: ${APP_CORS_ORIGINS}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
+      ALERT_SINK_FILE: ${ALERT_SINK_FILE:-}
     depends_on:
       postgres:
+        condition: service_healthy
+      pgbouncer:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -51,6 +102,7 @@ services:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready')"]
       interval: 20s
       retries: 5
+    restart: unless-stopped
 
   worker:
     build:
@@ -60,16 +112,42 @@ services:
     environment:
       APP_ENV: production
       REQUIRE_QUEUE: "true"
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/academiccheck
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/academiccheck
       REDIS_URL: redis://redis:6379/0
+      DB_POOL_SIZE: "5"
+      DB_MAX_OVERFLOW: "5"
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-resend}
+      EMAIL_API_KEY: ${EMAIL_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_TLS: ${SMTP_TLS:-required}
+      SMTP_TIMEOUT_SECONDS: ${SMTP_TIMEOUT_SECONDS:-15}
+      SMTP_REQUIRE_AUTH: ${SMTP_REQUIRE_AUTH:-true}
+      SMTP_EHLO_HOSTNAME: ${SMTP_EHLO_HOSTNAME:-}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_ENVELOPE_FROM: ${EMAIL_ENVELOPE_FROM:-}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
+      EMAIL_ASYNC: ${EMAIL_ASYNC:-true}
+      EMAIL_SMTP_PROBE_ON_STARTUP: ${EMAIL_SMTP_PROBE_ON_STARTUP:-true}
+      APP_WEB_URL: ${APP_WEB_URL}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
+      ALERT_SINK_FILE: ${ALERT_SINK_FILE:-}
     depends_on:
       postgres:
+        condition: service_healthy
+      pgbouncer:
         condition: service_healthy
       redis:
         condition: service_healthy
     deploy:
       replicas: 2
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  postgres_wal_archive:
   redis_data:

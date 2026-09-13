@@ -15,13 +15,13 @@ _WINDOW = 60
 _hits: dict[str, deque[float]] = defaultdict(deque)
 
 LIMITS = {
-    "guest": {"login": 10, "signup": 8, "upload": 8, "analysis": 4, "coach": 4, "default": 60},
-    "free": {"login": 20, "signup": 10, "upload": 20, "analysis": 8, "coach": 8, "default": 120},
-    "student": {"login": 30, "upload": 40, "analysis": 20, "coach": 20, "default": 240},
-    "pro": {"login": 40, "upload": 80, "analysis": 40, "coach": 40, "default": 400},
-    "power": {"login": 60, "upload": 120, "analysis": 80, "coach": 80, "default": 800},
-    "institution": {"login": 80, "upload": 200, "analysis": 120, "coach": 120, "default": 1200},
-    "admin": {"login": 80, "upload": 200, "analysis": 200, "coach": 200, "default": 2000},
+    "guest": {"login": 10, "signup": 8, "upload": 8, "analysis": 4, "coach": 4, "citation": 4, "share": 8, "checkout": 4, "verify": 5, "password_forgot": 5, "default": 60},
+    "free": {"login": 20, "signup": 10, "upload": 20, "analysis": 8, "coach": 8, "citation": 8, "checkout": 8, "verify": 8, "password_forgot": 6, "default": 120},
+    "student": {"login": 30, "upload": 40, "analysis": 20, "coach": 20, "citation": 20, "checkout": 12, "verify": 10, "password_forgot": 8, "default": 240},
+    "pro": {"login": 40, "upload": 80, "analysis": 40, "coach": 40, "citation": 40, "checkout": 20, "verify": 12, "password_forgot": 10, "default": 400},
+    "power": {"login": 60, "upload": 120, "analysis": 80, "coach": 80, "citation": 80, "checkout": 30, "verify": 15, "password_forgot": 12, "default": 800},
+    "institution": {"login": 80, "upload": 200, "analysis": 120, "coach": 120, "citation": 120, "checkout": 40, "verify": 20, "password_forgot": 15, "default": 1200},
+    "admin": {"login": 80, "upload": 200, "analysis": 200, "coach": 200, "citation": 200, "checkout": 40, "verify": 30, "password_forgot": 20, "default": 2000},
 }
 
 
@@ -33,6 +33,10 @@ def check_rate_limit(request: Request, bucket: str, user: User | None = None) ->
         role = "free"
     limits = LIMITS.get(role, LIMITS["guest"])
     max_hits = limits.get(bucket, limits["default"])
+    # Identity is user id or TCP peer (request.client.host). X-Forwarded-For / X-Real-IP
+    # are ignored on purpose — they are attacker-controlled without a trusted proxy.
+    # Identity is user id or TCP peer (request.client.host). X-Forwarded-For / X-Real-IP
+    # are ignored on purpose — they are attacker-controlled without a trusted proxy.
     ident = f"{role}:{bucket}:{user.id if user else request.client.host if request.client else 'anon'}"
     settings = get_settings()
     if settings.app_env == "test":
@@ -52,9 +56,9 @@ def check_rate_limit(request: Request, bucket: str, user: User | None = None) ->
 
 
 def _redis_hit(ident: str, max_hits: int) -> bool:
-    from redis import Redis
+    from app.workers.queue import redis_client
 
-    redis = Redis.from_url(get_settings().redis_url, socket_timeout=1)
+    redis = redis_client()
     key = f"rl:{ident}"
     current = redis.incr(key)
     if current == 1:

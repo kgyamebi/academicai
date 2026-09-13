@@ -1,0 +1,341 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-09-10T04:52:20Z",
+    "component": {
+      "name": "academiccheck-backend",
+      "type": "application"
+    },
+    "tools": [
+      {
+        "name": "ops/generate_sbom.py",
+        "version": "1"
+      }
+    ],
+    "note": "Direct pins from requirements.txt. Transitives are enumerated by pip-audit/CI Trivy."
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "fastapi",
+      "version": "0.141.1",
+      "purl": "pkg:pypi/fastapi@0.141.1",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "uvicorn",
+      "version": "0.52.1",
+      "purl": "pkg:pypi/uvicorn@0.52.1",
+      "extra": "standard",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pydantic",
+      "version": "2.13.5",
+      "purl": "pkg:pypi/pydantic@2.13.5",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pydantic-settings",
+      "version": "2.15.0",
+      "purl": "pkg:pypi/pydantic-settings@2.15.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "email-validator",
+      "version": "2.3.0",
+      "purl": "pkg:pypi/email-validator@2.3.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "sqlalchemy",
+      "version": "2.0.52",
+      "purl": "pkg:pypi/sqlalchemy@2.0.52",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "alembic",
+      "version": "1.19.2",
+      "purl": "pkg:pypi/alembic@1.19.2",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "psycopg",
+      "version": "3.3.5",
+      "purl": "pkg:pypi/psycopg@3.3.5",
+      "extra": "binary",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "redis",
+      "version": "8.1.0",
+      "purl": "pkg:pypi/redis@8.1.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "rq",
+      "version": "2.12.0",
+      "purl": "pkg:pypi/rq@2.12.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "passlib",
+      "version": "1.7.4",
+      "purl": "pkg:pypi/passlib@1.7.4",
+      "extra": "bcrypt",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "bcrypt",
+      "version": "5.0.0",
+      "purl": "pkg:pypi/bcrypt@5.0.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "argon2-cffi",
+      "version": "25.1.0",
+      "purl": "pkg:pypi/argon2-cffi@25.1.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pyjwt",
+      "version": "2.13.0",
+      "purl": "pkg:pypi/pyjwt@2.13.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "python-multipart",
+      "version": "0.0.32",
+      "purl": "pkg:pypi/python-multipart@0.0.32",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "httpx",
+      "version": "0.28.1",
+      "purl": "pkg:pypi/httpx@0.28.1",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pymupdf",
+      "version": "1.28.2",
+      "purl": "pkg:pypi/pymupdf@1.28.2",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "python-docx",
+      "version": "1.2.0",
+      "purl": "pkg:pypi/python-docx@1.2.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "reportlab",
+      "version": "5.0.1",
+      "purl": "pkg:pypi/reportlab@5.0.1",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "langdetect",
+      "version": "1.0.9",
+      "purl": "pkg:pypi/langdetect@1.0.9",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "orjson",
+      "version": "3.11.9",
+      "purl": "pkg:pypi/orjson@3.11.9",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "structlog",
+      "version": "26.1.0",
+      "purl": "pkg:pypi/structlog@26.1.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "tenacity",
+      "version": "9.1.4",
+      "purl": "pkg:pypi/tenacity@9.1.4",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "bleach",
+      "version": "6.4.0",
+      "purl": "pkg:pypi/bleach@6.4.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "python-magic-bin",
+      "version": "0.4.14",
+      "purl": "pkg:pypi/python-magic-bin@0.4.14",
+      "extra": "",
+      "marker": "sys_platform == \"win32\""
+    },
+    {
+      "type": "library",
+      "name": "python-magic",
+      "version": "0.4.27",
+      "purl": "pkg:pypi/python-magic@0.4.27",
+      "extra": "",
+      "marker": "sys_platform != \"win32\""
+    },
+    {
+      "type": "library",
+      "name": "cryptography",
+      "version": "50.0.1",
+      "purl": "pkg:pypi/cryptography@50.0.1",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "opentelemetry-api",
+      "version": "1.44.0",
+      "purl": "pkg:pypi/opentelemetry-api@1.44.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "opentelemetry-sdk",
+      "version": "1.44.0",
+      "purl": "pkg:pypi/opentelemetry-sdk@1.44.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pyotp",
+      "version": "2.10.0",
+      "purl": "pkg:pypi/pyotp@2.10.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "stripe",
+      "version": "15.6.1",
+      "purl": "pkg:pypi/stripe@15.6.1",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "boto3",
+      "version": "1.43.89",
+      "purl": "pkg:pypi/boto3@1.43.89",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "jsonschema",
+      "version": "4.26.0",
+      "purl": "pkg:pypi/jsonschema@4.26.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "sentry-sdk",
+      "version": "2.68.1",
+      "purl": "pkg:pypi/sentry-sdk@2.68.1",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pytest",
+      "version": "9.1.1",
+      "purl": "pkg:pypi/pytest@9.1.1",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pytest-asyncio",
+      "version": "1.4.0",
+      "purl": "pkg:pypi/pytest-asyncio@1.4.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pytest-cov",
+      "version": "7.1.0",
+      "purl": "pkg:pypi/pytest-cov@7.1.0",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "ruff",
+      "version": "0.16.6",
+      "purl": "pkg:pypi/ruff@0.16.6",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "hypothesis",
+      "version": "6.148.7",
+      "purl": "pkg:pypi/hypothesis@6.148.7",
+      "extra": "",
+      "marker": ""
+    },
+    {
+      "type": "library",
+      "name": "pip-audit",
+      "version": "2.10.1",
+      "purl": "pkg:pypi/pip-audit@2.10.1",
+      "extra": "",
+      "marker": ""
+    }
+  ]
+}

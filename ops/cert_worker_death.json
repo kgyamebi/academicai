@@ -1,0 +1,11 @@
+{
+  "measured_at": "2026-09-07T10:52:58Z",
+  "jobs": 12,
+  "statuses": {
+    "completed": 11,
+    "queued": 1
+  },
+  "stuck": 1,
+  "killed_pid_restarted": true,
+  "pass": false
+}

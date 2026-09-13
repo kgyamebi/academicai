@@ -9,7 +9,7 @@ export default async function BlogIndex() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="font-serif text-4xl">Writing guides</h1>
         <ul className="mt-8 space-y-5">
           {data.items.map((p: { slug: string; title: string; excerpt: string }) => (

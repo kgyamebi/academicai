@@ -1,8 +1,15 @@
 {
   "question_analyzer": 1.0,
   "thesis_analyzer": 1.0,
-  "citation_extractor": 0.963,
+  "citation_extractor": 1.0,
   "argument_analyzer": 1.0,
   "evidence_analyzer": 0.9965,
-  "rubric_checker": 1.0
+  "rubric_checker": 1.0,
+  "heldout_question": 1.0,
+  "heldout_thesis": 1.0,
+  "heldout_argument": 1.0,
+  "heldout_evidence": 1.0,
+  "heldout_citation": 1.0,
+  "hallucination_guard": 1.0,
+  "coach_refusal": 1.0
 }

@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -16,6 +16,11 @@ if TYPE_CHECKING:
 
 class AnalysisJob(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "analysis_jobs"
+    __table_args__ = (
+        Index("ix_analysis_jobs_user_status", "user_id", "status"),
+        Index("ix_analysis_jobs_status_started", "status", "started_at"),
+        Index("ix_analysis_jobs_status_created", "status", "created_at"),
+    )
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     assignment_id: Mapped[UUID | None] = mapped_column(
@@ -34,6 +39,8 @@ class AnalysisJob(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     duration_ms: Mapped[int] = mapped_column(Integer, default=0)
     error: Mapped[str | None] = mapped_column(Text, nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    recovery_count: Mapped[int] = mapped_column(Integer, default=0)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     cancelled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     idempotency_key: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
@@ -47,6 +54,7 @@ class AnalysisJob(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 class AnalysisReport(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "analysis_reports"
+    __table_args__ = (Index("ix_analysis_reports_user_created", "user_id", "created_at"),)
 
     job_id: Mapped[UUID] = mapped_column(ForeignKey("analysis_jobs.id", ondelete="CASCADE"), unique=True)
     assignment_id: Mapped[UUID | None] = mapped_column(ForeignKey("assignments.id"), nullable=True, index=True)
@@ -86,6 +94,11 @@ class AnalysisReport(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 class AnalysisFinding(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "analysis_findings"
+    __table_args__ = (
+        Index("ix_analysis_findings_report_severity", "report_id", "severity"),
+        Index("ix_analysis_findings_report_created", "report_id", "created_at"),
+        Index("ix_analysis_findings_report_created_id", "report_id", "created_at", "id"),
+    )
 
     report_id: Mapped[UUID] = mapped_column(ForeignKey("analysis_reports.id", ondelete="CASCADE"), index=True)
     category: Mapped[str] = mapped_column(String(64), index=True)

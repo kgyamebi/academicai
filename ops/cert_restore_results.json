@@ -1,0 +1,29 @@
+{
+  "measured_at": "2026-09-07T08:42:17Z",
+  "dump_s": 18.247,
+  "restore_s": 40.218,
+  "before": {
+    "users": 1,
+    "assignments": 100000,
+    "documents": 1,
+    "analysis_reports": 1,
+    "analysis_jobs": 1,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "after": {
+    "users": 1,
+    "assignments": 100000,
+    "documents": 1,
+    "analysis_reports": 1,
+    "analysis_jobs": 1,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "counts_match": true,
+  "pass": true,
+  "findings_on_restore_db": 1000000,
+  "stderr_dump": ""
+}

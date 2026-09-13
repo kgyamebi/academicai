@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AcademicCheck AI Status</title>
+  <style>
+    :root { color-scheme: light; --ink:#1a1a1a; --ok:#0f7a4d; --bad:#a11; --muted:#555; --bg:#f7f5f1; }
+    body { font-family: Georgia, "Times New Roman", serif; margin: 0; background: var(--bg); color: var(--ink); }
+    main { max-width: 42rem; margin: 0 auto; padding: 3rem 1.25rem; }
+    h1 { font-size: 2rem; margin: 0 0 0.5rem; }
+    p { line-height: 1.5; color: var(--muted); }
+    .badge { display: inline-block; padding: 0.35rem 0.75rem; border-radius: 0.25rem; font-weight: 700; }
+    .ok { background: #d9f2e5; color: var(--ok); }
+    .bad { background: #f8d9d9; color: var(--bad); }
+    ul { list-style: none; padding: 0; }
+    li { padding: 0.75rem 0; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+    code { font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>AcademicCheck AI status</h1>
+    <p>Public status page fed by live/ready health checks. Not a hosted Statuspage account.</p>
+    <p id="overall" class="badge bad" aria-live="polite">Checking…</p>
+    <ul id="checks" aria-live="polite"></ul>
+    <p><small>Last updated: <span id="ts">—</span></small></p>
+  </main>
+  <script>
+    const API = (window.STATUS_API_BASE || "http://127.0.0.1:8000").replace(/\/$/, "");
+    async function probe(path) {
+      try {
+        const r = await fetch(API + path, { cache: "no-store" });
+        return { ok: r.ok, status: r.status };
+      } catch (e) {
+        return { ok: false, status: 0, error: String(e) };
+      }
+    }
+    async function refresh() {
+      const live = await probe("/api/live");
+      const ready = await probe("/api/ready");
+      const items = [
+        ["API process (/api/live)", live],
+        ["Traffic ready (/api/ready)", ready],
+      ];
+      const allOk = items.every(([, x]) => x.ok);
+      const overall = document.getElementById("overall");
+      overall.textContent = allOk ? "All systems operational" : "Degraded or unavailable";
+      overall.className = "badge " + (allOk ? "ok" : "bad");
+      document.getElementById("checks").innerHTML = items.map(([name, x]) =>
+        `<li><span>${name}</span><code>${x.ok ? "OK" : "FAIL"} ${x.status}</code></li>`
+      ).join("");
+      document.getElementById("ts").textContent = new Date().toISOString();
+    }
+    refresh();
+    setInterval(refresh, 30000);
+  </script>
+</body>
+</html>

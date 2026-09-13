@@ -1,0 +1,56 @@
+{
+  "measured_at": "2026-09-09T21:13:22Z",
+  "consecutive_run_requirement": 2,
+  "drills": {
+    "host_export": {
+      "ok": true,
+      "sha256": "0cbb3455f31f96ffa2708f2c9cbe84c25cd7c65debdc90ba0cac94ffec05f7b2",
+      "size_bytes": 32893333
+    },
+    "host_restore_only": {
+      "ok": true,
+      "runs": 2,
+      "rto_s": [
+        43.346,
+        43.067
+      ],
+      "rto_consistent": true
+    },
+    "offsite_minio": {
+      "ok": true,
+      "runs": 2,
+      "live_cloud": false
+    },
+    "wal_pitr_local": {
+      "ok": true,
+      "runs": 2,
+      "managed_provider": false
+    },
+    "storage_app_restore": {
+      "ok": true,
+      "runs": 2
+    },
+    "queue_crash_aof": {
+      "ok": true,
+      "runs": 2,
+      "lost": [
+        0,
+        0
+      ]
+    },
+    "crr_config": {
+      "syntax_ok": true,
+      "replication_succeeded": false
+    }
+  },
+  "live_account_still_required": [
+    "managed Postgres PITR (RDS/Neon/Cloud SQL feature)",
+    "real S3/GCS bucket credentials in GHA secrets",
+    "S3 CRR between two regions",
+    "multi-region failover drill",
+    "human production dump/restore (docs/PROD_DR_DRILL.md)"
+  ],
+  "ok_local_package": true,
+  "production_dr_certified": false,
+  "launch_recommendation": "NO-GO \u2014 local DR package PASS; live account + human prod drill still open"
+}

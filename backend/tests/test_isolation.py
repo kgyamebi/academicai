@@ -249,4 +249,43 @@ def test_anonymous_cannot_read_tenant_objects(client):
         assert client.get(f"/api/reports/{owner['report_id']}").status_code == 401
         assert client.get(f"/api/reports/{owner['report_id']}/pdf").status_code == 401
         assert client.post(f"/api/reports/{owner['report_id']}/share", json={"hours": 1}).status_code == 401
-        assert client.post(f"/api/reports/{owner['report_id']}/share", json={"hours": 1}).status_code == 401
+
+
+def test_citations_are_tenant_isolated(client, monkeypatch):
+    from uuid import UUID
+
+    from app.db.session import SessionLocal
+    from app.models.citation import Reference
+    from app.services.analysis.verify_sources import Verification
+
+    monkeypatch.setattr(
+        "app.api.v1.citations.verify_reference",
+        lambda **_kwargs: Verification("could_not_verify", 0, "No bibliographic service returned a match.", "none"),
+    )
+    owner = _owned_stack(client, "cite-owner@example.com")
+    thief = _user(client, "cite-thief@example.com")
+    db = SessionLocal()
+    try:
+        row = Reference(
+            document_id=UUID(owner["document_id"]),
+            raw_text="Smith, A. (1999). Untitled.",
+            title="",
+            doi="",
+            sort_order=0,
+        )
+        db.add(row)
+        db.commit()
+        reference_id = str(row.id)
+    finally:
+        db.close()
+
+    stolen = thief["headers"]
+    assert client.get(f"/api/citations?document_id={owner['document_id']}", headers=stolen).status_code == 404
+    assert client.post("/api/citations/verify", json={"reference_id": reference_id}, headers=stolen).status_code == 404
+    listed = client.get(f"/api/citations?document_id={owner['document_id']}", headers=owner["headers"])
+    assert listed.status_code == 200
+    assert "invent" in listed.json()["disclaimer"].lower()
+    verified = client.post("/api/citations/verify", json={"reference_id": reference_id}, headers=owner["headers"])
+    assert verified.status_code == 200
+    assert verified.json()["status"] == "could_not_verify"
+    assert not verified.json().get("matched_title")

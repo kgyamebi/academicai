@@ -1,0 +1,102 @@
+{
+  "measured_at": "2026-09-10T05:34:34Z",
+  "allocator": "tracemalloc",
+  "request_thread": "pdf_docx_extraction_moved_to_worker_queue",
+  "txt": {
+    "small": {
+      "chars": 1048,
+      "words": 136,
+      "paragraphs": 8,
+      "latency_ms": 112.598,
+      "peak_traced_bytes": 131472
+    },
+    "medium": {
+      "chars": 10480,
+      "words": 1360,
+      "paragraphs": 80,
+      "latency_ms": 222.045,
+      "peak_traced_bytes": 600951
+    },
+    "large": {
+      "chars": 52400,
+      "words": 6800,
+      "paragraphs": 400,
+      "latency_ms": 280.599,
+      "peak_traced_bytes": 1296143
+    },
+    "very_large": {
+      "chars": 157200,
+      "words": 20400,
+      "paragraphs": 1200,
+      "latency_ms": 1401.171,
+      "peak_traced_bytes": 3758631
+    }
+  },
+  "pdf": {
+    "small": {
+      "pages": 1,
+      "bytes": 902,
+      "words": 14,
+      "latency_ms": 199.838,
+      "peak_traced_bytes": 21882
+    },
+    "medium": {
+      "pages": 8,
+      "bytes": 3972,
+      "words": 112,
+      "latency_ms": 233.295,
+      "peak_traced_bytes": 111933
+    },
+    "large": {
+      "pages": 24,
+      "bytes": 10997,
+      "words": 336,
+      "latency_ms": 440.344,
+      "peak_traced_bytes": 314499
+    },
+    "very_large": {
+      "pages": 60,
+      "bytes": 26972,
+      "words": 840,
+      "latency_ms": 194.149,
+      "peak_traced_bytes": 530075
+    }
+  },
+  "docx": {
+    "small": {
+      "paragraphs_in": 8,
+      "bytes": 35338,
+      "words": 80,
+      "paragraphs": 8,
+      "latency_ms": 160.112,
+      "peak_traced_bytes": 2274601
+    },
+    "medium": {
+      "paragraphs_in": 80,
+      "bytes": 35391,
+      "words": 800,
+      "paragraphs": 80,
+      "latency_ms": 1809.169,
+      "peak_traced_bytes": 2282873
+    },
+    "large": {
+      "paragraphs_in": 400,
+      "bytes": 35554,
+      "words": 4000,
+      "paragraphs": 400,
+      "latency_ms": 8658.11,
+      "peak_traced_bytes": 2320225
+    },
+    "very_large": {
+      "paragraphs_in": 1200,
+      "bytes": 35895,
+      "words": 12000,
+      "paragraphs": 1200,
+      "latency_ms": 21731.386,
+      "peak_traced_bytes": 2844142
+    }
+  },
+  "not_run": [
+    "parallel_parse"
+  ]
+}

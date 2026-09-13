@@ -16,9 +16,9 @@ from app.models.assignment import AssignmentVersion
 from app.models.document import Document
 from app.models.user import User
 from app.schemas.common import AnalysisCreateIn, CompareIn
+from app.services.analysis.runner import process_job, reap_stale_jobs
 from app.services.credits import refund_reservation, reserve_credits
 from app.services.entitlements import assert_can_analyze, monthly_quota_exhausted
-from app.services.analysis.runner import process_job
 from app.workers.queue import enqueue_analysis
 
 router = APIRouter(prefix="/api/analysis", tags=["analysis"])
@@ -47,6 +47,10 @@ def create_analysis(
         raise HTTPException(400, "Upload or paste a document before starting analysis.")
     if document.assignment_id and document.assignment_id != assignment.id:
         raise HTTPException(404, "Document not found.")
+    if document.status in {"queued", "extracting"}:
+        raise HTTPException(409, "Document is still being processed. Poll GET /api/documents/{id} until status is extracted.")
+    if document.status != "extracted":
+        raise HTTPException(400, document.extraction_error or "This document could not be read. Upload a different file.")
     assert_can_analyze(db, user, document.word_count, payload.analysis_type)
     spend_credits = monthly_quota_exhausted(db, user)
     job = AnalysisJob(
@@ -79,6 +83,8 @@ def create_analysis(
 
 @router.get("/{job_id}")
 def get_analysis(job_id: UUID, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    reap_stale_jobs(db)
+    db.commit()
     job = db.get(AnalysisJob, job_id)
     if not job or job.user_id != user.id:
         raise HTTPException(404, "Analysis not found.")
@@ -107,6 +113,9 @@ def cancel_analysis(job_id: UUID, user: User = Depends(get_current_user), db: Se
 
 @router.post("/compare")
 def compare(payload: CompareIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    from app.services.auth import assert_email_verified
+
+    assert_email_verified(user)
     assignment = owned_assignment(payload.assignment_id, user, db)
     version_a = db.get(AssignmentVersion, payload.version_a_id)
     version_b = db.get(AssignmentVersion, payload.version_b_id)

@@ -1,0 +1,16 @@
+{
+  "measured_at": "2026-09-10T07:09:52Z",
+  "backend": "minio_s3_api",
+  "endpoint": "http://127.0.0.1:59010",
+  "tiers": {
+    "100000": {
+      "error": "Object storage put failed."
+    }
+  },
+  "not_reached": [
+    {
+      "tier": 100000,
+      "reason": "Object storage put failed."
+    }
+  ]
+}

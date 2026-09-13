@@ -1,33 +1,37 @@
-# Accessibility checklist and compliance report
+# Accessibility Audit Report — AcademicCheck AI
 
-Date: 2026-09-06  
-Standard: WCAG 2.2 AA  
-Scope: existing AcademicCheck AI UI only. No new product surfaces.
+Date: 2026-09-07  
+Standard requested: WCAG 2.2 AA  
+Requested score: 98+  
+**Certificate: not issued.** Evidence-backed score: **93 / 100**.
 
-## What was remediated
+No product features were added. No UI redesign. No business-logic change. Invalid list markup and a billing error state were fixed because they would fail live axe.
 
-- Skip link and `lang="en"` on the root document
-- Visible mobile primary navigation with `aria-expanded` / `aria-controls`
-- `aria-current="page"` on app and marketing navigation
-- Form controls have visible labels, `id`/`htmlFor`, autocomplete, `aria-invalid`, and `role="alert"` errors
-- Sign-out and report actions use `type="button"`
-- Editor toolbar exposes `role="toolbar"` and `aria-pressed`
-- Score ring remains a numeric `role="img"` (not color-only)
-- Structure map uses text status, not symbols alone
-- Contrast token `--ink-muted: #314057` on `--paper: #f6f3ec` (estimated ≥ 7:1)
+## Blocker status
 
-## Automated checks
+| # | Blocker | Result | Evidence |
+| --- | --- | --- | --- |
+| 1 | NVDA | **Fail — not executed** | No NVDA on this host |
+| 2 | VoiceOver | **Fail — not executed** | macOS VoiceOver not available |
+| 3 | JAWS | **Fail — not executed** | JAWS not installed; markup follows APG only |
+| 4 | Authenticated dashboard live axe | **Pass (lab)** | Playwright axe on `/app/dashboard` |
+| 5 | Authenticated report live axe | **Pass (lab)** | Playwright axe on populated report + score table |
+| 6 | Admin live axe | **Pass (lab)** | Restricted student view and signed-in bootstrap admin overview |
+| 7 | Lighthouse on deployed URL | **Fail** | Local `127.0.0.1:3111` only; not a production host |
+| 8 | PDF PAC / Acrobat | **Fail** | Title/lang/extractable text proven; PAC and Acrobat Checker not run |
 
-`backend/tests/test_a11y_static.py` fails CI if buttons lack an explicit `type`, or if the skip link / language / contrast token disappear.
+## Score rationale
 
-## Remaining work before a 95 score can be claimed
+Previous verified score: 90 (public axe only). This pass proved authenticated axe, keyboard/zoom/reflow lab checks, and PDF extractability. That is a real move to **93**. It is not 98: screen readers and a deployed Lighthouse URL remain unrun.
 
-These are not signed off in this pass:
+## Source defects closed this pass
 
-- Third-party axe / Lighthouse audit on a deployed build
-- Screen-reader walkthrough (NVDA, VoiceOver, TalkBack) of check → report → billing
-- Focus restore after the analysis polling state and after share-password dialogs
-- Full 2.2 AA contrast measurement of every Tailwind opacity utility still in older pages
-- Mobile reflow at 320px for every authenticated assignment sub-page
+| ID | Severity | Finding | Fix | Retest |
+| --- | --- | --- | --- | --- |
+| A19 | Medium | Dashboard/assignments put `<p>` inside `<ul>` | Empty states moved outside the list | Auth axe pass |
+| A20 | Medium | Billing load failure stayed on “Loading…” | Error `role="alert"` when fetch fails | Auth axe pass |
+| A21 | Medium | PDF lacked language / table / extract checks | Title, `/Lang`, score table, PyMuPDF extract test | `test_pdf_a11y.py` pass |
 
-Honest current score: **improved, not certified**. Treat production accessibility as **open** until the remaining walkthroughs are recorded.
+Critical: 0. High: 0 in source. Certification High: unrun AT.
+
+Do not print “WCAG 2.2 AA compliant” on the product.

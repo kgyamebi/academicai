@@ -1,0 +1,117 @@
+{
+  "measured_at": "2026-09-09T20:46:31Z",
+  "engine": "postgresql-16",
+  "host": "docker postgres:16-alpine on 127.0.0.1:55432",
+  "counts": {
+    "assignments": 100006,
+    "findings": 1003333,
+    "citations": 100005,
+    "references": 50000,
+    "analytics_events": 100000
+  },
+  "indexes_ensured": [
+    "ix_assignments_user_updated_id",
+    "ix_analysis_findings_report_created_id",
+    "ix_documents_user_created_id"
+  ],
+  "queries": {
+    "assignment_offset_20": {
+      "n": 12,
+      "p50_ms": 4.671,
+      "p95_ms": 6.855,
+      "p99_ms": 6.855,
+      "max_ms": 10.414
+    },
+    "assignment_offset_50000": {
+      "n": 12,
+      "p50_ms": 102.915,
+      "p95_ms": 150.581,
+      "p99_ms": 150.581,
+      "max_ms": 178.503
+    },
+    "assignment_offset_99980": {
+      "n": 12,
+      "p50_ms": 152.624,
+      "p95_ms": 234.077,
+      "p99_ms": 234.077,
+      "max_ms": 258.821
+    },
+    "findings_offset_80": {
+      "n": 12,
+      "p50_ms": 8.312,
+      "p95_ms": 14.304,
+      "p99_ms": 14.304,
+      "max_ms": 14.468
+    },
+    "findings_offset_500000": {
+      "n": 12,
+      "p50_ms": 764.26,
+      "p95_ms": 1634.568,
+      "p99_ms": 1634.568,
+      "max_ms": 1944.966
+    },
+    "analytics_group": {
+      "n": 8,
+      "p50_ms": 29.942,
+      "p95_ms": 34.185,
+      "p99_ms": 34.185,
+      "max_ms": 80.622
+    },
+    "payments_list": {
+      "n": 12,
+      "p50_ms": 3.855,
+      "p95_ms": 7.045,
+      "p99_ms": 7.045,
+      "max_ms": 10.585
+    },
+    "assignment_keyset_page2": {
+      "n": 12,
+      "p50_ms": 4.401,
+      "p95_ms": 7.44,
+      "p99_ms": 7.44,
+      "max_ms": 9.81
+    },
+    "assignment_keyset_after_50k": {
+      "n": 12,
+      "p50_ms": 4.585,
+      "p95_ms": 7.113,
+      "p99_ms": 7.113,
+      "max_ms": 7.569
+    },
+    "findings_keyset_page2": {
+      "n": 12,
+      "p50_ms": 4.707,
+      "p95_ms": 6.791,
+      "p99_ms": 6.791,
+      "max_ms": 8.409
+    }
+  },
+  "explain_analyze": {
+    "assignment_offset_20": "Limit  (cost=2.13..3.84 rows=20 width=45) (actual time=0.130..0.174 rows=20 loops=1)\n  Buffers: shared hit=43\n  ->  Index Scan Backward using ix_assignments_user_updated_id on assignments  (cost=0.42..8552.80 rows=100003 width=45) (actual time=0.078..0.164 rows=40 loops=1)\n        Index Cond: (user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid)\n        Buffers: shared hit=43\nPlanning Time: 0.365 ms\nExecution Time: 0.260 ms",
+    "assignment_offset_50000": "Limit  (cost=4276.48..4278.19 rows=20 width=45) (actual time=64.071..64.095 rows=20 loops=1)\n  Buffers: shared hit=50669\n  ->  Index Scan Backward using ix_assignments_user_updated_id on assignments  (cost=0.42..8552.80 rows=100003 width=45) (actual time=0.085..59.624 rows=50020 loops=1)\n        Index Cond: (user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid)\n        Buffers: shared hit=50669\nPlanning Time: 0.401 ms\nExecution Time: 64.281 ms",
+    "assignment_offset_99980": "Limit  (cost=8550.83..8552.54 rows=20 width=45) (actual time=128.558..128.578 rows=20 loops=1)\n  Buffers: shared hit=101259\n  ->  Index Scan Backward using ix_assignments_user_updated_id on assignments  (cost=0.42..8552.80 rows=100003 width=45) (actual time=0.143..118.313 rows=100000 loops=1)\n        Index Cond: (user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid)\n        Buffers: shared hit=101259\nPlanning Time: 0.194 ms\nExecution Time: 128.689 ms",
+    "findings_offset_500000": "Limit  (cost=41493.78..41497.10 rows=40 width=38) (actual time=812.753..812.831 rows=40 loops=1)\n  Buffers: shared hit=502968\n  ->  Index Scan using ix_analysis_findings_report_created_id on analysis_findings  (cost=0.42..82994.53 rows=1000089 width=38) (actual time=0.087..755.391 rows=500040 loops=1)\n        Index Cond: (report_id = '819e65c6-bf8c-48ae-a28b-7d809c281170'::uuid)\n        Buffers: shared hit=502968\nPlanning Time: 0.288 ms\nExecution Time: 812.907 ms",
+    "analytics_group": "GroupAggregate  (cost=0.29..2693.55 rows=1 width=23) (actual time=48.714..48.715 rows=1 loops=1)\n  Group Key: event_name\n  Buffers: shared hit=89\n  ->  Index Only Scan using ix_analytics_events_user_event on analytics_events  (cost=0.29..2193.54 rows=100000 width=15) (actual time=0.079..19.710 rows=100000 loops=1)\n        Index Cond: (user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid)\n        Heap Fetches: 0\n        Buffers: shared hit=89\nPlanning Time: 0.233 ms\nExecution Time: 48.789 ms",
+    "citation_page": "Limit  (cost=6.25..9.17 rows=40 width=31) (actual time=2.306..2.461 rows=40 loops=1)\n  Buffers: shared hit=123\n  ->  Index Scan using ix_citations_document_id_pk on citations  (cost=0.42..7293.13 rows=99998 width=31) (actual time=2.038..2.433 rows=120 loops=1)\n        Index Cond: (document_id = '515d4519-e472-4bc3-b164-4b54d93be9b7'::uuid)\n        Buffers: shared hit=123\nPlanning:\n  Buffers: shared hit=9\nPlanning Time: 0.565 ms\nExecution Time: 2.550 ms",
+    "reference_page": "Limit  (cost=0.29..2.82 rows=40 width=66) (actual time=0.195..0.224 rows=40 loops=1)\n  Buffers: shared hit=3\n  ->  Index Scan using ix_references_document_sort on \"references\"  (cost=0.29..3165.98 rows=50000 width=66) (actual time=0.192..0.214 rows=40 loops=1)\n        Index Cond: (document_id = '515d4519-e472-4bc3-b164-4b54d93be9b7'::uuid)\n        Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=19\nPlanning Time: 0.870 ms\nExecution Time: 0.338 ms",
+    "assignment_keyset_page2": "Limit  (cost=0.42..2.57 rows=20 width=45) (actual time=0.082..0.129 rows=20 loops=1)\n  Buffers: shared hit=23\n  ->  Index Scan Backward using ix_assignments_user_updated_id on assignments  (cost=0.42..6475.69 rows=60140 width=45) (actual time=0.080..0.122 rows=20 loops=1)\n        Index Cond: ((user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid) AND (ROW(updated_at, id) < ROW('2026-09-07 08:35:09.777429+00'::timestamp with time zone, 'ffddcb38-07f9-45f5-94c4-a461dfe9beb4'::uuid)))\n        Buffers: shared hit=23\nPlanning Time: 0.322 ms\nExecution Time: 0.220 ms",
+    "assignment_keyset_after_50k": "Limit  (cost=0.42..7.37 rows=20 width=45) (actual time=0.064..0.096 rows=20 loops=1)\n  Buffers: shared hit=23\n  ->  Index Scan Backward using ix_assignments_user_updated_id on assignments  (cost=0.42..3559.68 rows=10239 width=45) (actual time=0.062..0.091 rows=20 loops=1)\n        Index Cond: ((user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid) AND (ROW(updated_at, id) < ROW('2026-09-07 08:35:02.515587+00'::timestamp with time zone, 'cd0ae958-e7c6-4c44-82b4-cc17f4052631'::uuid)))\n        Buffers: shared hit=23\nPlanning Time: 0.192 ms\nExecution Time: 0.219 ms"
+  },
+  "leading_seq_scan_only": {
+    "assignment_offset_20": false,
+    "assignment_offset_50000": false,
+    "assignment_offset_99980": false,
+    "findings_offset_500000": false,
+    "analytics_group": false,
+    "citation_page": false,
+    "reference_page": false,
+    "assignment_keyset_page2": false,
+    "assignment_keyset_after_50k": false
+  },
+  "not_run": [
+    "findings_5000000",
+    "findings_10000000",
+    "read_replica",
+    "pgbouncer"
+  ]
+}

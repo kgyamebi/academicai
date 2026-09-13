@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Academic Coach</title></head>
+  <body>
+    <a href="#main-content">Skip to main content</a>
+    <main id="main-content" tabindex="-1">
+      <h1>Academic Coach</h1>
+      <form>
+        <label for="assignment_id">Assignment
+          <select id="assignment_id" name="assignment_id" required>
+            <option value="1">Draft 1</option>
+          </select>
+        </label>
+        <label for="question">Question
+          <textarea id="question" name="question" required></textarea>
+        </label>
+        <button type="submit">Ask the coach</button>
+      </form>
+      <p aria-live="polite">The thesis is too broad. This is not an official grade.</p>
+    </main>
+  </body>
+</html>

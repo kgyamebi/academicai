@@ -1,0 +1,28 @@
+{
+  "measured_at": "2026-09-07T09:23:23Z",
+  "jobs_per_run": 50,
+  "runs": {
+    "1": {
+      "jobs": 50,
+      "elapsed_s": 57.699,
+      "throughput_jobs_per_min": 52.0,
+      "lost": 0,
+      "stuck": 0,
+      "duplicate_ids": 0,
+      "pass_no_loss_dup_stuck": true,
+      "note": "workers_registered reported 5 because stale RQ worker keys remained in Redis; throughput is the measured figure"
+    },
+    "5": {
+      "jobs": 1000,
+      "elapsed_s": 286.817,
+      "throughput_jobs_per_min": 209.2,
+      "lost": 0,
+      "stuck": 0,
+      "duplicate_ids": 0,
+      "pass_no_loss_dup_stuck": true,
+      "source": "ops/cert_queue_results.json 1000-job run"
+    }
+  },
+  "not_run": [2, 10, 25, 50],
+  "cpu_memory": "not_sampled_host_metrics"
+}

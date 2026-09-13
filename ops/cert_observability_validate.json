@@ -1,0 +1,10 @@
+{
+  "pass": true,
+  "dashboard_count": 11,
+  "errors": [],
+  "live_stack": {
+    "prometheus": "unreachable:URLError",
+    "grafana": "unreachable:URLError"
+  },
+  "note": "Live prometheus/grafana status is optional; syntax validation is required."
+}

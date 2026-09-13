@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-09-10T04:52:20Z",
+  "ok": true,
+  "allowed_count": 39,
+  "review_required": [
+    {
+      "name": "pymupdf",
+      "license": "AGPL-3.0-or-later"
+    }
+  ],
+  "unknown": [],
+  "forbidden": [],
+  "note": "PyMuPDF is AGPL; keep as reviewed-exception for local PDF extract. Not a CVE."
+}

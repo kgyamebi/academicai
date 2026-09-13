@@ -1,0 +1,15 @@
+{
+  "title": "AcademicCheck security (spec only — not deployed)",
+  "uid": "academiccheck-security",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Security (unassigned). Purpose: 4xx as a weak auth-abuse proxy. Alert A-AUTH is logs/SecurityEvent, not this counter. Runbooks: docs/RUNBOOK_LIBRARY/security-incident.md, authentication-failure.md.",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP 401/403 mix (4xx counter)",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_http_4xx", "refId": "A" }]
+    }
+  ]
+}

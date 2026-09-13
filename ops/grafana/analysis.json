@@ -1,0 +1,27 @@
+{
+  "title": "AcademicCheck analysis (spec only — not deployed)",
+  "uid": "academiccheck-analysis",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Backend (unassigned). Purpose: workers + queue + failed jobs. Alerts: A-WORKER, A-QUEUE. Runbooks: docs/RUNBOOK_LIBRARY/worker-failure.md, queue-backlog.md. Prefer workers.json and queues.json for split ownership.",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Workers",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_workers", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Queue depth",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "academiccheck_queue_depth", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jobs failed counter",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "academiccheck_jobs_failed", "refId": "A" }]
+    }
+  ]
+}

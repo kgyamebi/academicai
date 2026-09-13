@@ -1,0 +1,31 @@
+{
+  "measured_at": "2026-09-09T21:05:30Z",
+  "emulator": "minio",
+  "endpoint": "http://127.0.0.1:59000",
+  "bucket": "academiccheck-backups",
+  "source_kind": "host_pg_dump",
+  "consecutive_runs": 2,
+  "runs": [
+    {
+      "upload_s": 2.943,
+      "download_s": 6.81,
+      "integrity_ok": true,
+      "old_key_was_pruned": true,
+      "pruned_count": 10,
+      "local_prune_would_delete_count": 2,
+      "ok": true
+    },
+    {
+      "upload_s": 3.023,
+      "download_s": 2.304,
+      "integrity_ok": true,
+      "old_key_was_pruned": true,
+      "pruned_count": 4,
+      "local_prune_would_delete_count": 2,
+      "ok": true
+    }
+  ],
+  "live_cloud_account": false,
+  "ok": true,
+  "note": "Ready pending live account: set real bucket credentials. CRR not exercised."
+}

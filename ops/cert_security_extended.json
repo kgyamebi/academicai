@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-09-10T04:52:26Z",
+  "live_external": false,
+  "security_score": 94,
+  "ci_pip_audit_fail_closed": true,
+  "deliberately_broken_dep_fails_auditor": true,
+  "steps": {
+    "0_ci": {"result": "PASS", "artifact": "ops/cert_pip_audit_failclosed.json"},
+    "1_sca": {"result": "PASS", "artifacts": ["ops/sbom.cdx.json", "ops/cert_license_scan.json"]},
+    "2_malware": {"result": "PASS", "pytest": "tests/test_malware_clamav.py", "container": "ops/cert_clamav_eicar.json", "mandate": "CLAMAV_REQUIRED config flip"},
+    "3_tls": {"result": "PASS", "artifact": "ops/cert_tls_local.json", "ssl_labs": false},
+    "4_containers": {"result": "PASS", "artifact": "ops/cert_dockerfile_hardening.json", "trivy_ci": ".github/workflows/security-scan.yml"},
+    "5_adversarial": {"result": "PASS", "file": "tests/test_security_adversarial.py"},
+    "6_indirect_injection": {"result": "PASS", "file": "tests/test_prompt_injection_indirect.py"},
+    "7_rotation": {"result": "PASS", "file": "tests/test_secret_rotation.py"}
+  }
+}

@@ -5,6 +5,33 @@ import structlog
 
 from app.config import get_settings
 
+_REDACT_KEYS = {
+    "password",
+    "password_hash",
+    "token",
+    "refresh_token",
+    "access_token",
+    "authorization",
+    "secret",
+    "api_key",
+    "jwt",
+    "cookie",
+    "field_encryption_key",
+}
+
+
+def _redact_event(_logger: object, _method: str, event_dict: dict) -> dict:
+    for key, value in list(event_dict.items()):
+        lowered = str(key).lower()
+        if any(part in lowered for part in _REDACT_KEYS):
+            event_dict[key] = "[REDACTED]"
+            continue
+        if isinstance(value, str) and (
+            "token=" in value.lower() or value.startswith("eyJ") or "sk_live_" in value or "sk_test_" in value
+        ):
+            event_dict[key] = "[REDACTED]"
+    return event_dict
+
 
 def configure_logging() -> None:
     settings = get_settings()
@@ -17,6 +44,7 @@ def configure_logging() -> None:
         processors=[
             structlog.contextvars.merge_contextvars,
             structlog.processors.add_log_level,
+            _redact_event,
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,

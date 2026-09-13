@@ -1,0 +1,28 @@
+{
+  "measured_at": "2026-09-09T21:12:16Z",
+  "engine": "postgresql-16-alpine",
+  "managed_provider_pitr": false,
+  "consecutive_runs": 2,
+  "runs": [
+    {
+      "recovery_target_time": "2026-09-09 21:11:06.475717+00",
+      "ids_before_restore": "1,2",
+      "ids_after_pitr": "1",
+      "notes_after_pitr": "before-target",
+      "kept_row_a": true,
+      "excluded_row_b": true,
+      "ok": true
+    },
+    {
+      "recovery_target_time": "2026-09-09 21:11:58.47254+00",
+      "ids_before_restore": "1,2",
+      "ids_after_pitr": "1",
+      "notes_after_pitr": "before-target",
+      "kept_row_a": true,
+      "excluded_row_b": true,
+      "ok": true
+    }
+  ],
+  "pass": true,
+  "note": "Local WAL replay only. RDS/Neon/Cloud SQL PITR remains pending live account."
+}

@@ -1,0 +1,83 @@
+{
+  "measured_at": "2026-09-07T12:16:16Z",
+  "target": "http://127.0.0.1:8013",
+  "uvicorn_workers": 4,
+  "database": "postgresql-16 docker",
+  "results": {
+    "live_1": {
+      "path": "/api/live",
+      "in_flight": 1,
+      "requests": 200,
+      "p50_ms": 6.868,
+      "p95_ms": 10.368,
+      "p99_ms": 20.111,
+      "error_rate": 0.0
+    },
+    "live_50": {
+      "path": "/api/live",
+      "in_flight": 50,
+      "requests": 500,
+      "p50_ms": 209.536,
+      "p95_ms": 490.28,
+      "p99_ms": 675.698,
+      "error_rate": 0.0
+    },
+    "live_100": {
+      "path": "/api/live",
+      "in_flight": 100,
+      "requests": 1000,
+      "p50_ms": 483.781,
+      "p95_ms": 1129.311,
+      "p99_ms": 1564.019,
+      "error_rate": 0.0
+    },
+    "live_250": {
+      "path": "/api/live",
+      "in_flight": 250,
+      "requests": 1000,
+      "p50_ms": 1181.978,
+      "p95_ms": 2747.283,
+      "p99_ms": 3659.909,
+      "error_rate": 0.0
+    },
+    "live_500": {
+      "path": "/api/live",
+      "in_flight": 500,
+      "requests": 1000,
+      "p50_ms": 1686.207,
+      "p95_ms": 3348.052,
+      "p99_ms": 4080.452,
+      "error_rate": 0.0
+    },
+    "ready_1": {
+      "path": "/api/ready",
+      "in_flight": 1,
+      "requests": 200,
+      "p50_ms": 50.216,
+      "p95_ms": 103.07,
+      "p99_ms": 122.555,
+      "error_rate": 0.0
+    },
+    "ready_50": {
+      "path": "/api/ready",
+      "in_flight": 50,
+      "requests": 200,
+      "p50_ms": 931.487,
+      "p95_ms": 2394.125,
+      "p99_ms": 2960.776,
+      "error_rate": 0.0
+    }
+  },
+  "slo": {
+    "p95_ms": 500,
+    "p99_ms": 1000,
+    "error_rate": 0.01
+  },
+  "not_run": [
+    "1000_concurrent_users",
+    "10000_concurrent_users",
+    "50000_concurrent_users",
+    "k6_authenticated"
+  ],
+  "live_100_meets_slo": false
+}

@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-09-09T22:10:57Z",
+  "tool": "ops/cert_billing_mutation.py (equivalent to mutmut on FSM + dunning policy)",
+  "live_money": false,
+  "mutants": [
+    {
+      "mutant": "allow cancelled\u2192past_due",
+      "mutant_would_pass_assert_transition": true,
+      "existing_test_would_fail_on_mutant": true,
+      "restored_still_rejects": true,
+      "killed": true
+    },
+    {
+      "mutant": "MAX_ATTEMPTS=99",
+      "existing_exhaustion_test_would_fail_on_mutant": true,
+      "restored": true,
+      "killed": true
+    }
+  ],
+  "killed": true,
+  "score_cap_note": "Does not raise billing score; live $1 harness still required."
+}

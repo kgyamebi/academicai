@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy import ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 class Citation(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "citations"
+    __table_args__ = (Index("ix_citations_document_id_pk", "document_id", "id"),)
 
     document_id: Mapped[UUID] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"), index=True)
     raw_text: Mapped[str] = mapped_column(Text)
@@ -30,6 +31,7 @@ class Citation(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 class Reference(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "references"
+    __table_args__ = (Index("ix_references_document_sort", "document_id", "sort_order"),)
 
     document_id: Mapped[UUID] = mapped_column(ForeignKey("documents.id", ondelete="CASCADE"), index=True)
     raw_text: Mapped[str] = mapped_column(Text)
@@ -61,6 +63,7 @@ class AcademicSource(Base, UUIDPrimaryKeyMixin, TimestampMixin):
 
 class SourceVerification(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     __tablename__ = "source_verifications"
+    __table_args__ = (Index("ix_source_verifications_reference_created", "reference_id", "created_at"),)
 
     reference_id: Mapped[UUID] = mapped_column(ForeignKey("references.id", ondelete="CASCADE"), index=True)
     source_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_sources.id"), nullable=True)

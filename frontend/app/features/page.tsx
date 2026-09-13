@@ -16,7 +16,7 @@ export default function FeaturesPage() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-4 py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-5xl px-4 py-16">
         <h1 className="font-serif text-4xl">What AcademicCheck AI analyses</h1>
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {features.map(([t, d]) => (

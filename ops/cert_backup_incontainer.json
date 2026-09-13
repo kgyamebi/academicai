@@ -1,0 +1,7 @@
+{
+  "measured_at": "2026-09-09T21:03:03Z",
+  "location": "superseded_for_recovery_copy",
+  "note": "In-container cert.dump is no longer the recovery source. Use backups/host + ops/cert_backup_host_export.json.",
+  "host_export_artifact": "ops/cert_backup_host_export.json",
+  "ok": true
+}

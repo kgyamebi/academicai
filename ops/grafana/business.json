@@ -1,0 +1,28 @@
+{
+  "title": "AcademicCheck business metrics (spec only — not deployed)",
+  "uid": "academiccheck-business",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Product/ops (unassigned). Purpose: process counters only — not a warehouse. No dedicated business alert. Billing money-wrong uses A-PAY/A-WH. Runbook: docs/RUNBOOK_LIBRARY/billing-failure.md. Do not plot assignment text.",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Successful payments counter (process-local)",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_billing_successful_payments", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Citations listed",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 },
+      "targets": [{ "expr": "academiccheck_citations_listed", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Citations verified",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 0 },
+      "targets": [{ "expr": "academiccheck_citations_verified", "refId": "A" }]
+    }
+  ]
+}

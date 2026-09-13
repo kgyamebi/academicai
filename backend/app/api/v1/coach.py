@@ -12,6 +12,7 @@ from app.deps import get_current_user, owned_assignment
 from app.models.analysis import AnalysisReport
 from app.models.user import User
 from app.schemas.common import CoachIn
+from app.core.safe_json import loads_json
 from app.services.ai.enhance import coach_reply
 from app.services.entitlements import features_for, plan_for
 
@@ -38,8 +39,8 @@ def coach(payload: CoachIn, request: Request, user: User = Depends(get_current_u
         "question": decrypt_field(assignment.question.raw_text) if assignment.question else "",
         "level": assignment.academic_level,
         "score": report.overall_score if report else None,
-        "priorities": json.loads(report.priority_actions_json) if report else [],
-        "weaknesses": json.loads(report.weaknesses_json) if report else [],
+        "priorities": loads_json(report.priority_actions_json, []) if report else [],
+        "weaknesses": loads_json(report.weaknesses_json, []) if report else [],
         "disclaimer": "Coach answers use only the student's assignment context and must not invent sources.",
     }
     answer, tokens = coach_reply(payload.question, json.dumps(context))

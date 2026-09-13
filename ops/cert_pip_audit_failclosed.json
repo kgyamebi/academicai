@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-09-10T04:53:26Z",
+  "live_money": false,
+  "deliberately_vulnerable": "jinja2==2.10",
+  "pip_audit_exit_code": 1,
+  "fail_closed": true,
+  "ci_pip_audit_swallowed": false,
+  "ok": true,
+  "stdout_tail": "Name   Version ID              Fix Versions\n------ ------- --------------- ------------\njinja2 2.10    PYSEC-2021-66   2.11.3\njinja2 2.10    PYSEC-2019-217  2.10.1\njinja2 2.10    PYSEC-2026-1473 3.1.3\njinja2 2.10    PYSEC-2026-1471 3.1.6\njinja2 2.10    PYSEC-2026-1474 3.1.4\njinja2 2.10    PYSEC-2026-1475 3.1.5\n",
+  "stderr_tail": "Found 6 known vulnerabilities in 1 package\n"
+}

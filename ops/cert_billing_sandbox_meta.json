@@ -1,0 +1,10 @@
+{
+  "measured_at": "2026-09-07T19:28:00Z",
+  "suite": ["tests/test_billing_sandbox_scenarios.py", "tests/test_billing_critical.py"],
+  "result": "53 passed",
+  "log": "ops/cert_billing_sandbox_pytest.txt",
+  "sandbox_api_keys_present": false,
+  "live_charges_executed": false,
+  "billing_score": {"old": 91, "new": 93},
+  "note": "Sandbox-verified logic only; pending live-transaction confirmation of account config"
+}

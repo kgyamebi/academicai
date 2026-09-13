@@ -29,7 +29,11 @@ const content: Record<string, { title: string; body: string }> = {
   },
   pricing: {
     title: "Pricing and credits",
-    body: "Free, Student ($1.99), Pro Student ($3.99), Power ($7.99), plus institution and one-time credits. Credit costs are configurable. Payments are verified server-side via signed webhooks.",
+    body: "Public free launch: paid subscriptions and checkout are intentionally disabled. You can use the product under fair-use limits with no payment flow. Future paid tiers (when re-enabled) will unlock higher monthly limits; charges will only ever happen after verified server-side payment confirmation — never from the browser alone.",
+  },
+  terms: {
+    title: "Terms of use (summary)",
+    body: "AcademicCheck AI is a diagnostic study aid. It does not guarantee grades, write submissions for you, or invent sources. You remain responsible for academic integrity. Full terms live at /terms.",
   },
   "academic-integrity": {
     title: "Academic integrity",
@@ -44,7 +48,7 @@ export default async function HelpTopic({ params }: { params: Promise<{ topic: s
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-16">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="font-serif text-4xl">{page.title}</h1>
         <p className="mt-6 leading-7">{page.body}</p>
       </main>

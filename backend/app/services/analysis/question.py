@@ -31,6 +31,9 @@ COMMANDS = {
     "review": "Survey and comment on the main literature or evidence.",
     "argue": "Take a position and defend it with reasoning and evidence.",
     "critique": "Identify strengths and weaknesses of a claim, method, or text.",
+    "recommend": "Propose a course of action and justify it against criteria.",
+    "reflect": "Examine your own reasoning or practice; still support claims with evidence.",
+    "determine": "Reach a reasoned conclusion after weighing the available evidence.",
 }
 
 
@@ -62,6 +65,9 @@ def analyze_question(text: str, academic_level: str = "undergraduate") -> Questi
             # Avoid adding both "compare" and "compare and evaluate" as if they were independent.
             if any(command in existing for existing in found):
                 continue
+            if command == "explain" and any(c in found for c in ("to what extent", "how far")):
+                if not lowered.lstrip().startswith("explain"):
+                    continue
             found.append(command)
             explanations[command] = meaning
 

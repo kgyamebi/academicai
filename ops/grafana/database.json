@@ -1,0 +1,22 @@
+{
+  "title": "AcademicCheck database (spec only — not deployed)",
+  "uid": "academiccheck-database",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Data (unassigned). Purpose: API-side DB ping only. Alerts: A-DB. Runbooks: docs/RUNBOOK_LIBRARY/database-failure.md, backup-failure.md, restore-failure.md. No postgres_exporter; host disk unmonitored.",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "academiccheck_database",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_database", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Ready (sqlite-in-prod also fails this)",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 },
+      "targets": [{ "expr": "academiccheck_ready", "refId": "A" }]
+    }
+  ]
+}

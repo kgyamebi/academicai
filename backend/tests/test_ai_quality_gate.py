@@ -1,4 +1,4 @@
-from app.services.ai.eval import load_baseline, run_all, suite_sizes, thesis_gold, write_baseline
+from app.services.ai.eval import load_baseline, run_all, suite_sizes, thesis_gold, write_baseline, write_report
 from app.services.analysis.classifiers import classify_thesis
 from app.services.analysis.engine import run_analysis
 from app.services.documents.extractor import ExtractedDocument, ExtractedParagraph
@@ -31,7 +31,18 @@ def test_ai_quality_does_not_regress():
     assert by_name["argument_analyzer"].f1 >= 0.95
     assert by_name["evidence_analyzer"].f1 >= 0.95
     assert by_name["rubric_checker"].f1 >= 0.95
+    assert by_name["heldout_question"].f1 >= 0.85
+    assert by_name["heldout_thesis"].f1 >= 0.85
+    assert by_name["heldout_argument"].f1 >= 0.85
+    assert by_name["heldout_evidence"].f1 >= 0.85
+    assert by_name["heldout_citation"].f1 >= 0.80
+    assert by_name["hallucination_guard"].f1 >= 0.85
+    assert by_name["coach_refusal"].f1 >= 0.85
+    assert by_name["heldout_question"].source == "heldout"
+    assert by_name["question_analyzer"].source == "circular"
+    assert all(not m.certifiable for m in metrics)
     write_baseline(metrics)
+    write_report(metrics)
 
 
 def test_engine_thesis_matches_classifier_on_gold_sample():

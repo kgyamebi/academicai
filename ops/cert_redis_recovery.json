@@ -1,0 +1,32 @@
+{
+  "measured_at": "2026-09-09T17:22:20Z",
+  "redis_url_host": "redis://127.0.0.1:56379/0",
+  "ok": true,
+  "checks": [
+    {
+      "name": "ping",
+      "ok": true
+    },
+    {
+      "name": "aof_enabled",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "rdb_last_bgsave_status",
+      "ok": true,
+      "detail": "ok"
+    },
+    {
+      "name": "queue_llen",
+      "ok": true,
+      "detail": "analysis=0"
+    },
+    {
+      "name": "reconnect_ping",
+      "ok": true
+    }
+  ],
+  "failover": "UNPROVEN",
+  "aof_restore_drill": "UNPROVEN"
+}

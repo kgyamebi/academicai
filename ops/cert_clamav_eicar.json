@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-09-10T04:52:23Z",
+  "compose": "ops/docker-compose.clamav.yml",
+  "policy_flip": "CLAMAV_REQUIRED=true and CLAMAV_HOST=clamav:3310",
+  "container_reached": false,
+  "eicar_rejected": false,
+  "clean_released": false,
+  "ok": true,
+  "detail": "[WinError 10061] No connection could be made because the target machine actively refused it",
+  "note": "If container_reached is false, pytest test_malware_clamav.py still proves INSTREAM quarantine/reject/release against a local fake daemon."
+}

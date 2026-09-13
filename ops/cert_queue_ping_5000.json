@@ -1,0 +1,20 @@
+{
+  "measured_at": "2026-09-07T10:30:23Z",
+  "kind": "cert_ping",
+  "jobs": 5000,
+  "workers_started": 5,
+  "workers_registered": 3,
+  "enqueue_s": 60.53,
+  "elapsed_s": 87.221,
+  "throughput_jobs_per_min": 3439.5,
+  "finished_registry": 5000,
+  "failed_registry": 0,
+  "queued_remaining": 0,
+  "dlq_depth": 0,
+  "duplicate_enqueue_blocked": false,
+  "lost": 0,
+  "pass": true,
+  "not_run": [
+    50000
+  ]
+}

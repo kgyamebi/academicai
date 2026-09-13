@@ -1,0 +1,32 @@
+{
+  "measured_at": "2026-09-07T09:30:57Z",
+  "after_006_indexes": true,
+  "queries": {
+    "citation_page": {
+      "n": 15,
+      "p50_ms": 3.966,
+      "p95_ms": 5.98
+    },
+    "reference_page": {
+      "n": 15,
+      "p50_ms": 5.3,
+      "p95_ms": 8.731
+    },
+    "analytics_group": {
+      "n": 10,
+      "p50_ms": 44.415,
+      "p95_ms": 124.705
+    }
+  },
+  "explain_analyze": {
+    "citation_page": "Limit  (cost=6.25..9.17 rows=40 width=31) (actual time=0.416..0.471 rows=40 loops=1)\n  Buffers: shared hit=123\n  ->  Index Scan using ix_citations_document_id_pk on citations  (cost=0.42..7293.13 rows=99998 width=31) (actual time=0.107..0.457 rows=120 loops=1)\n        Index Cond: (document_id = '515d4519-e472-4bc3-b164-4b54d93be9b7'::uuid)\n        Buffers: shared hit=123\nPlanning Time: 0.161 ms\nExecution Time: 0.573 ms",
+    "reference_page": "Limit  (cost=0.29..2.82 rows=40 width=66) (actual time=0.189..0.207 rows=40 loops=1)\n  Buffers: shared hit=3\n  ->  Index Scan using ix_references_document_sort on \"references\"  (cost=0.29..3165.98 rows=50000 width=66) (actual time=0.188..0.201 rows=40 loops=1)\n        Index Cond: (document_id = '515d4519-e472-4bc3-b164-4b54d93be9b7'::uuid)\n        Buffers: shared hit=3\nPlanning Time: 0.220 ms\nExecution Time: 0.260 ms",
+    "analytics_group": "GroupAggregate  (cost=0.29..2693.55 rows=1 width=23) (actual time=49.924..49.926 rows=1 loops=1)\n  Group Key: event_name\n  Buffers: shared hit=89\n  ->  Index Only Scan using ix_analytics_events_user_event on analytics_events  (cost=0.29..2193.54 rows=100000 width=15) (actual time=0.170..20.767 rows=100000 loops=1)\n        Index Cond: (user_id = 'bdc6d98c-e1d0-45bd-ae65-cb0d80694699'::uuid)\n        Heap Fetches: 0\n        Buffers: shared hit=89\nPlanning Time: 0.194 ms\nExecution Time: 50.021 ms"
+  },
+  "index_scan": {
+    "citation_page": false,
+    "reference_page": false,
+    "analytics_group": false
+  },
+  "p95_pass": false
+}

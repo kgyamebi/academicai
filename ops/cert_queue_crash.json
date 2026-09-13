@@ -1,0 +1,29 @@
+{
+  "measured_at": "2026-09-09T21:04:06Z",
+  "container": "aiessayassignmentchecker-redis-1",
+  "kill_signal": "docker kill (SIGKILL)",
+  "consecutive_runs": 2,
+  "runs": [
+    {
+      "aof_enabled": true,
+      "queued_before_kill": 12,
+      "queued_after_restart": 12,
+      "missing_job_ids": [],
+      "lost_job_count": 0,
+      "ping_after_restart": true,
+      "ok": true
+    },
+    {
+      "aof_enabled": true,
+      "queued_before_kill": 12,
+      "queued_after_restart": 12,
+      "missing_job_ids": [],
+      "lost_job_count": 0,
+      "ping_after_restart": true,
+      "ok": true
+    }
+  ],
+  "pass": true,
+  "sentinel_failover": "UNPROVEN",
+  "note": "Volume retained. Redis volume-loss (down -v) still UNPROVEN."
+}

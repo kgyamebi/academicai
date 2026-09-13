@@ -1,0 +1,63 @@
+{
+  "measured_at": "2026-09-09T21:07:29Z",
+  "host_dump": "backups/host/academiccheck-20260909T210244Z.dump",
+  "host_sha256": "0cbb3455f31f96ffa2708f2c9cbe84c25cd7c65debdc90ba0cac94ffec05f7b2",
+  "source_counts": {
+    "users": 7,
+    "assignments": 100006,
+    "documents": 7,
+    "analysis_reports": 1112,
+    "analysis_jobs": 3113,
+    "analysis_findings": 1003333,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "runs": [
+    {
+      "restore_s": 43.346,
+      "counts": {
+        "users": 7,
+        "assignments": 100006,
+        "documents": 7,
+        "analysis_reports": 1112,
+        "analysis_jobs": 3113,
+        "analysis_findings": 1003333,
+        "payments": 1,
+        "credits": 1,
+        "subscriptions": 1
+      },
+      "cert_incontainer_dump_not_required": true,
+      "isolated_volume_destroyed_after": true,
+      "pg_isready_ok": true,
+      "docker_test_cert_unused_ok": true
+    },
+    {
+      "restore_s": 43.067,
+      "counts": {
+        "users": 7,
+        "assignments": 100006,
+        "documents": 7,
+        "analysis_reports": 1112,
+        "analysis_jobs": 3113,
+        "analysis_findings": 1003333,
+        "payments": 1,
+        "credits": 1,
+        "subscriptions": 1
+      },
+      "cert_incontainer_dump_not_required": true,
+      "isolated_volume_destroyed_after": true,
+      "pg_isready_ok": true,
+      "docker_test_cert_unused_ok": true
+    }
+  ],
+  "consecutive_runs": 2,
+  "counts_match_source_both_runs": true,
+  "rto_s": [
+    43.346,
+    43.067
+  ],
+  "rto_consistent": true,
+  "used_only_host_copy": true,
+  "pass": true
+}

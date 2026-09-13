@@ -35,5 +35,38 @@ def test_refresh_reuse_is_rejected(client):
     refresh = created.json()["refresh_token"]
     first = client.post("/api/auth/refresh", json={"refresh_token": refresh})
     assert first.status_code == 200
+    rotated = first.json()["refresh_token"]
     second = client.post("/api/auth/refresh", json={"refresh_token": refresh})
     assert second.status_code == 401
+    family = client.post("/api/auth/refresh", json={"refresh_token": rotated})
+    assert family.status_code == 401
+
+
+def test_login_stores_device_ip_and_user_agent(client):
+    client.post(
+        "/api/auth/register",
+        json={"email": "device-track@example.com", "password": "password12", "full_name": "Device"},
+    )
+    login = client.post(
+        "/api/auth/login",
+        json={"email": "device-track@example.com", "password": "password12"},
+        headers={"User-Agent": "AcademicCheck-Cert/1.0"},
+    )
+    assert login.status_code == 200
+    from app.db.session import SessionLocal
+    from app.models.user import SessionToken, User
+
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == "device-track@example.com").one()
+        row = (
+            db.query(SessionToken)
+            .filter(SessionToken.user_id == user.id, SessionToken.token_type == "refresh")
+            .order_by(SessionToken.created_at.desc())
+            .first()
+        )
+        assert row is not None
+        assert row.user_agent == "AcademicCheck-Cert/1.0"
+        assert row.ip_address
+    finally:
+        db.close()

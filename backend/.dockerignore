@@ -1,0 +1,7 @@
+# Never bake secrets into image layers.
+.env
+.env.*
+!.env.example
+**/*.pem
+**/certs/
+**/*secret*

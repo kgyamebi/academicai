@@ -13,16 +13,16 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   const csrf = csrfToken();
   if (csrf) headers.set("X-CSRF-Token", csrf);
-  const response = await fetch(`${apiUrl()}${path}`, { ...init, headers, credentials: "include" });
+  const response = await fetchWithTimeout(`${apiUrl()}${path}`, { ...init, headers, credentials: "include" });
   if (response.status === 401 && typeof window !== "undefined" && !path.startsWith("/api/auth")) {
-    const refreshed = await fetch(`${apiUrl()}/api/auth/refresh`, {
+    const refreshed = await fetchWithTimeout(`${apiUrl()}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
       credentials: "include",
       body: JSON.stringify({}),
     });
     if (refreshed.ok) {
-      const retry = await fetch(`${apiUrl()}${path}`, { ...init, headers, credentials: "include" });
+      const retry = await fetchWithTimeout(`${apiUrl()}${path}`, { ...init, headers, credentials: "include" });
       if (!retry.ok) throw await errorFrom(retry);
       if (retry.status === 204) return {} as T;
       return parseBody<T>(retry);
@@ -34,6 +34,25 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok) throw await errorFrom(response);
   if (response.status === 204) return {} as T;
   return parseBody<T>(response);
+}
+
+async function fetchWithTimeout(url: string, init: RequestInit = {}): Promise<Response> {
+  const timeoutMs = init.body instanceof FormData ? 180_000 : 60_000;
+  if (init.signal) {
+    return fetch(url, init);
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Request timed out. Please try again.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function parseBody<T>(response: Response): Promise<T> {

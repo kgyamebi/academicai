@@ -1,22 +1,40 @@
 # Point-in-time recovery
 
-Use the managed PostgreSQL provider's PITR. Do not invent a custom WAL shipper in application code.
+Date: 2026-09-09
 
-## Architecture
+## What is proven locally
 
-- Primary: managed Postgres with WAL retention ≥ 7 days
-- Backups: nightly `ops/backup_postgres.sh` to object storage + provider snapshots
-- RPO target: 5 minutes (WAL)
-- RTO target: 2 hours (restore to scratch, then cut over)
+WAL archive + `recovery_target_time` against Postgres 16 Alpine (`ops/docker-compose.pitr.yml`).
 
-## Quarterly drill
+Artifact: `ops/cert_wal_pitr.json` (two consecutive runs).
 
-1. Create a scratch instance.
-2. Restore the latest snapshot + WAL to T-15 minutes.
-3. Run `SELECT count(*) FROM users, payments, analysis_reports`.
-4. Run the isolation pytest suite against the scratch API.
-5. Record the drill in the ops channel. A drill that is not restored is not a backup.
+| Run | Target timestamp | Before restore | After PITR | Result |
+| --- | --- | --- | --- | --- |
+| 1 | 2026-09-09 21:11:06.475717+00 | ids 1,2 | id **1** only (`before-target`) | PASS |
+| 2 | 2026-09-09 21:11:58.47254+00 | ids 1,2 | id **1** only | PASS |
+
+This is the same engine mechanism a managed provider uses. It is **not** a certificate that RDS/Neon/Cloud SQL PITR works in our account.
+
+## Local runbook
+
+```bash
+docker compose -f ops/docker-compose.pitr.yml up -d
+py -3.14 ops/cert_wal_pitr.py
+# Expect ops/cert_wal_pitr.json pass=true, ids_after_pitr=1 both runs
+docker compose -f ops/docker-compose.pitr.yml down -v
+```
+
+Do not point this compose at cert/prod data volumes.
+
+## Managed provider (pending live account)
+
+1. Enable PITR / WAL retention ≥ 7 days on the vendor console.
+2. Quarterly: restore snapshot + WAL to T-15 minutes on a **scratch** instance (never primary).
+3. Compare `users` / `payments` / `analysis_reports` counts to a pre-drill manifest.
+4. Record the vendor restore job ID in the ops channel.
+
+RPO target (design): 5 minutes with managed WAL. Local dump RPO remains “time since last `pg_dump`”.
 
 ## Cutover
 
-Expand schema with Alembic before restore if the backup predates a migration. Never `alembic downgrade 001` on customer data.
+Expand schema with Alembic on the restored scratch if needed. Never `alembic downgrade` on customer data. Never restore onto the production primary.

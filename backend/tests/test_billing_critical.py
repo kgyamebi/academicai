@@ -132,11 +132,30 @@ def test_paystack_valid_signature_roundtrip(client, monkeypatch):
     from app.config import get_settings
 
     get_settings.cache_clear()
-    body = json.dumps({"event": "charge.failed", "data": {"reference": "r1"}}).encode()
+    token = _register(client, "bill-paystack-sig@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-paystack-sig@example.com").one()
+    payment = Payment(
+        user_id=user.id,
+        provider="paystack",
+        amount_cents=199,
+        currency="USD",
+        status="pending",
+        purpose="subscription",
+        raw_payload={},
+    )
+    db.add(payment)
+    db.commit()
+    payment_id = str(payment.id)
+    db.close()
+    body = json.dumps(
+        {"event": "charge.failed", "data": {"reference": "r1", "metadata": {"payment_id": payment_id}}}
+    ).encode()
     sig = hmac.new(secret.encode(), body, hashlib.sha512).hexdigest()
     response = client.post("/api/billing/webhooks/paystack", content=body, headers={"x-paystack-signature": sig})
     assert response.status_code == 200
     get_settings.cache_clear()
+    _ = token
 
 
 def test_failed_then_successful_webhook_still_grants(client):
@@ -327,4 +346,90 @@ def test_expired_credits_are_unusable(client):
     db.commit()
     user = db.query(User).filter(User.email == "bill-expire@example.com").one()
     assert float(available_credits(db, user)) == 0
+    from app.models.billing import CreditTransaction
+    from app.services.credits import wallet_matches_ledger
+
+    expired_rows = (
+        db.query(CreditTransaction)
+        .filter(CreditTransaction.user_id == user.id, CreditTransaction.status == "expired")
+        .all()
+    )
+    assert len(expired_rows) == 1
+    assert float(expired_rows[0].amount) == 8
+    assert wallet_matches_ledger(db, user) is True
+    db.close()
+
+
+def test_invoice_paid_extends_period_near_expiry(client):
+    from datetime import timedelta
+
+    from app.core.time import as_utc, utcnow
+    from app.models.billing import Plan, Subscription
+    from app.services.billing import apply_successful_payment
+
+    _register(client, "bill-renew@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-renew@example.com").one()
+    plan = db.query(Plan).filter(Plan.slug == "student").one()
+    sub = Subscription(
+        user_id=user.id,
+        plan_id=plan.id,
+        status="active",
+        provider="stripe",
+        cancel_at_period_end=False,
+        current_period_start=utcnow() - timedelta(days=28),
+        current_period_end=utcnow() + timedelta(days=1),
+        checks_used=3,
+    )
+    payment = Payment(
+        user_id=user.id,
+        provider="stripe",
+        amount_cents=199,
+        currency="USD",
+        status="successful",
+        purpose="subscription",
+        raw_payload={"plan": "student"},
+    )
+    db.add_all([sub, payment])
+    db.commit()
+    apply_successful_payment(db, payment, "evt_invoice_paid_1", {"type": "invoice.paid"})
+    db.commit()
+    refreshed = db.get(Subscription, sub.id)
+    assert refreshed is not None
+    assert refreshed.checks_used == 0
+    end = as_utc(refreshed.current_period_end)
+    assert end is not None
+    assert end > utcnow() + timedelta(days=20)
+    db.close()
+
+
+def test_checkout_rate_limit_bucket_exists():
+    from app.core.rate_limit import LIMITS
+
+    assert "checkout" in LIMITS["free"]
+    assert LIMITS["free"]["checkout"] > 0
+
+
+def test_failed_payment_records_analytics(client):
+    from app.models.admin import AnalyticsEvent
+    from app.services.billing import mark_payment_failed
+
+    _register(client, "bill-analytics@example.com")
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "bill-analytics@example.com").one()
+    payment = Payment(
+        user_id=user.id,
+        provider="stripe",
+        amount_cents=199,
+        currency="USD",
+        status="pending",
+        purpose="subscription",
+        raw_payload={"plan": "student"},
+    )
+    db.add(payment)
+    db.commit()
+    mark_payment_failed(db, payment, "evt_fail_analytics", {"type": "payment_intent.payment_failed"})
+    db.commit()
+    events = db.query(AnalyticsEvent).filter(AnalyticsEvent.event_name == "payment_failed").all()
+    assert any(e.user_id == user.id for e in events)
     db.close()

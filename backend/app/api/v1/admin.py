@@ -2,20 +2,53 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.pagination import enforce_shallow_offset
 from app.db.session import get_db
 from app.deps import require_roles
 from app.models.admin import AdminAuditLog, FeatureFlag, SecurityEvent
 from app.models.analysis import AnalysisJob
 from app.models.billing import Payment, Plan
 from app.models.user import User
+from app.schemas.common import AdminFlagIn, AdminPlanUpdateIn
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
 @router.get("/overview")
 def overview(admin: User = Depends(require_roles("admin")), db: Session = Depends(get_db)):
+    users = db.scalar(select(func.count(User.id)).where(User.is_guest.is_(False))) or 0
+    verified = (
+        db.scalar(
+            select(func.count(User.id)).where(User.is_guest.is_(False), User.email_verified_at.is_not(None))
+        )
+        or 0
+    )
+    unverified = max(0, users - verified)
+    disposable_attempts = (
+        db.scalar(select(func.count(SecurityEvent.id)).where(SecurityEvent.event_type == "disposable_email_attempt"))
+        or 0
+    )
+    failed_verifications = (
+        db.scalar(select(func.count(SecurityEvent.id)).where(SecurityEvent.event_type == "verification_failed"))
+        or 0
+    )
+    verification_sent = (
+        db.scalar(select(func.count(SecurityEvent.id)).where(SecurityEvent.event_type == "verification_sent")) or 0
+    )
+    verification_completed = (
+        db.scalar(select(func.count(SecurityEvent.id)).where(SecurityEvent.event_type == "verification_completed"))
+        or 0
+    )
+    rate = round((verified / users) * 100, 1) if users else 0.0
     return {
-        "users": db.scalar(select(func.count(User.id)).where(User.is_guest.is_(False))) or 0,
+        "users": users,
+        "verified_users": verified,
+        "unverified_users": unverified,
+        "verification_rate_pct": rate,
+        "verification_sent": verification_sent,
+        "verification_completed": verification_completed,
+        "failed_verifications": failed_verifications,
+        "disposable_email_attempts": disposable_attempts,
         "jobs": db.scalar(select(func.count(AnalysisJob.id))) or 0,
         "failed_jobs": db.scalar(select(func.count(AnalysisJob.id)).where(AnalysisJob.status == "failed")) or 0,
         "payments": db.scalar(select(func.count(Payment.id)).where(Payment.status == "successful")) or 0,
@@ -30,6 +63,7 @@ def users(
     admin: User = Depends(require_roles("admin")),
     db: Session = Depends(get_db),
 ):
+    enforce_shallow_offset(page, 20)
     query = select(User).where(User.is_guest.is_(False))
     if q:
         query = query.where(User.email.ilike(f"%{q}%"))
@@ -41,6 +75,7 @@ def users(
                 "email": u.email,
                 "full_name": u.full_name,
                 "is_suspended": u.is_suspended,
+                "email_verified": bool(u.email_verified_at),
                 "role": u.role.name if u.role else None,
             }
             for u in items
@@ -82,15 +117,20 @@ def plans(admin: User = Depends(require_roles("admin")), db: Session = Depends(g
 
 
 @router.patch("/plans/{plan_id}")
-def update_plan(plan_id: str, payload: dict, admin: User = Depends(require_roles("admin")), db: Session = Depends(get_db)):
+def update_plan(
+    plan_id: str,
+    payload: AdminPlanUpdateIn,
+    admin: User = Depends(require_roles("admin")),
+    db: Session = Depends(get_db),
+):
     from uuid import UUID
 
     plan = db.get(Plan, UUID(plan_id))
     if not plan:
         raise HTTPException(404, "Plan not found.")
-    for field in ("name", "price_usd_cents", "checks_per_month", "max_words", "features", "is_active", "description"):
-        if field in payload:
-            setattr(plan, field, payload[field])
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(plan, field, value)
     db.add(AdminAuditLog(admin_user_id=admin.id, action="update_plan", target_type="plan", target_id=plan_id))
     db.commit()
     return {"ok": True}
@@ -103,13 +143,16 @@ def flags(admin: User = Depends(require_roles("admin")), db: Session = Depends(g
 
 
 @router.post("/flags")
-def upsert_flag(payload: dict, admin: User = Depends(require_roles("admin")), db: Session = Depends(get_db)):
-    flag = db.scalar(select(FeatureFlag).where(FeatureFlag.key == payload["key"]))
+def upsert_flag(payload: AdminFlagIn, admin: User = Depends(require_roles("admin")), db: Session = Depends(get_db)):
+    flag = db.scalar(select(FeatureFlag).where(FeatureFlag.key == payload.key))
     if not flag:
-        flag = FeatureFlag(key=payload["key"], enabled=bool(payload.get("enabled", True)), description=payload.get("description", ""))
+        flag = FeatureFlag(key=payload.key, enabled=payload.enabled, description=payload.description)
         db.add(flag)
     else:
-        flag.enabled = bool(payload.get("enabled", flag.enabled))
+        flag.enabled = payload.enabled
+        if payload.description:
+            flag.description = payload.description
+    db.add(AdminAuditLog(admin_user_id=admin.id, action="upsert_flag", target_type="flag", target_id=payload.key))
     db.commit()
     return {"ok": True}
 
@@ -120,6 +163,7 @@ def security_events(
     admin: User = Depends(require_roles("admin")),
     db: Session = Depends(get_db),
 ):
+    enforce_shallow_offset(page, 50)
     items = db.scalars(
         select(SecurityEvent).order_by(SecurityEvent.created_at.desc()).offset((page - 1) * 50).limit(50)
     ).all()

@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-09-10T04:52:21Z",
+  "trivy_binary": false,
+  "ran_locally": false,
+  "exit_code": null,
+  "ci_job": ".github/workflows/security-scan.yml trivy (HIGH+)",
+  "ok_local_or_ci_wired": true,
+  "note": "Local binary optional. CI fail-closed Trivy filesystem scan is the scheduled/path-triggered gate."
+}

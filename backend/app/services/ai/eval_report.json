@@ -1,0 +1,617 @@
+{
+  "suites": {
+    "question_analyzer": {
+      "name": "question_analyzer",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 4320,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 4320,
+      "confusion": {},
+      "source": "circular",
+      "precision_ci95": [
+        0.9991,
+        1.0
+      ],
+      "recall_ci95": [
+        0.9991,
+        1.0
+      ],
+      "f1_ci95": [
+        0.9991,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Circular: labels generated from the same rules as the classifier. Not validity evidence."
+    },
+    "thesis_analyzer": {
+      "name": "thesis_analyzer",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 4032,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 4032,
+      "confusion": {
+        "strong": {
+          "strong": 1536,
+          "weak": 0,
+          "missing": 0
+        },
+        "weak": {
+          "strong": 0,
+          "weak": 1344,
+          "missing": 0
+        },
+        "missing": {
+          "strong": 0,
+          "weak": 0,
+          "missing": 1152
+        }
+      },
+      "source": "circular",
+      "precision_ci95": [
+        0.999,
+        1.0
+      ],
+      "recall_ci95": [
+        0.999,
+        1.0
+      ],
+      "f1_ci95": [
+        0.999,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Circular: labels generated from the same rules as the classifier. Not validity evidence."
+    },
+    "citation_extractor": {
+      "name": "citation_extractor",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 39,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 55,
+      "confusion": {},
+      "source": "circular",
+      "precision_ci95": [
+        0.9103,
+        1.0
+      ],
+      "recall_ci95": [
+        0.9103,
+        1.0
+      ],
+      "f1_ci95": [
+        0.9347,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Circular: labels generated from the same rules as the classifier. Not validity evidence."
+    },
+    "argument_analyzer": {
+      "name": "argument_analyzer",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 1920,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 3648,
+      "confusion": {
+        "tp": 1920,
+        "fp": 0,
+        "fn": 0,
+        "tn": 1728
+      },
+      "source": "circular",
+      "precision_ci95": [
+        0.998,
+        1.0
+      ],
+      "recall_ci95": [
+        0.998,
+        1.0
+      ],
+      "f1_ci95": [
+        0.9989,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Circular: labels generated from the same rules as the classifier. Not validity evidence."
+    },
+    "evidence_analyzer": {
+      "name": "evidence_analyzer",
+      "precision": 0.993103448275862,
+      "recall": 1.0,
+      "f1": 0.9965397923875432,
+      "true_positives": 1728,
+      "false_positives": 12,
+      "false_negatives": 0,
+      "support": 2880,
+      "confusion": {
+        "tp": 1728,
+        "fp": 12,
+        "fn": 0,
+        "tn": 1140
+      },
+      "source": "circular",
+      "precision_ci95": [
+        0.988,
+        0.9961
+      ],
+      "recall_ci95": [
+        0.9978,
+        1.0
+      ],
+      "f1_ci95": [
+        0.9936,
+        0.9981
+      ],
+      "certifiable": false,
+      "notes": "Circular: labels generated from the same rules as the classifier. Not validity evidence."
+    },
+    "rubric_checker": {
+      "name": "rubric_checker",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 264,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 96,
+      "confusion": {},
+      "source": "circular",
+      "precision_ci95": [
+        0.9857,
+        1.0
+      ],
+      "recall_ci95": [
+        0.9857,
+        1.0
+      ],
+      "f1_ci95": [
+        0.9615,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Circular: labels generated from the same rules as the classifier. Not validity evidence."
+    },
+    "heldout_question": {
+      "name": "heldout_question",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 37,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 35,
+      "confusion": {},
+      "source": "heldout",
+      "precision_ci95": [
+        0.9059,
+        1.0
+      ],
+      "recall_ci95": [
+        0.9059,
+        1.0
+      ],
+      "f1_ci95": [
+        0.9011,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Independent held-out, but n=35 is below the 1000 certification floor."
+    },
+    "heldout_thesis": {
+      "name": "heldout_thesis",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 20,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 20,
+      "confusion": {},
+      "source": "heldout",
+      "precision_ci95": [
+        0.8389,
+        1.0
+      ],
+      "recall_ci95": [
+        0.8389,
+        1.0
+      ],
+      "f1_ci95": [
+        0.8389,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Independent held-out, but n=20 is below the 1000 certification floor."
+    },
+    "heldout_argument": {
+      "name": "heldout_argument",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 8,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 17,
+      "confusion": {
+        "tp": 8,
+        "fp": 0,
+        "fn": 0,
+        "tn": 9
+      },
+      "source": "heldout",
+      "precision_ci95": [
+        0.6756,
+        1.0
+      ],
+      "recall_ci95": [
+        0.6756,
+        1.0
+      ],
+      "f1_ci95": [
+        0.8157,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Independent held-out, but n=17 is below the 1000 certification floor."
+    },
+    "heldout_evidence": {
+      "name": "heldout_evidence",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 18,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 18,
+      "confusion": {
+        "supported": {
+          "supported": 5,
+          "needs_citation": 0,
+          "potentially_unsupported": 0,
+          "cannot_determine": 0
+        },
+        "needs_citation": {
+          "supported": 0,
+          "needs_citation": 7,
+          "potentially_unsupported": 0,
+          "cannot_determine": 0
+        },
+        "potentially_unsupported": {
+          "supported": 0,
+          "needs_citation": 0,
+          "potentially_unsupported": 2,
+          "cannot_determine": 0
+        },
+        "cannot_determine": {
+          "supported": 0,
+          "needs_citation": 0,
+          "potentially_unsupported": 0,
+          "cannot_determine": 4
+        }
+      },
+      "source": "heldout",
+      "precision_ci95": [
+        0.8241,
+        1.0
+      ],
+      "recall_ci95": [
+        0.8241,
+        1.0
+      ],
+      "f1_ci95": [
+        0.8241,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Independent held-out, but n=18 is below the 1000 certification floor."
+    },
+    "heldout_citation": {
+      "name": "heldout_citation",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 21,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 22,
+      "confusion": {},
+      "source": "heldout",
+      "precision_ci95": [
+        0.8454,
+        1.0
+      ],
+      "recall_ci95": [
+        0.8454,
+        1.0
+      ],
+      "f1_ci95": [
+        0.8513,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Independent held-out, but n=22 is below the 2000 certification floor."
+    },
+    "hallucination_guard": {
+      "name": "hallucination_guard",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 2,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 4,
+      "confusion": {
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "tn": 2
+      },
+      "source": "heldout",
+      "precision_ci95": [
+        0.3424,
+        1.0
+      ],
+      "recall_ci95": [
+        0.3424,
+        1.0
+      ],
+      "f1_ci95": [
+        0.5101,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "n=4 unit cases. Not the 1000-case red-team suite."
+    },
+    "coach_refusal": {
+      "name": "coach_refusal",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "true_positives": 4,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "support": 4,
+      "confusion": {},
+      "source": "heldout",
+      "precision_ci95": [
+        0.5101,
+        1.0
+      ],
+      "recall_ci95": [
+        0.5101,
+        1.0
+      ],
+      "f1_ci95": [
+        0.5101,
+        1.0
+      ],
+      "certifiable": false,
+      "notes": "Independent held-out, but n=4 is below the 1000 certification floor."
+    }
+  },
+  "sizes": {
+    "question": 4320,
+    "thesis": 4032,
+    "citation": 55,
+    "argument": 3648,
+    "evidence": 2880,
+    "rubric": 96,
+    "heldout_question": 35,
+    "heldout_thesis": 20,
+    "heldout_argument": 17,
+    "heldout_evidence": 18,
+    "heldout_citation": 22,
+    "heldout": 120,
+    "total_template": 15031,
+    "total": 15031
+  },
+  "circular_suites": [
+    "argument_analyzer",
+    "citation_extractor",
+    "evidence_analyzer",
+    "question_analyzer",
+    "rubric_checker",
+    "thesis_analyzer"
+  ],
+  "hallucination_redteam": {
+    "n_should_block": 1210,
+    "n_total": 1214,
+    "escaped": 0,
+    "escape_rate": 0.0,
+    "target": 0.005,
+    "pass_target": true
+  },
+  "reviewer_agreement": {
+    "n": 0,
+    "cohen_a_b": null,
+    "cohen_a_ai": null,
+    "cohen_b_ai": null,
+    "fleiss": null,
+    "pairwise_a_b": null,
+    "pairwise_a_ai": null,
+    "note": "No dual reviewer labels are on disk. Lecturer agreement is unmeasured."
+  },
+  "verification": {
+    "empty_status": "could_not_verify",
+    "never_invents_on_empty": true,
+    "precision": null,
+    "recall": null,
+    "n_labeled": 0,
+    "note": "Live Crossref/OpenAlex/Semantic Scholar precision is unmeasured. Empty lookup is not verified."
+  },
+  "citation_parser_robustness": {
+    "n": 2440,
+    "failures": 0,
+    "extracted_spans": 2160,
+    "failure_rate": 0.0,
+    "labeled_for_f1": false,
+    "note": "Robustness corpus is unlabeled. Do not report F1 on these strings."
+  },
+  "argument_coverage": {
+    "n": 17,
+    "claim_rate": 0.47058823529411764,
+    "reasoning_rate": 0.23529411764705882,
+    "counterargument_rate": 0.23529411764705882,
+    "rebuttal_rate": 0.0,
+    "logical_gap_rate": 0.5294117647058824,
+    "note": "Coverage of heuristic flags on held-out paragraphs. Not relationship-accuracy gold."
+  },
+  "live_llm": {
+    "n_requested": 1000,
+    "n_run": 0,
+    "prompt_version": "v1.1.0",
+    "providers": [
+      {
+        "provider": "openai",
+        "configured": false,
+        "n_run": 0,
+        "accuracy": null,
+        "latency_ms": null,
+        "cost_usd": null,
+        "schema_compliance": null,
+        "failure_rate": null,
+        "status": "unproven"
+      },
+      {
+        "provider": "anthropic",
+        "configured": false,
+        "n_run": 0,
+        "accuracy": null,
+        "latency_ms": null,
+        "cost_usd": null,
+        "schema_compliance": null,
+        "failure_rate": null,
+        "status": "unproven"
+      },
+      {
+        "provider": "gemini",
+        "configured": false,
+        "n_run": 0,
+        "accuracy": null,
+        "latency_ms": null,
+        "cost_usd": null,
+        "schema_compliance": null,
+        "failure_rate": null,
+        "status": "unproven"
+      }
+    ],
+    "note": "Live LLM eval was not executed. Keys present: 0/3. Do not treat heuristic F1 as live-model accuracy."
+  },
+  "prompt_registry": {
+    "active": "v1.1.0",
+    "entries": [
+      {
+        "prompt_version": "v1.1.0",
+        "model": "heuristic_classifiers",
+        "accuracy": null,
+        "latency_ms": null,
+        "token_cost": null,
+        "regression_score": null,
+        "status": "active_unevaluated_on_live_llm"
+      }
+    ],
+    "gate": {
+      "allow_deploy": false,
+      "reason": "Live prompt regression scores are unmeasured. Reject 98 certification."
+    }
+  },
+  "calibration": {
+    "n": 55,
+    "ece": 0.0,
+    "brier": 0.0,
+    "exposed_in_ui": false,
+    "passes_calibration": false,
+    "note": "Classifiers emit hard labels. ECE here assumes p=1.0 on every decision. Student-facing confidence is disabled until a calibrated probability model exists."
+  },
+  "certification": {
+    "claim_98": false,
+    "any_gate_pass_for_98": false,
+    "certified": false,
+    "gates": [
+      {
+        "gate": "heldout_question",
+        "required_n": 1000,
+        "measured_n": 35,
+        "required_f1_ci_low": 0.98,
+        "f1": 1.0,
+        "f1_ci_low": 0.9011,
+        "pass": false
+      },
+      {
+        "gate": "heldout_thesis",
+        "required_n": 1000,
+        "measured_n": 20,
+        "required_f1_ci_low": 0.98,
+        "f1": 1.0,
+        "f1_ci_low": 0.8389,
+        "pass": false
+      },
+      {
+        "gate": "heldout_argument",
+        "required_n": 1000,
+        "measured_n": 17,
+        "required_f1_ci_low": 0.98,
+        "f1": 1.0,
+        "f1_ci_low": 0.8157,
+        "pass": false
+      },
+      {
+        "gate": "heldout_evidence",
+        "required_n": 1000,
+        "measured_n": 18,
+        "required_f1_ci_low": 0.98,
+        "f1": 1.0,
+        "f1_ci_low": 0.8241,
+        "pass": false
+      },
+      {
+        "gate": "heldout_citation",
+        "required_n": 2000,
+        "measured_n": 22,
+        "required_f1_ci_low": 0.98,
+        "f1": 1.0,
+        "f1_ci_low": 0.8513,
+        "pass": false
+      },
+      {
+        "gate": "hallucination_escape",
+        "required": "<0.005 on n>=1000 red-team block cases",
+        "measured": 0.0,
+        "n": 1210,
+        "pass": true
+      },
+      {
+        "gate": "reviewer_agreement",
+        "required": "dual lecturer labels",
+        "measured_n": 0,
+        "pass": false
+      },
+      {
+        "gate": "reference_verification_precision",
+        "required": 0.98,
+        "measured": null,
+        "pass": false
+      },
+      {
+        "gate": "schema_compliance_live",
+        "required": 0.999,
+        "measured": null,
+        "n_run": 0,
+        "pass": false
+      }
+    ],
+    "reason": "98% AI quality is not certified. Held-out n is below the independent-label floors, template suites are circular, reviewer labels are absent, live LLM eval was not run, and reference-verification precision is unmeasured."
+  },
+  "note": "Template gold is circular (same rules generate labels and classifiers). Held-out cases are independent expert-constructed examples, not lecturer-reviewed gold. Do not claim 98% AI quality from this report."
+}

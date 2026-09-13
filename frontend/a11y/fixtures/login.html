@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sign in</title>
+  </head>
+  <body>
+    <a href="#main-content">Skip to main content</a>
+    <main id="main-content" tabindex="-1">
+      <h1>Sign in</h1>
+      <form>
+        <label for="email">Email
+          <input id="email" name="email" type="email" autocomplete="email" required aria-invalid="true" aria-describedby="login-error" />
+        </label>
+        <label for="password">Password
+          <input id="password" name="password" type="password" autocomplete="current-password" required aria-invalid="true" aria-describedby="login-error" />
+        </label>
+        <p id="login-error" role="alert">Could not sign in.</p>
+        <button type="submit">Continue</button>
+      </form>
+    </main>
+  </body>
+</html>

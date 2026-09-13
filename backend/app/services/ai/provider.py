@@ -6,14 +6,17 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from app.config import get_settings
 from app.core.logging import get_logger
+from app.core.metrics import incr
+from app.services.ai.cache import cache_key, get_cached, publish_result, set_cached, take_leadership
+from app.services.ai.circuit import allow, record_failure, record_success
 
 log = get_logger("ai")
 
-PROMPT_VERSION = "v1.0.0"
+PROMPT_VERSION = "v1.1.0"
 
 SYSTEM_PROMPT = """You are AcademicCheck AI, an academic writing analyst.
 
@@ -117,7 +120,7 @@ class GeminiProvider:
             "contents": [{"parts": [{"text": user_prompt}]}],
             "generationConfig": {"temperature": 0.2, "response_mime_type": "application/json"},
         }
-        data = _post_json(url, payload, {}, params={"key": settings.gemini_api_key})
+        data = _post_json(url, payload, {"x-goog-api-key": settings.gemini_api_key})
         text = data["candidates"][0]["content"]["parts"][0]["text"]
         tokens = int((data.get("usageMetadata") or {}).get("totalTokenCount") or 0)
         return AIResponse(text, model, self.name, tokens)
@@ -143,16 +146,49 @@ def available_providers() -> list[AIProvider]:
 
 
 def complete_with_fallback(user_prompt: str, *, strong: bool = False) -> AIResponse | None:
-    last_error = None
-    for provider in available_providers():
+    key = cache_key(user_prompt, strong=strong)
+    cached = get_cached(key)
+    if isinstance(cached, AIResponse):
+        incr("ai.cache_hit")
+        return cached
+    waiter = take_leadership(key)
+    if waiter is not None:
         try:
-            return provider.complete(user_prompt, strong=strong)
-        except Exception as exc:  # noqa: BLE001
-            last_error = exc
-            log.warning("ai_provider_failed", provider=provider.name, error=str(exc))
-    if last_error:
-        log.error("ai_all_providers_failed", error=str(last_error))
-    return None
+            result = waiter.result(timeout=30)
+        except Exception:  # noqa: BLE001
+            result = None
+        if isinstance(result, AIResponse):
+            incr("ai.cache_hit")
+            return result
+        cached = get_cached(key)
+        if isinstance(cached, AIResponse):
+            incr("ai.cache_hit")
+            return cached
+        return None
+    last_error = None
+    response: AIResponse | None = None
+    try:
+        for provider in available_providers():
+            if not allow(provider.name):
+                log.warning("ai_circuit_open", provider=provider.name)
+                incr("ai.circuit_open")
+                continue
+            try:
+                response = provider.complete(user_prompt, strong=strong)
+                record_success(provider.name)
+                set_cached(key, response)
+                incr("ai.provider_ok")
+                return response
+            except Exception as exc:  # noqa: BLE001
+                last_error = exc
+                record_failure(provider.name)
+                incr("ai.provider_fail")
+                log.warning("ai_provider_failed", provider=provider.name, error=str(exc))
+        if last_error:
+            log.error("ai_all_providers_failed", error=str(last_error))
+        return None
+    finally:
+        publish_result(key, response)
 
 
 def parse_json_object(raw: str) -> dict[str, Any]:
@@ -171,7 +207,7 @@ def wrap_untrusted(label: str, content: str) -> str:
     )
 
 
-@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=0.5, max=4))
+@retry(stop=stop_after_attempt(2), wait=wait_random_exponential(multiplier=0.5, max=4), reraise=True)
 def _post_json(url: str, payload: dict, headers: dict, params: dict | None = None) -> dict:
     settings = get_settings()
     hdrs = {"Content-Type": "application/json", **headers}

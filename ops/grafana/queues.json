@@ -1,0 +1,22 @@
+{
+  "title": "AcademicCheck queues (spec only — not deployed)",
+  "uid": "academiccheck-queues",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Backend (unassigned). Purpose: RQ analysis queue depth. Alerts: A-QUEUE (depth only; age not emitted). Runbook: docs/RUNBOOK_LIBRARY/queue-backlog.md.",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Queue depth",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_queue_depth", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue depth over time",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 0 },
+      "targets": [{ "expr": "academiccheck_queue_depth", "refId": "A" }]
+    }
+  ]
+}

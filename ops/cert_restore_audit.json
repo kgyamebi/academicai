@@ -1,0 +1,129 @@
+{
+  "measured_at": "2026-09-09T20:22:38Z",
+  "provider": "docker-local",
+  "managed_postgres": false,
+  "dump_s": 12.193,
+  "restore_s": {
+    "initial": 29.45,
+    "after_accidental_delete": 30.069,
+    "after_drop_findings": 27.542,
+    "after_failed_migration": 27.146,
+    "after_destroy_env": 27.446
+  },
+  "rto_s": 27.446,
+  "rpo": "point-in-time of last pg_dump only; WAL PITR not exercised",
+  "before": {
+    "users": 7,
+    "assignments": 100006,
+    "documents": 7,
+    "analysis_reports": 1112,
+    "analysis_jobs": 3113,
+    "analysis_findings": 1003333,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "after_initial": {
+    "users": 7,
+    "assignments": 100006,
+    "documents": 7,
+    "analysis_reports": 1112,
+    "analysis_jobs": 3113,
+    "analysis_findings": 1003333,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "after_delete_before_restore": {
+    "users": 7,
+    "assignments": 99756,
+    "documents": 7,
+    "analysis_reports": 1112,
+    "analysis_jobs": 3113,
+    "analysis_findings": 1003333,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "after_delete_restore": {
+    "users": 7,
+    "assignments": 100006,
+    "documents": 7,
+    "analysis_reports": 1112,
+    "analysis_jobs": 3113,
+    "analysis_findings": 1003333,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "after_drop_restore": {
+    "users": 7,
+    "assignments": 100006,
+    "documents": 7,
+    "analysis_reports": 1112,
+    "analysis_jobs": 3113,
+    "analysis_findings": 1003333,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "after_migration_restore": {
+    "users": 7,
+    "assignments": 100006,
+    "documents": 7,
+    "analysis_reports": 1112,
+    "analysis_jobs": 3113,
+    "analysis_findings": 1003333,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "after_destroy_restore": {
+    "users": 7,
+    "assignments": 100006,
+    "documents": 7,
+    "analysis_reports": 1112,
+    "analysis_jobs": 3113,
+    "analysis_findings": 1003333,
+    "payments": 1,
+    "credits": 1,
+    "subscriptions": 1
+  },
+  "fingerprints_before": {
+    "users": "98d22cdd6df69e2e",
+    "assignments": "d7c43c922597abb3",
+    "documents": "89f8ad52743d1502",
+    "analysis_reports": "76d96d0ce260aed3",
+    "analysis_jobs": "142850d0056906a6",
+    "analysis_findings": "7310ed5a48b1b1ae",
+    "payments": "d120cea731388dd7",
+    "credits": "7a98d1d97ec5984d",
+    "subscriptions": "da996122593ff973"
+  },
+  "fingerprints_final": {
+    "users": "98d22cdd6df69e2e",
+    "assignments": "d7c43c922597abb3",
+    "documents": "89f8ad52743d1502",
+    "analysis_reports": "76d96d0ce260aed3",
+    "analysis_jobs": "142850d0056906a6",
+    "analysis_findings": "7310ed5a48b1b1ae",
+    "payments": "d120cea731388dd7",
+    "credits": "7a98d1d97ec5984d",
+    "subscriptions": "da996122593ff973"
+  },
+  "relationship_orphans": {
+    "documents_missing_user": 0,
+    "assignments_missing_user": 0,
+    "jobs_missing_assignment": 0,
+    "reports_missing_job": 0,
+    "payments_missing_user": 0,
+    "credits_missing_user": 0,
+    "subscriptions_missing_plan": 0
+  },
+  "relationships_ok": true,
+  "counts_match": true,
+  "fingerprints_match": true,
+  "failed_migration_error_present": true,
+  "accidental_delete_reduced_assignments": true,
+  "pass": true
+}

@@ -1,0 +1,12 @@
+{
+  "measured_at": "2026-09-09T21:03:03Z",
+  "container": "aiessayassignmentchecker-postgres-1",
+  "host_path": "backups/host/academiccheck-20260909T210244Z.dump",
+  "size_bytes": 32893333,
+  "sha256": "0cbb3455f31f96ffa2708f2c9cbe84c25cd7c65debdc90ba0cac94ffec05f7b2",
+  "format": "pg_dump custom",
+  "dump_s": 14.315,
+  "in_container_copy_deleted": true,
+  "independent_of_container_lifecycle": true,
+  "ok": true
+}

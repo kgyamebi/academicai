@@ -1,0 +1,48 @@
+{
+  "measured_at": "2026-09-07T09:15:03Z",
+  "engine": "heuristic_run_analysis",
+  "runs": {
+    "1": {
+      "parallel": 1,
+      "p50_ms": 4.053,
+      "p95_ms": 4.053,
+      "elapsed_s": 0.028,
+      "errors": 0,
+      "throughput_per_min": 2126.4
+    },
+    "10": {
+      "parallel": 10,
+      "p50_ms": 4.042,
+      "p95_ms": 4.427,
+      "elapsed_s": 0.156,
+      "errors": 0,
+      "throughput_per_min": 3850.0
+    },
+    "50": {
+      "parallel": 50,
+      "p50_ms": 4.258,
+      "p95_ms": 11.547,
+      "elapsed_s": 0.325,
+      "errors": 0,
+      "throughput_per_min": 9218.0
+    },
+    "100": {
+      "parallel": 100,
+      "p50_ms": 3.916,
+      "p95_ms": 11.047,
+      "elapsed_s": 0.602,
+      "errors": 0,
+      "throughput_per_min": 9974.5
+    }
+  },
+  "cache_1000_hits": 1000,
+  "cache_1000_ms": 3.849,
+  "live_provider": false,
+  "not_run": [
+    "parallel_1000",
+    "parallel_5000",
+    "parallel_10000",
+    "live_openai",
+    "live_failover_load"
+  ]
+}

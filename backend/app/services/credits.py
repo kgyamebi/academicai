@@ -19,7 +19,7 @@ def required_credits(operation: str) -> Decimal:
 
 def available_credits(db: Session, user: User) -> Decimal:
     wallet = _wallet(db, user.id, lock=False)
-    _expire_if_needed(wallet)
+    _expire_if_needed(db, wallet)
     return max(Decimal("0"), (wallet.remaining or Decimal("0")))
 
 
@@ -28,7 +28,7 @@ def reserve_credits(db: Session, user: User, operation: str, job_id: UUID) -> Cr
     if amount <= 0:
         return None
     wallet = _wallet(db, user.id, lock=True)
-    _expire_if_needed(wallet)
+    _expire_if_needed(db, wallet)
     remaining = wallet.remaining or Decimal("0")
     if remaining < amount:
         raise HTTPException(
@@ -107,8 +107,10 @@ def clawback_credits(db: Session, user: User, amount: Decimal, operation: str = 
 
 
 def grant_credits(db: Session, user: User, amount: Decimal, operation: str = "purchase") -> Credit:
+    assert_wallet_integrity(db, user, stage="pre_grant")
     wallet = _wallet(db, user.id, lock=True)
-    wallet.remaining = (wallet.remaining or Decimal("0")) + amount
+    previous = wallet.remaining or Decimal("0")
+    wallet.remaining = previous + amount
     db.add(
         CreditTransaction(
             user_id=user.id,
@@ -116,9 +118,27 @@ def grant_credits(db: Session, user: User, amount: Decimal, operation: str = "pu
             amount=amount,
             status="available",
             operation=operation,
+            notes=f"previous={previous} new={wallet.remaining}",
         )
     )
+    db.flush()
+    assert_wallet_integrity(db, user, stage="post_grant")
     return wallet
+
+
+def assert_wallet_integrity(db: Session, user: User, *, stage: str = "check") -> None:
+    """Fail closed on ledger drift — no silent balance changes."""
+    from app.core.logging import get_logger
+    from app.core.metrics import incr
+
+    if wallet_matches_ledger(db, user):
+        return
+    incr("billing.ledger_drift")
+    get_logger("credits").error("ledger_drift_detected", user_id=str(user.id), stage=stage)
+    raise HTTPException(
+        status.HTTP_409_CONFLICT,
+        "Credit ledger integrity check failed. Purchase blocked until reconciled.",
+    )
 
 
 def _wallet(db: Session, user_id: UUID, *, lock: bool) -> Credit:
@@ -134,6 +154,39 @@ def _wallet(db: Session, user_id: UUID, *, lock: bool) -> Credit:
     return wallet
 
 
-def _expire_if_needed(wallet: Credit) -> None:
+def expected_remaining(db: Session, user_id: UUID) -> Decimal:
+    """Rebuild remaining from credit_transactions. Reservation refunds restore remaining and are omitted."""
+    rows = list(db.scalars(select(CreditTransaction).where(CreditTransaction.user_id == user_id)))
+    available = sum((t.amount for t in rows if t.status == "available"), Decimal("0"))
+    consumed = sum((t.amount for t in rows if t.status == "consumed"), Decimal("0"))
+    reserved = sum((t.amount for t in rows if t.status == "reserved"), Decimal("0"))
+    expired = sum((t.amount for t in rows if t.status == "expired"), Decimal("0"))
+    clawback = sum(
+        (t.amount for t in rows if t.status == "refunded" and t.analysis_job_id is None),
+        Decimal("0"),
+    )
+    return available - consumed - reserved - expired - clawback
+
+
+def wallet_matches_ledger(db: Session, user: User) -> bool:
+    wallet = _wallet(db, user.id, lock=False)
+    _expire_if_needed(db, wallet)
+    remaining = wallet.remaining or Decimal("0")
+    return remaining == expected_remaining(db, user.id)
+
+
+def _expire_if_needed(db: Session, wallet: Credit) -> None:
     if wallet.expires_at and is_past(wallet.expires_at):
+        remaining = wallet.remaining or Decimal("0")
+        if remaining > 0:
+            db.add(
+                CreditTransaction(
+                    user_id=wallet.user_id,
+                    credit_id=wallet.id,
+                    amount=remaining,
+                    status="expired",
+                    operation="expiry",
+                )
+            )
         wallet.remaining = Decimal("0")
+        db.flush()

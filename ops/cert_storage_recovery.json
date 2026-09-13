@@ -1,0 +1,36 @@
+{
+  "measured_at": "2026-09-09T20:19:39Z",
+  "backend": "local-disk",
+  "s3_replication": false,
+  "versioning": "drill-sidecar-sha256",
+  "ok": true,
+  "steps": [
+    {
+      "name": "seed",
+      "ok": true,
+      "files": 3
+    },
+    {
+      "name": "backup",
+      "ok": true,
+      "seconds": 0.0301,
+      "files": 3
+    },
+    {
+      "name": "mutate_delete_corrupt",
+      "ok": true
+    },
+    {
+      "name": "restore",
+      "ok": true,
+      "seconds": 0.0997,
+      "files": 3
+    },
+    {
+      "name": "verify_integrity",
+      "ok": true,
+      "files": 3
+    }
+  ],
+  "note": "Local-disk drill only. Cross-region / S3 versioning / object-lock: UNPROVEN."
+}

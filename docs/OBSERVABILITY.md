@@ -4,8 +4,8 @@
 
 - `GET /api/live` — process up
 - `GET /api/health` — shallow status
-- `GET /api/ready` — database, and Redis/workers when production or `REQUIRE_QUEUE=true`
-- `GET /api/metrics` — health plus in-process counters (`http.requests`, `http.5xx`, `http.4xx`, `billing.successful_payments`)
+- `GET /api/ready` — database, and Redis/workers when production or `REQUIRE_QUEUE=true`. HTTP **503** when `ready` is false.
+- `GET /api/metrics` — health plus in-process counters (`http.requests`, `http.5xx`, `http.4xx`, `billing.successful_payments`, `ai.cache_hit`, `ai.provider_fail`), `ai_circuits`, and rolling `http_latency` (p50/p95/p99, last 2000 samples via `observe_ms`)
 
 Structured JSON logs in production via structlog. Sentry initializes when `SENTRY_DSN` is set.
 

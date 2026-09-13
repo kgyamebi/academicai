@@ -1,0 +1,33 @@
+{
+  "pass": 3,
+  "measured_at": "2026-09-07T19:20:00Z",
+  "pytest_pass3": {
+    "file": "ops/cert_pass3_pytest.txt",
+    "result": "21 passed (pass3_hardening + a11y focus trap assert)"
+  },
+  "full_suite_coverage": {
+    "file": "ops/cert_pass3_coverage.txt",
+    "passed": 208,
+    "total_stmts": 5820,
+    "missed": 1107,
+    "cover_pct": 80.98
+  },
+  "score_deltas": {
+    "security": {"old": 92, "new": 93},
+    "billing": {"old": 89, "new": 91},
+    "reliability": {"old": 93, "new": 94},
+    "scalability": {"old": 69, "new": 72},
+    "disaster_recovery": {"old": 74, "new": 76},
+    "observability": {"old": 70, "new": 73},
+    "accessibility": {"old": 93, "new": 94},
+    "testing": {"old": 79, "new": 81},
+    "operations": {"old": 58, "new": 62},
+    "deployment_readiness": {"old": 82, "new": 84},
+    "production_readiness": {"old": 82, "new": 84},
+    "ai_quality": {"old": 87, "new": 87},
+    "overall": {"old": 87, "new": 88}
+  },
+  "live_psp": false,
+  "hosted_grafana": false,
+  "managed_pitr": false
+}

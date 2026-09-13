@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Assignment analysis report</title>
+  </head>
+  <body>
+    <a href="#main-content">Skip to main content</a>
+    <nav aria-label="App">
+      <a href="/app/dashboard">Dashboard</a>
+    </nav>
+    <main id="main-content" tabindex="-1">
+      <h1>Assignment analysis report</h1>
+      <div role="tablist" aria-label="Report sections">
+        <button type="button" id="report-tab-score" role="tab" aria-selected="true" aria-controls="report-panel-score">score</button>
+        <button type="button" id="report-tab-findings" role="tab" aria-selected="false" aria-controls="report-panel-findings">findings</button>
+      </div>
+      <section id="report-panel-score" role="tabpanel" aria-labelledby="report-tab-score">
+        <div role="img" aria-label="Diagnostic score 72 out of 100">72</div>
+        <p>AI-assisted diagnostic indicator — not an official grade.</p>
+        <table>
+          <caption>Category scores. These are diagnostic indicators, not an official grade.</caption>
+          <thead>
+            <tr><th scope="col">Category</th><th scope="col">Score</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">thesis</th><td>72 out of 100</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="report-panel-findings" role="tabpanel" aria-labelledby="report-tab-findings">
+        <article>
+          <p>
+            <span aria-hidden="true">!</span>
+            <span class="sr-only">High warning. </span>
+            high · thesis
+          </p>
+          <p>The thesis is too broad.</p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

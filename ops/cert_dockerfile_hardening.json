@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-09-10T04:52:20Z",
+  "ok": true,
+  "checks": {
+    "backend_non_root": true,
+    "backend_slim_base": true,
+    "backend_no_dotenv_copy": true,
+    "frontend_non_root": true,
+    "frontend_npm_ci": true,
+    "prod_no_host_postgres": true,
+    "prod_no_host_redis": true
+  }
+}

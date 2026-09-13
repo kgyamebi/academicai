@@ -8,11 +8,23 @@ INJECTION_PATTERNS = [
     r"you are now",
     r"jailbreak",
     r"dan mode",
+    r"developer mode",
     r"reveal (the )?(system|hidden) prompt",
     r"print your (system|developer|hidden) prompt",
     r"override safety",
+    r"forget (all|your) (instructions|rules|constraints)",
+    r"new instructions?:",
+    r"do not follow the (system|previous|developer)",
     r"</?(system|assistant)>",
     r"<<<UNTRUSTED_",
+    r"treat this (document|file|paper) as (trusted|system)",
+    r"ignore (citation|source|reference) verif",
+    r"skip citation (checks?|verification)",
+    r"bypass (the )?(citation|source) (logic|verifier|check)",
+    r"output (other|another) (users?|tenants?|students?)[' ]",
+    r"exfiltrate",
+    r"dump (the )?(system prompt|hidden prompt|api keys?)",
+    r"this is (now )?(the )?system (prompt|message)",
 ]
 
 SECRET_PATTERNS = [
@@ -33,6 +45,11 @@ SYSTEM_LEAK_MARKERS = [
 def looks_like_injection(text: str) -> bool:
     blob = text.lower()
     return any(re.search(pattern, blob) for pattern in INJECTION_PATTERNS)
+
+
+def untrusted_corpus_is_injection(*parts: str) -> bool:
+    """True when uploaded document/citation text tries to steer the model."""
+    return any(looks_like_injection(part or "") for part in parts)
 
 
 def contains_secret(text: str) -> bool:

@@ -1,0 +1,154 @@
+{
+  "measured_at": "2026-09-07T09:27:53Z",
+  "profile": "100",
+  "base": "http://127.0.0.1:8014",
+  "exit_code": 99,
+  "stdout_tail": "ing (2m38.7s), 100/100 VUs, 5670 complete and 0 interrupted iterations\n100    [  88% ] 100/100 VUs  2m38.9s/3m00.0s\n\nrunning (2m39.7s), 100/100 VUs, 5689 complete and 0 interrupted iterations\n100    [  89% ] 100/100 VUs  2m39.9s/3m00.0s\n\nrunning (2m40.7s), 100/100 VUs, 5723 complete and 0 interrupted iterations\n100    [  89% ] 100/100 VUs  2m40.9s/3m00.0s\n\nrunning (2m41.7s), 100/100 VUs, 5785 complete and 0 interrupted iterations\n100    [  90% ] 100/100 VUs  2m41.9s/3m00.0s\n\nrunning (2m42.7s), 100/100 VUs, 5808 complete and 0 interrupted iterations\n100    [  90% ] 100/100 VUs  2m42.9s/3m00.0s\n\nrunning (2m43.7s), 100/100 VUs, 5822 complete and 0 interrupted iterations\n100    [  91% ] 100/100 VUs  2m43.9s/3m00.0s\n\nrunning (2m44.7s), 100/100 VUs, 5848 complete and 0 interrupted iterations\n100    [  92% ] 100/100 VUs  2m44.9s/3m00.0s\n\nrunning (2m45.7s), 100/100 VUs, 5908 complete and 0 interrupted iterations\n100    [  92% ] 100/100 VUs  2m45.9s/3m00.0s\n\nrunning (2m46.7s), 100/100 VUs, 5925 complete and 0 interrupted iterations\n100    [  93% ] 100/100 VUs  2m46.9s/3m00.0s\n\nrunning (2m47.7s), 100/100 VUs, 5949 complete and 0 interrupted iterations\n100    [  93% ] 100/100 VUs  2m47.9s/3m00.0s\n\nrunning (2m48.7s), 100/100 VUs, 6019 complete and 0 interrupted iterations\n100    [  94% ] 100/100 VUs  2m48.9s/3m00.0s\n\nrunning (2m49.7s), 100/100 VUs, 6050 complete and 0 interrupted iterations\n100    [  94% ] 100/100 VUs  2m49.9s/3m00.0s\n\nrunning (2m50.7s), 100/100 VUs, 6060 complete and 0 interrupted iterations\n100    [  95% ] 100/100 VUs  2m50.9s/3m00.0s\n\nrunning (2m51.7s), 100/100 VUs, 6122 complete and 0 interrupted iterations\n100    [  95% ] 100/100 VUs  2m51.9s/3m00.0s\n\nrunning (2m52.7s), 100/100 VUs, 6150 complete and 0 interrupted iterations\n100    [  96% ] 100/100 VUs  2m52.9s/3m00.0s\n\nrunning (2m53.7s), 100/100 VUs, 6162 complete and 0 interrupted iterations\n100    [  97% ] 100/100 VUs  2m53.9s/3m00.0s\n\nrunning (2m54.7s), 100/100 VUs, 6214 complete and 0 interrupted iterations\n100    [  97% ] 100/100 VUs  2m54.9s/3m00.0s\n\nrunning (2m55.7s), 100/100 VUs, 6270 complete and 0 interrupted iterations\n100    [  98% ] 100/100 VUs  2m55.9s/3m00.0s\n\nrunning (2m56.7s), 100/100 VUs, 6290 complete and 0 interrupted iterations\n100    [  98% ] 100/100 VUs  2m56.9s/3m00.0s\n\nrunning (2m57.7s), 100/100 VUs, 6323 complete and 0 interrupted iterations\n100    [  99% ] 100/100 VUs  2m57.9s/3m00.0s\n\nrunning (2m58.7s), 100/100 VUs, 6388 complete and 0 interrupted iterations\n100    [  99% ] 100/100 VUs  2m58.9s/3m00.0s\n\nrunning (2m59.7s), 100/100 VUs, 6404 complete and 0 interrupted iterations\n100    [ 100% ] 100/100 VUs  2m59.9s/3m00.0s\n\nrunning (3m00.7s), 041/100 VUs, 6467 complete and 0 interrupted iterations\n100  \u00e2\u2020\u201c [ 100% ] 100/100 VUs  3m0s\n\n\n  \u00e2\u2013\u02c6 THRESHOLDS \n\n    http_req_duration\n    \u00e2\u0153\u2014 'p(95)<500' p(95)=1.87s\n\n    http_req_failed\n    \u00e2\u0153\u201c 'rate<0.01' rate=0.00%\n\n\n  \u00e2\u2013\u02c6 TOTAL RESULTS \n\n    checks_total.......: 13016   71.820006/s\n    checks_succeeded...: 100.00% 13016 out of 13016\n    checks_failed......: 0.00%   0 out of 13016\n\n    \u00e2\u0153\u201c live is 200\n    \u00e2\u0153\u201c ready is 200 or 503\n\n    HTTP\n    http_req_duration..............: avg=654ms min=429.92\u00c2\u00b5s med=298.64ms max=2.86s p(90)=1.65s p(95)=1.87s\n      { expected_response:true }...: avg=654ms min=429.92\u00c2\u00b5s med=298.64ms max=2.86s p(90)=1.65s p(95)=1.87s\n    http_req_failed................: 0.00%  0 out of 13016\n    http_reqs......................: 13016  71.820006/s\n\n    EXECUTION\n    iteration_duration.............: avg=2.31s min=1.09s    med=2.32s    max=3.97s p(90)=3.03s p(95)=3.23s\n    iterations.....................: 6508   35.910003/s\n    vus............................: 45     min=1          max=100\n    vus_max........................: 100    min=100        max=100\n\n    NETWORK\n    data_received..................: 6.2 MB 34 kB/s\n    data_sent......................: 1.2 MB 6.4 kB/s\n\n\n\n\nrunning (3m01.2s), 000/100 VUs, 6508 complete and 0 interrupted iterations\n100  \u00e2\u0153\u201c [ 100% ] 000/100 VUs  3m0s\n",
+  "stderr_tail": "Unable to find image 'grafana/k6:latest' locally\nlatest: Pulling from grafana/k6\n4f4fb700ef54: Pulling fs layer\ne5b773ddb4d8: Pulling fs layer\n275eb3e317af: Pulling fs layer\n4f4fb700ef54: Already exists\ne5b773ddb4d8: Download complete\ne5b773ddb4d8: Pull complete\n8d44e72234a0: Download complete\n275eb3e317af: Download complete\n275eb3e317af: Pull complete\n4f4fb700ef54: Pull complete\nDigest: sha256:5221b620a4f874faff6e32ba597aa667c058391fe4898b1c6f6377f062c6cdec\nStatus: Downloaded newer image for grafana/k6:latest\ntime=\"2026-09-07T09:27:51Z\" level=error msg=\"thresholds on metrics 'http_req_duration' have been crossed\"\n",
+  "not_run": [
+    "1000",
+    "5000",
+    "10000",
+    "50000"
+  ],
+  "k6_summary": {
+    "metrics": {
+      "vus": {
+        "value": 45,
+        "min": 1,
+        "max": 100
+      },
+      "vus_max": {
+        "value": 100,
+        "min": 100,
+        "max": 100
+      },
+      "http_req_connecting": {
+        "avg": 0.22191868346650276,
+        "min": 0,
+        "med": 0,
+        "max": 196.528332,
+        "p(90)": 0,
+        "p(95)": 0
+      },
+      "checks": {
+        "passes": 13016,
+        "fails": 0,
+        "value": 1
+      },
+      "data_sent": {
+        "count": 1164932,
+        "rate": 6427.890569050435
+      },
+      "http_req_duration": {
+        "med": 298.6436715,
+        "max": 2868.948772,
+        "p(90)": 1653.5784615,
+        "p(95)": 1878.84255925,
+        "avg": 654.0064445450972,
+        "min": 0.429928,
+        "thresholds": {
+          "p(95)<500": true
+        }
+      },
+      "http_req_tls_handshaking": {
+        "max": 0,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0,
+        "min": 0,
+        "med": 0
+      },
+      "http_req_sending": {
+        "p(90)": 0.102618,
+        "p(95)": 0.119421,
+        "avg": 0.05952559096496607,
+        "min": 0.010802,
+        "med": 0.031605,
+        "max": 19.552516
+      },
+      "http_req_waiting": {
+        "avg": 647.2971203126922,
+        "min": 0.127053,
+        "med": 283.709616,
+        "max": 2851.937979,
+        "p(90)": 1646.9791344999999,
+        "p(95)": 1866.15335825
+      },
+      "http_req_failed": {
+        "passes": 0,
+        "fails": 13016,
+        "thresholds": {
+          "rate<0.01": false
+        },
+        "value": 0
+      },
+      "http_req_receiving": {
+        "min": 0.041107,
+        "med": 0.607407,
+        "max": 265.870934,
+        "p(90)": 20.226813,
+        "p(95)": 33.174986000000004,
+        "avg": 6.6497986414412615
+      },
+      "http_req_duration{expected_response:true}": {
+        "avg": 654.0064445450972,
+        "min": 0.429928,
+        "med": 298.6436715,
+        "max": 2868.948772,
+        "p(90)": 1653.5784615,
+        "p(95)": 1878.84255925
+      },
+      "http_req_blocked": {
+        "avg": 0.25457665788260464,
+        "min": 0.0039,
+        "med": 0.011402,
+        "max": 196.714965,
+        "p(90)": 0.015703,
+        "p(95)": 0.019322
+      },
+      "data_received": {
+        "count": 6182600,
+        "rate": 34114.50302010008
+      },
+      "http_reqs": {
+        "count": 13016,
+        "rate": 71.82000635810543
+      },
+      "iterations": {
+        "rate": 35.910003179052715,
+        "count": 6508
+      },
+      "iteration_duration": {
+        "max": 3979.397369,
+        "p(90)": 3034.8153798,
+        "p(95)": 3233.1183209499986,
+        "avg": 2312.02630461693,
+        "min": 1094.752832,
+        "med": 2320.2950330000003
+      }
+    },
+    "root_group": {
+      "path": "",
+      "id": "d41d8cd98f00b204e9800998ecf8427e",
+      "groups": {},
+      "checks": {
+        "live is 200": {
+          "fails": 0,
+          "name": "live is 200",
+          "path": "::live is 200",
+          "id": "8e2433f4c03eba6c29b0f49e6ef19784",
+          "passes": 6508
+        },
+        "ready is 200 or 503": {
+          "name": "ready is 200 or 503",
+          "path": "::ready is 200 or 503",
+          "id": "dd98cb2904423ec90fb1cd1a8f67ec32",
+          "passes": 6508,
+          "fails": 0
+        }
+      },
+      "name": ""
+    }
+  }
+}

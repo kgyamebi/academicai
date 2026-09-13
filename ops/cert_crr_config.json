@@ -1,0 +1,7 @@
+{
+  "config": "ops/s3_crr_replication.json",
+  "syntax_ok": true,
+  "errors": [],
+  "replication_succeeded": false,
+  "reason": "CRR requires two real regional buckets plus IAM. Not executed."
+}

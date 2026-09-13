@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, ForeignKey, Index, Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -15,6 +15,23 @@ if TYPE_CHECKING:
 
 class Assignment(Base, UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "assignments"
+    __table_args__ = (
+        Index(
+            "ix_assignments_user_updated_active",
+            "user_id",
+            "updated_at",
+            sqlite_where=text("deleted_at IS NULL"),
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+        Index(
+            "ix_assignments_user_updated_id",
+            "user_id",
+            "updated_at",
+            "id",
+            sqlite_where=text("deleted_at IS NULL"),
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
+    )
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     title: Mapped[str] = mapped_column(String(255), default="Untitled assignment")

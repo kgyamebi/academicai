@@ -1,0 +1,21 @@
+{
+  "title": "AcademicCheck billing (spec only — not deployed)",
+  "uid": "academiccheck-billing",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Payments (unassigned). Purpose: webhook unmatched + 4xx proxy. Alerts: A-WH; A-PAY has no fail counter. Runbooks: docs/RUNBOOK_LIBRARY/billing-failure.md, payment-webhook-failure.md.",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Webhook unmatched (process counter)",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_billing_webhook_unmatched", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP 4xx (includes webhook rejects)",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 0 },
+      "targets": [{ "expr": "academiccheck_http_4xx", "refId": "A" }]
+    }
+  ]
+}

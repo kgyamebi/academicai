@@ -1,0 +1,45 @@
+{
+  "measured_at": "2026-09-06T21:11:26Z",
+  "target": "http://127.0.0.1:8011",
+  "endpoint": "/api/live",
+  "results": {
+    "1": {
+      "in_flight": 1,
+      "requests": 200,
+      "p50_ms": 6.176,
+      "p95_ms": 7.629,
+      "p99_ms": 9.767,
+      "error_rate": 0.0
+    },
+    "50": {
+      "in_flight": 50,
+      "requests": 500,
+      "p50_ms": 238.424,
+      "p95_ms": 281.673,
+      "p99_ms": 288.798,
+      "error_rate": 0.0
+    },
+    "100": {
+      "in_flight": 100,
+      "requests": 1000,
+      "p50_ms": 602.421,
+      "p95_ms": 1208.406,
+      "p99_ms": 1770.102,
+      "error_rate": 0.0
+    },
+    "250": {
+      "in_flight": 250,
+      "requests": 1000,
+      "p50_ms": 1019.3,
+      "p95_ms": 2653.555,
+      "p99_ms": 3424.974,
+      "error_rate": 0.0
+    }
+  },
+  "not_run": [
+    "1000_in_flight",
+    "10000_in_flight",
+    "50000_in_flight",
+    "authenticated_routes"
+  ]
+}

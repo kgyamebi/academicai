@@ -1,0 +1,22 @@
+{
+  "title": "AcademicCheck storage (spec only — not deployed — INCOMPLETE)",
+  "uid": "academiccheck-storage",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed", "incomplete"],
+  "description": "Owner: Platform (unassigned). Purpose: there is NO storage success/fail gauge. This dashboard shows S3/storage circuit if present and HTTP 4xx as a weak proxy. Alert A-STORAGE cannot fire. Runbook: docs/RUNBOOK_LIBRARY/storage-failure.md. Chaos storage_kill: not_run.",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP 4xx (weak proxy — not storage-specific)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_http_4xx", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Storage circuit open (if labeled)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [{ "expr": "academiccheck_circuit{state=\"open\"}", "refId": "A" }]
+    }
+  ]
+}

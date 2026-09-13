@@ -25,6 +25,7 @@ from app.models.assignment import (
 from app.models.billing import (
     Credit,
     CreditTransaction,
+    FinancialAuditEntry,
     Payment,
     PaymentTransaction,
     Plan,
@@ -45,6 +46,7 @@ __all__ = [
     "PaymentTransaction",
     "Credit",
     "CreditTransaction",
+    "FinancialAuditEntry",
     "Assignment",
     "AssignmentVersion",
     "AssignmentQuestion",

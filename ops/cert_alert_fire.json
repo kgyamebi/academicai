@@ -1,0 +1,27 @@
+{
+  "measured_at": "2026-09-07T10:54:21Z",
+  "events": [
+    {
+      "probe": "baseline_ready",
+      "status": 200
+    },
+    {
+      "probe": "redis_down_ready",
+      "status": 503
+    },
+    {
+      "probe": "alert_posted",
+      "status": 200
+    },
+    {
+      "probe": "redis_recovered_ready",
+      "status": 503
+    }
+  ],
+  "sink_received": 1,
+  "grafana": false,
+  "pagerduty": false,
+  "alertmanager": false,
+  "local_sink_alert": true,
+  "pass_local_ready_alert": true
+}

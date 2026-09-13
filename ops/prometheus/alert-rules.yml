@@ -1,0 +1,114 @@
+# AcademicCheck AI — Prometheus recording/alert rules (SPECIFICATION ONLY).
+# Not loaded. No Prometheus or Alertmanager runs in this repository.
+# Do not treat presence of this file as a passing alert-creation gate.
+#
+# Scrape target when an operator later deploys Prometheus:
+#   GET /api/metrics/prometheus  (process-local; scrape every replica)
+#
+# Catalog: docs/ALERT_CATALOG.md
+# Validation: docs/ALERT_VALIDATION_REPORT.md
+
+groups:
+  - name: academiccheck.availability
+    rules:
+      - alert: AcademicCheckAPINotReady
+        expr: academiccheck_ready == 0
+        for: 1m
+        labels:
+          severity: sev2
+          alert_id: A-READY
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/high-error-rate.md
+          summary: /api/ready would fail (database, redis, or sqlite-in-prod)
+
+      - alert: AcademicCheckDatabaseDown
+        expr: academiccheck_database == 0
+        for: 0m
+        labels:
+          severity: sev2
+          alert_id: A-DB
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/database-failure.md
+
+      - alert: AcademicCheckRedisDown
+        expr: academiccheck_redis == 0
+        for: 0m
+        labels:
+          severity: sev2
+          alert_id: A-REDIS
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/redis-failure.md
+
+      - alert: AcademicCheckWorkersDown
+        expr: academiccheck_workers == 0
+        for: 1m
+        labels:
+          severity: sev2
+          alert_id: A-WORKER
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/worker-failure.md
+
+      - alert: AcademicCheckQueueBacklog
+        expr: academiccheck_queue_depth > 100
+        for: 10m
+        labels:
+          severity: sev2
+          alert_id: A-QUEUE
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/queue-backlog.md
+          warning: Queue age is not emitted; this is depth-only.
+
+  - name: academiccheck.http
+    rules:
+      - alert: AcademicCheckHighErrorRate
+        expr: |
+          rate(academiccheck_http_5xx[5m])
+          / clamp_min(rate(academiccheck_http_requests[5m]), 0.001) > 0.02
+        for: 5m
+        labels:
+          severity: sev2
+          alert_id: A-5XX
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/high-error-rate.md
+
+      - alert: AcademicCheckLatencyBreach
+        expr: academiccheck_http_latency_ms{quantile="0.95"} > 200
+        for: 10m
+        labels:
+          severity: sev2
+          alert_id: A-LAT
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/high-latency.md
+          warning: Histogram is rolling in-process (max 2000 samples), not a Prometheus histogram.
+
+  - name: academiccheck.billing_ai
+    rules:
+      - alert: AcademicCheckWebhookUnmatched
+        expr: increase(academiccheck_billing_webhook_unmatched[5m]) > 20
+        labels:
+          severity: sev2
+          alert_id: A-WH
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/payment-webhook-failure.md
+
+      - alert: AcademicCheckPaymentFailures
+        expr: increase(academiccheck_billing_failed_payments[5m]) > 10
+        labels:
+          severity: sev1
+          alert_id: A-PAY
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/billing-failure.md
+          warning: Spec only until Prometheus scrapes replicas. Not a live PSP certificate.
+
+      - alert: AcademicCheckAICircuitOpen
+        expr: academiccheck_circuit{state="open"} == 1
+        for: 5m
+        labels:
+          severity: sev3
+          alert_id: A-AI
+        annotations:
+          runbook: docs/RUNBOOK_LIBRARY/ai-provider-failure.md
+
+# Intentionally absent (no series exist):
+# A-STORAGE, A-CPU, A-MEM, A-DISK, A-NET, A-DBSAT, A-BACKUP, A-CERT, queue age.
+# A-PAY now has billing_failed_payments — still not hosted.

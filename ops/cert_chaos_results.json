@@ -1,0 +1,28 @@
+{
+  "measured_at": "2026-09-07T12:36:39Z",
+  "api": "http://127.0.0.1:8012",
+  "results": {
+    "baseline_live": 200,
+    "baseline_ready": 200,
+    "redis_down_live": 200,
+    "redis_down_ready": 503,
+    "redis_recovered_ready": 200,
+    "postgres_down_live": 200,
+    "postgres_down_ready": 503,
+    "postgres_recovered_ready": 200
+  },
+  "expect": {
+    "live_stays_200": true,
+    "ready_503_when_redis_down": true,
+    "ready_503_when_postgres_down": true,
+    "redis_recovered_ready": true,
+    "postgres_recovered_ready": true
+  },
+  "not_run": [
+    "ai_provider_kill",
+    "billing_provider_kill",
+    "network_partition",
+    "storage_kill"
+  ],
+  "pass": true
+}

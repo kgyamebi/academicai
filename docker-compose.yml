@@ -25,6 +25,13 @@ services:
       timeout: 3s
       retries: 10
 
+  # Local inbox UI: http://localhost:8025  SMTP: localhost:1025 (no auth, plain)
+  mailpit:
+    image: axllent/mailpit:v1.22.3
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
   api:
     build:
       context: ./backend
@@ -36,6 +43,12 @@ services:
       DATABASE_URL: postgresql+psycopg://academiccheck:academiccheck@postgres:5432/academiccheck
       REDIS_URL: redis://redis:6379/0
       STORAGE_LOCAL_PATH: /data/storage
+      EMAIL_PROVIDER: smtp
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_TLS: disabled
+      EMAIL_FROM: noreply@academiccheck.local
+      EMAIL_ASYNC: "true"
     volumes:
       - ./backend:/app
       - storage_data:/data/storage
@@ -46,6 +59,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   worker:
     build:
@@ -58,6 +73,12 @@ services:
       DATABASE_URL: postgresql+psycopg://academiccheck:academiccheck@postgres:5432/academiccheck
       REDIS_URL: redis://redis:6379/0
       STORAGE_LOCAL_PATH: /data/storage
+      EMAIL_PROVIDER: smtp
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_TLS: disabled
+      EMAIL_FROM: noreply@academiccheck.local
+      EMAIL_ASYNC: "true"
     volumes:
       - ./backend:/app
       - storage_data:/data/storage
@@ -66,6 +87,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   web:
     build:

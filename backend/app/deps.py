@@ -55,10 +55,28 @@ def get_optional_user(
 
 
 def require_roles(*roles: str) -> Callable:
-    def checker(user: User = Depends(get_current_user)) -> User:
+    def checker(user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
         name = user.role.name if user.role else "student"
         if name not in roles:
+            from app.services.security_events import record_security_event
+
+            record_security_event(
+                db,
+                "authorization_denied",
+                user_id=user.id,
+                details=f"required={','.join(roles)} actual={name}",
+                severity="warning",
+            )
+            db.commit()
             raise HTTPException(status.HTTP_403_FORBIDDEN, "You do not have access to this action.")
+        # Privileged roles must have MFA enabled (code-complete; pending org mandate rollout).
+        from app.services.mfa import PRIVILEGED_ROLES
+
+        if name in PRIVILEGED_ROLES and not user.mfa_enabled:
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "Multi-factor authentication is required for this role. Enroll MFA first.",
+            )
         return user
 
     return checker

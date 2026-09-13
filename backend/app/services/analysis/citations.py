@@ -11,6 +11,13 @@ APA_PAREN = re.compile(
 APA_NARRATIVE = re.compile(
     r"\b[A-Z][A-Za-z'’\-]+(?:\s+(?:and|&)\s+[A-Z][A-Za-z'’\-]+)?(?:\s+et\s+al\.)?\s+\((?:19|20)\d{2}[a-z]?\)"
 )
+HARVARD_PAREN = re.compile(
+    r"\((?:[A-Z][A-Za-z'’\-]+(?:\s+(?:and|&)\s+[A-Z][A-Za-z'’\-]+)?(?:\s+et\s+al\.)?)\s+(?:19|20)\d{2}[a-z]?"
+    r"(?::\s*\d+[-–]?\d*)?\)"
+)
+CHICAGO_PAREN = re.compile(
+    r"\((?:[A-Z][A-Za-z'’\-]+(?:\s+(?:and|&)\s+[A-Z][A-Za-z'’\-]+)?)\s+(?:19|20)\d{2}[a-z]?,\s*\d+[-–]?\d*\)"
+)
 MLA_PAREN = re.compile(r"\([A-Z][A-Za-z'’\-]+(?:\s+and\s+[A-Z][A-Za-z'’\-]+)?\s+\d{1,4}\)")
 IEEE_PAREN = re.compile(r"\[(\d{1,3}(?:\s*[-–,]\s*\d{1,3})*)\]")
 DOI = re.compile(r"10\.\d{4,9}/[-._;()/:A-Za-z0-9]+")
@@ -91,19 +98,27 @@ def _extract_citations(text: str, paragraphs: list, style: str) -> list[ParsedCi
     found: list[ParsedCitation] = []
     patterns: list[tuple[re.Pattern, str]] = []
     if style in {"apa7", "harvard", "chicago"}:
-        patterns = [(APA_PAREN, style), (APA_NARRATIVE, style)]
+        patterns = [(APA_PAREN, style), (APA_NARRATIVE, style), (HARVARD_PAREN, "harvard"), (CHICAGO_PAREN, "chicago")]
     elif style == "mla9":
         patterns = [(MLA_PAREN, "mla9"), (APA_PAREN, "possible-apa")]
     elif style == "ieee":
         patterns = [(IEEE_PAREN, "ieee")]
     else:
-        patterns = [(APA_PAREN, style), (MLA_PAREN, "mla9"), (IEEE_PAREN, "ieee")]
+        patterns = [
+            (APA_PAREN, style),
+            (APA_NARRATIVE, style),
+            (HARVARD_PAREN, "harvard"),
+            (MLA_PAREN, "mla9"),
+            (IEEE_PAREN, "ieee"),
+        ]
 
     seen: set[tuple[int, int]] = set()
     for pattern, guess in patterns:
         for match in pattern.finditer(text):
             span = (match.start(), match.end())
             if span in seen:
+                continue
+            if _in_reference_block(paragraphs, match.start()):
                 continue
             seen.add(span)
             raw = match.group(0)
@@ -113,6 +128,10 @@ def _extract_citations(text: str, paragraphs: list, style: str) -> list[ParsedCi
             if ym:
                 year = ym.group(1)
             author = _author_from_citation(raw)
+            locator = None
+            loc = re.search(r"(?:p+\.?\s*|,\s*)(\d+[-–]?\d*)\s*\)?$", raw)
+            if loc:
+                locator = loc.group(1)
             found.append(
                 ParsedCitation(
                     raw_text=raw,
@@ -187,11 +206,10 @@ def _looks_like_reference(text: str) -> bool:
     blob = text.strip()
     if DOI.search(blob) or URL.search(blob):
         return True
-    if re.match(r"^[A-Z][A-Za-z'’\-]+,\s+[A-Z]", blob) and YEAR.search(blob):
-        return True
-    if YEAR.search(blob) and len(blob) > 40 and "," in blob:
-        return True
     if re.match(r"^\[\d+\]", blob):
+        return True
+    # Bibliographic lines, not ordinary sentences that happen to contain a year.
+    if re.match(r"^[A-Z][A-Za-z'’\-]+,\s+[A-Z]", blob) and YEAR.search(blob) and len(blob.split()) >= 6:
         return True
     return False
 
@@ -212,6 +230,23 @@ def _author_from_citation(raw: str) -> str | None:
     cleaned = re.sub(r"p+\.?\s*\d+[-–]?\d*", "", cleaned, flags=re.I)
     cleaned = cleaned.replace(",", " ").replace("&", " ").strip()
     return cleaned[:120] or None
+
+
+def _in_reference_block(paragraphs: list, pos: int) -> bool:
+    if not paragraphs:
+        return False
+    para_idx = _paragraph_index(paragraphs, pos)
+    ref_start = None
+    for p in paragraphs:
+        heading = (p.text or "").lower()
+        if getattr(p, "is_heading", False) and any(
+            k in heading for k in ("reference", "bibliograph", "works cited")
+        ):
+            ref_start = p.index
+            break
+    if ref_start is None:
+        return False
+    return para_idx is not None and para_idx >= ref_start
 
 
 def _paragraph_index(paragraphs: list, pos: int) -> int | None:

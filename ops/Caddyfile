@@ -1,0 +1,26 @@
+# Caddy reverse proxy — HTTPS in front of AcademicCheck (set-and-forget edge).
+# Install Caddy, then: caddy run --config ops/Caddyfile
+#
+# Replace academiccheck.example.com with your domain and point DNS here.
+# Local API must listen on 127.0.0.1:8000; frontend on 127.0.0.1:3001.
+
+academiccheck.example.com {
+	encode gzip
+
+	# Security headers (API also sets its own).
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3001
+	}
+}

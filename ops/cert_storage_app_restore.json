@@ -1,0 +1,27 @@
+{
+  "measured_at": "2026-09-09T21:02:46Z",
+  "backend": "local-disk",
+  "app_path": "app.services.documents.storage.read_bytes",
+  "s3_replication": false,
+  "consecutive_runs": 2,
+  "runs": [
+    {
+      "files": 3,
+      "backup_s": 0.0243,
+      "restore_s": 0.0889,
+      "checksums_match": true,
+      "app_read_bytes_ok": true,
+      "ok": true
+    },
+    {
+      "files": 3,
+      "backup_s": 0.02,
+      "restore_s": 0.0264,
+      "checksums_match": true,
+      "app_read_bytes_ok": true,
+      "ok": true
+    }
+  ],
+  "pass": true,
+  "note": "Functional app read after restore. Live object-store/CRR UNPROVEN."
+}

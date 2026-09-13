@@ -1,0 +1,34 @@
+{
+  "title": "AcademicCheck infrastructure (spec only — not deployed)",
+  "uid": "academiccheck-infrastructure",
+  "schemaVersion": 39,
+  "tags": ["academiccheck", "not-deployed"],
+  "description": "Owner: Platform (unassigned). Purpose: process up vs dependency health. Alerts: A-READY, A-DB, A-REDIS. Runbooks: docs/RUNBOOK_LIBRARY/database-failure.md, redis-failure.md, high-error-rate.md. Host CPU/mem/disk/net are not in this scrape.",
+  "timezone": "browser",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Ready (use this for LB, not live)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "academiccheck_ready", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Database ping",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "academiccheck_database", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Redis ping ( -1 = not checked )",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [{ "expr": "academiccheck_redis", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP 5xx counter (process-local)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "academiccheck_http_5xx", "refId": "A" }]
+    }
+  ]
+}
