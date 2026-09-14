@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   devIndicators: false,
   async rewrites() {
-    const api = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    // Always proxy to the in-process/local API — never loop through the public domain.
+    const api = process.env.API_INTERNAL_URL || "http://127.0.0.1:8000";
     return [{ source: "/api/:path*", destination: `${api}/api/:path*` }];
   },
   async headers() {

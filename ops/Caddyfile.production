@@ -1,0 +1,26 @@
+# Production Caddy edge for AcademicCheck AI
+# API: 127.0.0.1:8000  |  Next.js: 127.0.0.1:3001
+#
+# sudo cp ops/Caddyfile.production /etc/caddy/Caddyfile && sudo systemctl reload caddy
+
+academiccheck.org, www.academiccheck.org {
+	encode gzip
+
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# FastAPI only
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8000
+	}
+
+	# Site + app UI
+	handle {
+		reverse_proxy 127.0.0.1:3001
+	}
+}
