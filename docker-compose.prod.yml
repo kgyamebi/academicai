@@ -9,7 +9,6 @@ services:
       POSTGRES_DB: academiccheck
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # WAL copies must outlive the container. Replay of these files is still unrun (DR-02).
       - postgres_wal_archive:/backups
     command:
       - postgres
@@ -58,12 +57,11 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
- 
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+    ports:
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./storage:/app/storage
- 
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
-
     environment:
       APP_SECRET_KEY: ${APP_SECRET_KEY}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
@@ -73,11 +71,10 @@ services:
       COOKIE_SECURE: "true"
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/academiccheck
       REDIS_URL: redis://redis:6379/0
-      # Keep app pool below PgBouncer DEFAULT_POOL_SIZE (20) across api workers + worker replicas.
       DB_POOL_SIZE: "5"
       DB_MAX_OVERFLOW: "5"
       STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
-      STORAGE_LOCAL_PATH: /data/storage
+      STORAGE_LOCAL_PATH: /app/storage
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-resend}
       EMAIL_API_KEY: ${EMAIL_API_KEY:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
@@ -85,7 +82,6 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-
       SMTP_TLS: ${SMTP_TLS:-required}
       SMTP_TIMEOUT_SECONDS: ${SMTP_TIMEOUT_SECONDS:-15}
       SMTP_REQUIRE_AUTH: ${SMTP_REQUIRE_AUTH:-true}
@@ -101,9 +97,7 @@ services:
       APP_CORS_ORIGINS: ${APP_CORS_ORIGINS}
       SENTRY_DSN: ${SENTRY_DSN:-}
       ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
-      ALERT_SINK_FILE: ${ALERT_SINK_FILE:-/data/storage/alerts.jsonl}
-    volumes:
-      - prod_storage:/data/storage
+      ALERT_SINK_FILE: ${ALERT_SINK_FILE:-/app/storage/alerts.jsonl}
     depends_on:
       postgres:
         condition: service_healthy
@@ -120,14 +114,11 @@ services:
   worker:
     build:
       context: ./backend
-      dockerfile: Dockerfile 
-
+      dockerfile: Dockerfile
+    command: python -m app.workers.rq_worker
     volumes:
       - ./storage:/app/storage
-
-    command: python -m app.workers.rq_worker
     environment:
-     
       APP_SECRET_KEY: ${APP_SECRET_KEY}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY}
@@ -138,7 +129,7 @@ services:
       DB_POOL_SIZE: "5"
       DB_MAX_OVERFLOW: "5"
       STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
-      STORAGE_LOCAL_PATH: /data/storage
+      STORAGE_LOCAL_PATH: /app/storage
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-resend}
       EMAIL_API_KEY: ${EMAIL_API_KEY:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
@@ -158,9 +149,7 @@ services:
       APP_WEB_URL: ${APP_WEB_URL}
       SENTRY_DSN: ${SENTRY_DSN:-}
       ALERT_WEBHOOK_URL: ${ALERT_WEBHOOK_URL:-}
-      ALERT_SINK_FILE: ${ALERT_SINK_FILE:-/data/storage/alerts.jsonl}
-    volumes:
-      - prod_storage:/data/storage
+      ALERT_SINK_FILE: ${ALERT_SINK_FILE:-/app/storage/alerts.jsonl}
     depends_on:
       postgres:
         condition: service_healthy
@@ -176,4 +165,3 @@ volumes:
   postgres_data:
   postgres_wal_archive:
   redis_data:
-  prod_storage:
