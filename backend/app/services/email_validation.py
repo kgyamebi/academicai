@@ -108,6 +108,26 @@ DEFAULT_DISPOSABLE = frozenset(
     }
 )
 
+# Common typo domains that often resolve but are almost always user mistakes.
+COMMON_TYPO_DOMAINS = frozenset(
+    {
+        "gail.com",
+        "gamil.com",
+        "gmial.com",
+        "gmal.com",
+        "gnail.com",
+        "gmaill.com",
+        "gmail.con",
+        "gmail.co",
+        "hotnail.com",
+        "hotmai.com",
+        "outlok.com",
+        "outllok.com",
+        "yahooo.com",
+        "yaho.com",
+    }
+)
+
 # Local-parts that are never valid for a student account signup.
 BLOCKED_LOCAL_PARTS = frozenset(
     {
@@ -200,6 +220,11 @@ def assert_public_domain(email: str) -> str:
 def assert_not_disposable(email: str) -> str:
     value = assert_public_domain(email)
     domain = value.split("@", 1)[1].lower()
+    if domain in COMMON_TYPO_DOMAINS:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "That email domain looks like a typo. Check the spelling (for example gmail.com) and try again.",
+        )
     blocked = disposable_domains()
     if domain in blocked or any(domain.endswith("." + d) for d in blocked):
         raise HTTPException(
