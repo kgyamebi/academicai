@@ -217,6 +217,36 @@ def _seed_content(db) -> None:
             "Difference between analysis and description",
             "Description says what happened. Analysis explains significance and relationship.",
         ),
+        (
+            "pre-submission-essay-checklist",
+            "Pre-submission essay checklist (printable mental model)",
+            "Question fit, thesis, evidence, structure, citations — in that order.",
+        ),
+        (
+            "how-to-revise-using-feedback",
+            "How to revise an essay using feedback (without rewriting everything)",
+            "Prioritise question fit and thesis before polishing sentences.",
+        ),
+        (
+            "citation-styles-compared",
+            "APA vs MLA vs Harvard: which citation style do you need?",
+            "A plain-English comparison so you stop mixing styles mid-essay.",
+        ),
+        (
+            "using-ai-responsibly-for-essays",
+            "Using AI responsibly while writing essays",
+            "Study aid vs ghostwriting — stay on the right side of integrity policies.",
+        ),
+        (
+            "what-academiccheck-report-means",
+            "How to read an AcademicCheck report",
+            "Scores are diagnostics. Priority fixes are the useful part.",
+        ),
+        (
+            "assignment-checker-vs-grammar-checker",
+            "Assignment checker vs grammar checker: what’s the difference?",
+            "Grammar tools polish sentences. Assignment checkers test whether you answered the brief.",
+        ),
     ]
     now = datetime.now(UTC)
     for slug, title, excerpt in posts:

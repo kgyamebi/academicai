@@ -24,7 +24,28 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function SeoPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const reserved = new Set(["app", "check", "login", "register", "pricing", "features", "blog", "help", "shared", "verify", "forgot-password", "reset-password"]);
+  const reserved = new Set([
+    "app",
+    "check",
+    "login",
+    "register",
+    "pricing",
+    "features",
+    "blog",
+    "help",
+    "resources",
+    "shared",
+    "verify",
+    "verify-email",
+    "forgot-password",
+    "reset-password",
+    "about",
+    "contact",
+    "security",
+    "terms",
+    "sample-report",
+    "onboarding",
+  ]);
   if (reserved.has(slug)) notFound();
   const page = await loadPage(slug);
   if (!page) notFound();

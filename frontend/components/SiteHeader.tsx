@@ -6,11 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { ButtonLink } from "@/components/ui/Button";
 
 const links = [
+  { href: "/resources", label: "Resources" },
+  { href: "/blog", label: "Blog" },
   { href: "/sample-report", label: "Sample report" },
   { href: "/pricing", label: "Pricing" },
-  { href: "/about", label: "About" },
   { href: "/help", label: "Help" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export function SiteHeader({ compact = false }: { compact?: boolean }) {

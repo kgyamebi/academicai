@@ -1,13 +1,26 @@
 import type { MetadataRoute } from "next";
+import { allBlogSlugs } from "@/lib/content/blog";
+import { allResourceSlugs } from "@/lib/content/resources";
 import { siteUrl } from "@/lib/utils";
 
-const slugs = [
+const core = [
   "",
   "pricing",
   "features",
   "blog",
+  "resources",
   "help",
   "check",
+  "about",
+  "contact",
+  "security",
+  "terms",
+  "sample-report",
+  "login",
+  "register",
+];
+
+const seoLanding = [
   "ai-essay-checker",
   "assignment-checker",
   "essay-checker",
@@ -33,20 +46,37 @@ const slugs = [
   "essay-checker-nigeria",
   "assignment-checker-nigeria",
   "essay-checker-kenya",
-  "about",
-  "contact",
-  "security",
-  "terms",
-  "sample-report",
-  "login",
-  "register",
+];
+
+const helpTopics = [
+  "help/how-to-check",
+  "help/file-types",
+  "help/citation-styles",
+  "help/ai-writing-indicators",
+  "help/rubric-checker",
+  "help/privacy",
+  "help/pricing",
+  "help/academic-integrity",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl();
-  return slugs.map((slug) => ({
+  const staticPaths = [
+    ...core,
+    ...seoLanding,
+    ...helpTopics,
+    ...allResourceSlugs().map((s) => `resources/${s}`),
+    ...allBlogSlugs().map((s) => `blog/${s}`),
+  ];
+  return staticPaths.map((slug) => ({
     url: slug ? `${base}/${slug}` : base,
-    changeFrequency: "weekly",
-    priority: slug ? 0.7 : 1,
+    changeFrequency: slug.startsWith("blog/") || slug.startsWith("resources/") ? "monthly" : "weekly",
+    priority: !slug
+      ? 1
+      : slug === "resources" || slug === "blog"
+        ? 0.9
+        : slug.startsWith("resources/") || slug.startsWith("blog/")
+          ? 0.8
+          : 0.7,
   }));
 }

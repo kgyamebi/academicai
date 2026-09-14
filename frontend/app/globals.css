@@ -194,6 +194,74 @@ body {
   line-height: 1.7;
 }
 
+.ac-guide h2 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: var(--ink);
+}
+
+.ac-guide h3 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ac-guide p {
+  margin-top: 0.85rem;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.ac-guide ul {
+  margin-top: 0.75rem;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.ac-guide li {
+  margin-top: 0.35rem;
+  line-height: 1.65;
+}
+
+.ac-guide a {
+  color: var(--teal);
+  text-underline-offset: 3px;
+}
+
+.ac-guide a:hover {
+  text-decoration: underline;
+}
+
+.ac-guide code {
+  font-size: 0.9em;
+  background: var(--paper);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+.ac-guide-table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.ac-guide-table th,
+.ac-guide-table td {
+  border: 1px solid var(--rule);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ac-guide-table th {
+  background: var(--paper);
+  font-weight: 600;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

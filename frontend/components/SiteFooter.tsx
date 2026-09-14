@@ -48,6 +48,11 @@ export function SiteFooter() {
           <nav aria-label="Learn">
             <ul className="mt-3 space-y-2.5 text-sm text-[var(--ink-muted)]">
               <li>
+                <Link className="hover:text-[var(--ink)]" href="/resources">
+                  Resources centre
+                </Link>
+              </li>
+              <li>
                 <Link className="hover:text-[var(--ink)]" href="/blog">
                   Writing guides
                 </Link>

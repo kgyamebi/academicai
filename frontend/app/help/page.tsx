@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { apiUrl } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "Help centre",
+  description: "How to check assignments, file types, citation styles, privacy, pricing, and academic integrity.",
+  alternates: { canonical: "/help" },
+};
 
 const docs = [
   ["/help/how-to-check", "How to check an assignment"],
@@ -48,6 +55,17 @@ export default async function HelpPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-16">
         <h1 className="font-serif text-4xl">Help centre</h1>
+        <p className="mt-4 text-[var(--ink-muted)] leading-7">
+          Product how-tos live here. For deeper writing guides, open the{" "}
+          <Link href="/resources" className="text-[var(--teal)] underline-offset-4 hover:underline">
+            Resources centre
+          </Link>{" "}
+          or the{" "}
+          <Link href="/blog" className="text-[var(--teal)] underline-offset-4 hover:underline">
+            writing blog
+          </Link>
+          .
+        </p>
         <ul className="mt-8 space-y-3">
           {docs.map(([href, label]) => (
             <li key={href}>
