@@ -1,0 +1,69 @@
+# Fail-closed until secrets exist. With secrets, dumps and uploads via S3-compatible API.
+# Local proof uses MinIO (ops/docker-compose.minio.yml + ops/cert_offsite_minio.py), not this workflow.
+name: backup-postgres
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse backup without a database URL
+        run: |
+          if [ -z "${{ secrets.BACKUP_DATABASE_URL }}" ]; then
+            echo "UNPROVEN: BACKUP_DATABASE_URL secret is not set. Automated production dump is not certified."
+            exit 1
+          fi
+      - name: Refuse backup without an artifact bucket
+        run: |
+          if [ -z "${{ secrets.BACKUP_UPLOAD_URI }}" ]; then
+            echo "UNPROVEN: BACKUP_UPLOAD_URI secret is not set. Offsite copy is not certified."
+            exit 1
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Dump, upload, prune (live account only)
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_UPLOAD_URI: ${{ secrets.BACKUP_UPLOAD_URI }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_S3_SECRET_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.BACKUP_S3_REGION }}
+          S3_ENDPOINT_URL: ${{ secrets.BACKUP_S3_ENDPOINT }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+          pip install -q boto3
+          STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+          mkdir -p backups/host
+          FILE="backups/host/academiccheck-${STAMP}.dump"
+          pg_dump --format=custom "$DATABASE_URL" --file "$FILE"
+          python - <<'PY'
+          import os, sys
+          from pathlib import Path
+          sys.path.insert(0, "ops")
+          from offsite_backup import s3_client, ensure_bucket, upload_file, prune_remote
+          uri = os.environ["BACKUP_UPLOAD_URI"]  # s3://bucket/prefix
+          assert uri.startswith("s3://"), uri
+          _, rest = uri.split("s3://", 1)
+          bucket, _, prefix = rest.partition("/")
+          prefix = prefix.rstrip("/") + "/" if prefix else "backups/postgres/"
+          files = sorted(Path("backups/host").glob("academiccheck-*.dump"))
+          path = files[-1]
+          key = f"{prefix}{path.name}"
+          client = s3_client(
+              endpoint_url=os.environ.get("S3_ENDPOINT_URL") or "",
+              access_key=os.environ["AWS_ACCESS_KEY_ID"],
+              secret_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+              region=os.environ.get("AWS_DEFAULT_REGION") or "us-east-1",
+          )
+          ensure_bucket(client, bucket)
+          digest = upload_file(client, bucket, key, path)
+          pruned = prune_remote(client, bucket, prefix, daily_keep=7, weekly_keep=4)
+          print(f"uploaded {key} sha256={digest} pruned={len(pruned)}")
+          PY

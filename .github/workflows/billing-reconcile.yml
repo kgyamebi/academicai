@@ -1,0 +1,37 @@
+# Scheduled reconcile reminder. Fail-closed without snapshot artifact/secret.
+# Presence is not a live PSP certification.
+name: billing-reconcile
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3 * * *"
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Refuse without snapshot
+        run: |
+          if [ -z "${{ secrets.BILLING_RECONCILE_SNAPSHOT }}" ] && [ ! -f ops/fixtures/billing_reconcile_snapshot.json ]; then
+            echo "UNPROVEN: provide secrets.BILLING_RECONCILE_SNAPSHOT or ops/fixtures/billing_reconcile_snapshot.json"
+            exit 1
+          fi
+      - name: Install + run reconcile (fixture path)
+        if: ${{ hashFiles('ops/fixtures/billing_reconcile_snapshot.json') != '' }}
+        working-directory: backend
+        env:
+          APP_ENV: test
+          DATABASE_URL: sqlite:///./reconcile.db
+          JWT_SECRET_KEY: ci-jwt-secret-key-32-bytes-minimum
+          APP_SECRET_KEY: ci-secret
+          ALERT_SINK_FILE: ../ops/alert_reconcile.jsonl
+        run: |
+          pip install -r requirements.txt
+          python -c "from app.db.session import Base, engine; Base.metadata.create_all(bind=engine)"
+          PYTHONPATH=. python ../ops/run_billing_reconcile.py --snapshot ../ops/fixtures/billing_reconcile_snapshot.json --out ../ops/cert_billing_reconcile.json --alert || true
+          test -f ../ops/cert_billing_reconcile.json

@@ -31,9 +31,21 @@ jobs:
         run: |
           pytest -q --cov=app --cov-report=term-missing --cov-fail-under=70
           pytest -q tests/test_isolation.py tests/test_billing_critical.py tests/test_hardening.py tests/test_security_cert.py --cov=app.services.billing --cov=app.services.credits --cov=app.deps --cov-fail-under=75
-          pytest -q tests/test_ai_quality_gate.py tests/test_a11y_static.py
-      - name: Dependency audit
-        run: pip install pip-audit && pip-audit -r requirements.txt || true
+          pytest -q tests/test_ai_quality_gate.py tests/test_a11y_static.py tests/test_reliability_injection.py
+      - name: Dependency audit (blocking, any known CVE)
+        run: |
+          python -m pip install --upgrade pip-audit
+          pip-audit -r requirements.txt --progress-spinner off
+      - name: Pins + SBOM + license allow-list
+        run: |
+          python ../ops/generate_sbom.py --requirements requirements.txt --out ../ops/sbom.cdx.json
+          python ../ops/license_scan.py --sbom ../ops/sbom.cdx.json --out ../ops/cert_license_scan.json
+      - name: Prove pip-audit fail-closed
+        working-directory: .
+        run: python ops/cert_pip_audit_failclosed.py
+      - name: CI must not swallow security scanners
+        working-directory: .
+        run: python ops/cert_ci_security_gates.py
 
   frontend:
     runs-on: ubuntu-latest
@@ -45,7 +57,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Install and typecheck
         run: |
-          npm ci || npm install
+          npm ci
           npx tsc --noEmit
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high
+      - name: Install API for authenticated axe
+        run: python -m pip install -r ../backend/requirements.txt
+      - name: Accessibility axe gate
+        run: npm run a11y
+      - name: Playwright accessibility
+        run: |
+          npx playwright install --with-deps chromium
+          npm run a11y:playwright
+        env:
+          A11Y_PYTHON: python
+      - name: Logging hygiene (backend)
+        working-directory: backend
+        run: pytest -q tests/test_logging_hygiene.py tests/test_observability_metrics.py
+        env:
+          APP_ENV: test
+          JWT_SECRET_KEY: ci-jwt-secret-key-32-bytes-minimum
+          APP_SECRET_KEY: ci-secret
+          DATABASE_URL: sqlite:///./ci.db
+          OTEL_SDK_DISABLED: "true"

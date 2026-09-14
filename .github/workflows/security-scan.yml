@@ -1,0 +1,83 @@
+# Fail-closed dependency, SBOM, license, and filesystem CVE scan.
+# Green means auditors ran and found nothing above threshold. Not a pentest.
+name: security-scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"
+  push:
+    paths:
+      - "backend/requirements.txt"
+      - "frontend/package-lock.json"
+      - ".github/workflows/security-scan.yml"
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: pip-audit (blocking, any known CVE)
+        run: |
+          python -m pip install --upgrade pip pip-audit
+          pip-audit -r requirements.txt --progress-spinner off
+      - name: SBOM + license
+        run: |
+          python ../ops/generate_sbom.py --requirements requirements.txt --out ../ops/sbom.cdx.json
+          python ../ops/license_scan.py --sbom ../ops/sbom.cdx.json --out ../ops/cert_license_scan.json
+      - name: Secret literal scan (app tree)
+        env:
+          APP_ENV: test
+          JWT_SECRET_KEY: ci-jwt-secret-key-32-bytes-minimum
+          APP_SECRET_KEY: ci-secret
+          DATABASE_URL: sqlite:///./scan.db
+        run: |
+          pip install -r requirements.txt pytest
+          pytest -q tests/test_mfa_and_recovery.py::test_secret_literal_scan_includes_common_patterns
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-sbom
+          path: ops/sbom.cdx.json
+
+  node:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: npm ci + audit high+ (blocking)
+        run: |
+          npm ci
+          npm audit --audit-level=high
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy filesystem scan (HIGH+)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          ignore-unfixed: true
+          format: json
+          output: ops/trivy-fs.json
+      - name: Upload Trivy report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs
+          path: ops/trivy-fs.json

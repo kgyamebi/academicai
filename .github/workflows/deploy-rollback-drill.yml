@@ -1,0 +1,25 @@
+# Local rollback drill companion. Cloud CD is not wired.
+# Evidence for automatic rollback is ops/cert_bluegreen.py (failed green → traffic returns to blue).
+name: deploy-rollback-drill
+
+on:
+  workflow_dispatch:
+
+jobs:
+  health-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refuse deploy without a staging URL
+        run: |
+          if [ -z "${{ secrets.STAGING_URL }}" ]; then
+            echo "UNPROVEN: STAGING_URL secret is not set. Automatic production rollback is not certified."
+            exit 1
+          fi
+      - name: Check staging ready
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" "${{ secrets.STAGING_URL }}/api/ready")
+          if [ "$code" != "200" ]; then
+            echo "Health failed ($code); CD must not proceed."
+            exit 1
+          fi
