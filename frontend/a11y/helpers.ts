@@ -37,14 +37,18 @@ export async function registerStudent(page: Page) {
   return email;
 }
 
-async function csrfHeaders(page: Page) {
+async function csrfHeaders(page: Page): Promise<Record<string, string>> {
   const cookies = await page.context().cookies();
   const csrf = cookies.find((c) => c.name === "ac_csrf")?.value || "";
-  return csrf ? { "X-CSRF-Token": csrf } : {};
+  const headers: Record<string, string> = {};
+  if (csrf) {
+    headers["X-CSRF-Token"] = csrf;
+  }
+  return headers;
 }
 
 export async function apiJson<T>(page: Page, path: string, init?: { method?: string; data?: unknown }): Promise<T> {
-  const headers = { ...(await csrfHeaders(page)) };
+  const headers = await csrfHeaders(page);
   const request: APIRequestContext = page.request;
   const response = init?.method && init.method !== "GET"
     ? await request.fetch(path, { method: init.method, data: init.data, headers })
