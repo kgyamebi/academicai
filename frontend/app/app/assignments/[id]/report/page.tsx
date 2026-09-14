@@ -155,8 +155,11 @@ export default function ReportPage() {
     );
   }
 
+  // Capture after null guard — nested async fns don't keep TS narrowing on `report`.
+  const currentReport = report;
+
   async function downloadPdf() {
-    const blob = await api<Blob>(`/api/reports/${report.id}/pdf`);
+    const blob = await api<Blob>(`/api/reports/${currentReport.id}/pdf`);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -169,7 +172,7 @@ export default function ReportPage() {
     setBusyShare(true);
     setShareMsg("");
     try {
-      const data = await api<{ path: string; expires_at: string }>(`/api/reports/${report.id}/share`, {
+      const data = await api<{ path: string; expires_at: string }>(`/api/reports/${currentReport.id}/share`, {
         method: "POST",
         body: JSON.stringify({ hours: 72 }),
       });
@@ -192,7 +195,7 @@ export default function ReportPage() {
         method: "POST",
         body: JSON.stringify({
           name: `After analysis ${new Date().toLocaleDateString()}`,
-          notes: `Saved from report ${report.id} (score ${report.overall_score}).`,
+          notes: `Saved from report ${currentReport.id} (score ${currentReport.overall_score}).`,
         }),
       });
       setVersionMsg("Version saved to this assignment.");
@@ -206,15 +209,15 @@ export default function ReportPage() {
 
   function focusFix(category?: string) {
     const match =
-      report.findings.find((f) => f.category === category) ||
-      report.findings.find((f) => f.category === report.weakest_area.category) ||
-      report.findings[0];
+      currentReport.findings.find((f) => f.category === category) ||
+      currentReport.findings.find((f) => f.category === currentReport.weakest_area.category) ||
+      currentReport.findings[0];
     setSelected(match || null);
     setTab("actions");
   }
 
   function scrollToFindings(id: string) {
-    const f = report.findings.find((x) => x.id === id);
+    const f = currentReport.findings.find((x) => x.id === id);
     if (f) {
       setSelected(f);
       setTab("findings");
