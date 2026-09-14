@@ -58,8 +58,16 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+ 
+    volumes:
+      - ./storage:/app/storage
+ 
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+
     environment:
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY}
       APP_ENV: production
       REQUIRE_QUEUE: "true"
       COOKIE_SECURE: "true"
@@ -77,6 +85,7 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+
       SMTP_TLS: ${SMTP_TLS:-required}
       SMTP_TIMEOUT_SECONDS: ${SMTP_TIMEOUT_SECONDS:-15}
       SMTP_REQUIRE_AUTH: ${SMTP_REQUIRE_AUTH:-true}
@@ -111,9 +120,17 @@ services:
   worker:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile 
+
+    volumes:
+      - ./storage:/app/storage
+
     command: python -m app.workers.rq_worker
     environment:
+     
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY}
       APP_ENV: production
       REQUIRE_QUEUE: "true"
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/academiccheck
