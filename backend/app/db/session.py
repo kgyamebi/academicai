@@ -24,7 +24,6 @@ def _engine_kwargs(url: str) -> dict:
     kwargs["query_cache_size"] = 1200
     kwargs["connect_args"] = {
         "connect_timeout": 3,
-        "options": "-c statement_timeout=30000 -c lock_timeout=10000",
     }
     return kwargs
 

@@ -5,3 +5,6 @@
 **/*.pem
 **/certs/
 **/*secret*
+
+!app/core/secrets.py
+
