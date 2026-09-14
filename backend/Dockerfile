@@ -13,11 +13,17 @@ RUN pip install --no-cache-dir -r requirements.txt \
     && pip cache purge
 
 COPY --chown=app:app . .
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh \
+    && mkdir -p /data/storage \
+    && chown -R app:app /data/storage
 
 ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    STORAGE_LOCAL_PATH=/data/storage
 EXPOSE 8000
 
-USER 10001
-
+# Start as root so entrypoint can chown the mounted volume, then drop to app.
+USER root
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
