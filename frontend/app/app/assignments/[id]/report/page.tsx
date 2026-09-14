@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { AnalysisRitual } from "@/components/AnalysisRitual";
@@ -68,6 +68,21 @@ type Report = {
 };
 
 export default function ReportPage() {
+  return (
+    <Suspense
+      fallback={
+        <main aria-busy="true">
+          <h1 className="font-serif text-3xl">Academic Performance Overview</h1>
+          <Skeleton className="mt-8 h-40 w-full rounded-[var(--radius-md)]" />
+        </main>
+      }
+    >
+      <ReportPageInner />
+    </Suspense>
+  );
+}
+
+function ReportPageInner() {
   const params = useParams<{ id: string }>();
   const search = useSearchParams();
   const [report, setReport] = useState<Report | null>(null);

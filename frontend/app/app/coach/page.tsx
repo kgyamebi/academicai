@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { api, track } from "@/lib/api";
@@ -44,6 +44,21 @@ function structureCoach(text: string): CoachParts {
 }
 
 export default function CoachPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto max-w-3xl px-4 py-10">
+          <h1 className="font-serif text-3xl">Writing coach</h1>
+          <Skeleton className="mt-8 h-40 w-full rounded-[var(--radius-md)]" />
+        </main>
+      }
+    >
+      <CoachPageInner />
+    </Suspense>
+  );
+}
+
+function CoachPageInner() {
   const search = useSearchParams();
   const [assignments, setAssignments] = useState<Assignment[] | null>(null);
   const [assignmentId, setAssignmentId] = useState("");
