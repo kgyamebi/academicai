@@ -61,6 +61,7 @@ const helpTopics = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl();
+  const prioritySlugs = new Set(["assignment-checker", "thesis-checker", "citation-checker"]);
   const staticPaths = [
     ...core,
     ...seoLanding,
@@ -73,7 +74,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: slug.startsWith("blog/") || slug.startsWith("resources/") ? "monthly" : "weekly",
     priority: !slug
       ? 1
-      : slug === "resources" || slug === "blog"
+      : prioritySlugs.has(slug) || slug === "resources" || slug === "blog"
         ? 0.9
         : slug.startsWith("resources/") || slug.startsWith("blog/")
           ? 0.8

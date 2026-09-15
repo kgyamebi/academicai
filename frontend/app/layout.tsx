@@ -11,14 +11,18 @@ const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif" });
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: `${messages.product} — ${messages.tagline}`,
+    default: "Free Assignment, Thesis & Citation Checker | AcademicCheck AI",
     template: `%s | ${messages.product}`,
   },
-  description: messages.heroSub,
+  description:
+    "Get actionable feedback on your assignment’s thesis, argument, evidence, structure and citations before submission. Free first check.",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: messages.product,
-    description: messages.heroSub,
+    title: "Free Assignment, Thesis & Citation Checker | AcademicCheck AI",
+    description:
+      "Get actionable feedback on your assignment’s thesis, argument, evidence, structure and citations before submission. Free first check.",
     type: "website",
+    url: "/",
   },
   robots: { index: true, follow: true },
 };

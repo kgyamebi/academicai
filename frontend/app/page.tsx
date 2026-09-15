@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ButtonLink } from "@/components/ui/Button";
 import { messages } from "@/lib/i18n";
+import { siteUrl } from "@/lib/utils";
 
 /** Static report preview — proof above the fold; not live user data. */
 const PREVIEW = {
@@ -17,10 +19,48 @@ const PREVIEW = {
   ],
 };
 
+const HOME_TITLE = "Free Assignment, Thesis & Citation Checker | AcademicCheck AI";
+const HOME_DESCRIPTION =
+  "Get actionable feedback on your assignment’s thesis, argument, evidence, structure and citations before submission. Free first check.";
+
+export const metadata: Metadata = {
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    url: "/",
+    type: "website",
+  },
+};
+
 export default function HomePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        name: "AcademicCheck AI",
+        url: siteUrl(),
+        description: HOME_DESCRIPTION,
+      },
+      {
+        "@type": "SoftwareApplication",
+        name: "AcademicCheck AI",
+        applicationCategory: "EducationalApplication",
+        operatingSystem: "Web",
+        url: siteUrl(),
+        description: HOME_DESCRIPTION,
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      },
+    ],
+  };
+
   return (
     <>
       <SiteHeader />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <main id="main-content" tabIndex={-1}>
         {/* HERO + PROOF */}
         <section className="ac-hero-plane relative overflow-hidden">
