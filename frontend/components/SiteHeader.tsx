@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { BrandMark } from "@/components/BrandMark";
 import { ButtonLink } from "@/components/ui/Button";
 
 const links = [
@@ -35,8 +36,15 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--rule)]/80 bg-[var(--paper-2)]/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-        <Link href="/" className="font-serif text-xl tracking-tight text-[var(--ink)]">
-          AcademicCheck <span className="text-[var(--teal)]">AI</span>
+        <Link
+          href="/"
+          className="group flex items-center gap-2.5 font-serif text-xl tracking-tight text-[var(--ink)]"
+          aria-label="AcademicCheck AI home"
+        >
+          <BrandMark className="h-8 w-8 shrink-0 transition-transform duration-300 group-hover:scale-[1.03]" />
+          <span>
+            AcademicCheck <span className="text-[var(--teal)]">AI</span>
+          </span>
         </Link>
         {!compact && (
           <nav className="hidden items-center gap-7 text-sm md:flex" aria-label="Primary">

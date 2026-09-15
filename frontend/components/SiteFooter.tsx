@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 import { messages } from "@/lib/i18n";
 
 export function SiteFooter() {
@@ -6,8 +7,11 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-[var(--rule)] bg-[var(--paper-2)]">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-4">
         <div>
-          <p className="font-serif text-lg">
-            AcademicCheck <span className="text-[var(--teal)]">AI</span>
+          <p className="flex items-center gap-2.5 font-serif text-lg">
+            <BrandMark className="h-7 w-7 shrink-0" />
+            <span>
+              AcademicCheck <span className="text-[var(--teal)]">AI</span>
+            </span>
           </p>
           <p className="mt-3 text-sm leading-7 text-[var(--ink-muted)]">{messages.tagline}</p>
         </div>
