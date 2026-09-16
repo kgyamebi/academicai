@@ -15,13 +15,13 @@ _WINDOW = 60
 _hits: dict[str, deque[float]] = defaultdict(deque)
 
 LIMITS = {
-    "guest": {"login": 10, "signup": 8, "upload": 8, "analysis": 4, "coach": 4, "citation": 4, "share": 8, "checkout": 4, "verify": 5, "password_forgot": 5, "default": 60},
-    "free": {"login": 20, "signup": 10, "upload": 20, "analysis": 8, "coach": 8, "citation": 8, "checkout": 8, "verify": 8, "password_forgot": 6, "default": 120},
-    "student": {"login": 30, "upload": 40, "analysis": 20, "coach": 20, "citation": 20, "checkout": 12, "verify": 10, "password_forgot": 8, "default": 240},
-    "pro": {"login": 40, "upload": 80, "analysis": 40, "coach": 40, "citation": 40, "checkout": 20, "verify": 12, "password_forgot": 10, "default": 400},
-    "power": {"login": 60, "upload": 120, "analysis": 80, "coach": 80, "citation": 80, "checkout": 30, "verify": 15, "password_forgot": 12, "default": 800},
-    "institution": {"login": 80, "upload": 200, "analysis": 120, "coach": 120, "citation": 120, "checkout": 40, "verify": 20, "password_forgot": 15, "default": 1200},
-    "admin": {"login": 80, "upload": 200, "analysis": 200, "coach": 200, "citation": 200, "checkout": 40, "verify": 30, "password_forgot": 20, "default": 2000},
+    "guest": {"login": 10, "signup": 8, "upload": 8, "analysis": 4, "coach": 4, "citation": 4, "share": 8, "checkout": 4, "verify": 5, "password_forgot": 5, "oauth_start": 12, "oauth_callback": 12, "default": 60},
+    "free": {"login": 20, "signup": 10, "upload": 20, "analysis": 8, "coach": 8, "citation": 8, "checkout": 8, "verify": 8, "password_forgot": 6, "oauth_start": 20, "oauth_callback": 20, "default": 120},
+    "student": {"login": 30, "upload": 40, "analysis": 20, "coach": 20, "citation": 20, "checkout": 12, "verify": 10, "password_forgot": 8, "oauth_start": 30, "oauth_callback": 30, "default": 240},
+    "pro": {"login": 40, "upload": 80, "analysis": 40, "coach": 40, "citation": 40, "checkout": 20, "verify": 12, "password_forgot": 10, "oauth_start": 40, "oauth_callback": 40, "default": 400},
+    "power": {"login": 60, "upload": 120, "analysis": 80, "coach": 80, "citation": 80, "checkout": 30, "verify": 15, "password_forgot": 12, "oauth_start": 60, "oauth_callback": 60, "default": 800},
+    "institution": {"login": 80, "upload": 200, "analysis": 120, "coach": 120, "citation": 120, "checkout": 40, "verify": 20, "password_forgot": 15, "oauth_start": 80, "oauth_callback": 80, "default": 1200},
+    "admin": {"login": 80, "upload": 200, "analysis": 200, "coach": 200, "citation": 200, "checkout": 40, "verify": 30, "password_forgot": 20, "oauth_start": 80, "oauth_callback": 80, "default": 2000},
 }
 
 

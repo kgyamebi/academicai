@@ -53,9 +53,26 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin, SoftDeleteMixin):
 
     role: Mapped["Role | None"] = relationship(back_populates="users")
     sessions: Mapped[list["SessionToken"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    oauth_accounts: Mapped[list["OAuthAccount"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     assignments: Mapped[list["Assignment"]] = relationship(back_populates="user")
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="user")
     credits: Mapped[list["Credit"]] = relationship(back_populates="user")
+
+
+class OAuthAccount(Base, UUIDPrimaryKeyMixin, TimestampMixin):
+    """Linked social identity (Google / Microsoft). One row per provider subject."""
+
+    __tablename__ = "oauth_accounts"
+    __table_args__ = (UniqueConstraint("provider", "provider_subject", name="uq_oauth_provider_subject"),)
+
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    provider: Mapped[str] = mapped_column(String(32), index=True)  # google | microsoft
+    provider_subject: Mapped[str] = mapped_column(String(255))
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    raw_profile: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    user: Mapped["User"] = relationship(back_populates="oauth_accounts")
 
 
 class SessionToken(Base, UUIDPrimaryKeyMixin, TimestampMixin):

@@ -11,7 +11,7 @@ import jwt
 
 from app.config import get_settings
 
-TokenType = Literal["access", "refresh", "verify", "reset", "guest", "mfa_challenge", "mfa_enroll"]
+TokenType = Literal["access", "refresh", "verify", "reset", "guest", "mfa_challenge", "mfa_enroll", "oauth_state"]
 
 _DUMMY_BCRYPT = bcrypt.hashpw(b"timing-dummy-not-a-real-password", bcrypt.gensalt()).decode("utf-8")
 _COMMON_PASSWORDS = {
@@ -134,6 +134,8 @@ def create_token(
             expires_delta = timedelta(hours=settings.email_verification_hours)
         elif token_type == "guest":
             expires_delta = timedelta(hours=settings.guest_retention_hours)
+        elif token_type == "oauth_state":
+            expires_delta = timedelta(minutes=10)
         else:
             expires_delta = timedelta(hours=settings.password_reset_hours)
     now = datetime.now(UTC)

@@ -34,12 +34,13 @@ from app.models.billing import (
 from app.models.citation import AcademicSource, Citation, Reference, SourceVerification
 from app.models.content import BlogPost, FAQ, SeoPage
 from app.models.document import Document, DocumentAsset, DocumentParagraph, DocumentSection
-from app.models.user import Role, SessionToken, User
+from app.models.user import OAuthAccount, Role, SessionToken, User
 
 __all__ = [
     "User",
     "Role",
     "SessionToken",
+    "OAuthAccount",
     "Plan",
     "Subscription",
     "Payment",

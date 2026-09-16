@@ -1,6 +1,6 @@
 import secrets
 
-from fastapi import APIRouter, Body, Depends, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.cookies import REFRESH_COOKIE, clear_auth_cookies, set_auth_cookies, set_csrf_cookie
@@ -269,11 +269,114 @@ def me(user: User = Depends(get_current_user)):
     return auth_service.serialize_user(user)
 
 
+@router.get("/oauth/providers")
+def oauth_providers():
+    from app.services import oauth as oauth_service
+
+    return {"providers": oauth_service.configured_providers()}
+
+
+@router.get("/oauth/{provider}/start")
+def oauth_start(provider: str, request: Request, next: str = "/app/dashboard"):
+    from fastapi.responses import RedirectResponse
+
+    from app.core.cookies import cookie_secure
+    from app.services import oauth as oauth_service
+
+    check_rate_limit(request, "oauth_start")
+    provider = provider.lower().strip()
+    if provider not in oauth_service.PROVIDERS:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Unknown sign-in provider.")
+    verifier, challenge = oauth_service.pkce_pair()
+    state = oauth_service.issue_oauth_state(provider=provider, code_verifier=verifier, next_path=next)
+    url = oauth_service.build_authorize_url(provider, state=state, code_challenge=challenge)
+    response = RedirectResponse(url, status_code=302)
+    response.set_cookie(
+        oauth_service.OAUTH_STATE_COOKIE,
+        state,
+        httponly=True,
+        secure=cookie_secure(),
+        samesite="lax",
+        max_age=600,
+        path="/api/auth/oauth",
+    )
+    return response
+
+
+@router.get("/oauth/{provider}/callback")
+def oauth_callback(provider: str, request: Request, db: Session = Depends(get_db), code: str | None = None, state: str | None = None, error: str | None = None):
+    from fastapi.responses import RedirectResponse
+    from urllib.parse import urlencode
+
+    from app.config import get_settings
+    from app.services import oauth as oauth_service
+    from app.services import mfa as mfa_service
+
+    settings = get_settings()
+    web = settings.app_web_url.rstrip("/")
+    provider = provider.lower().strip()
+
+    def _fail(msg: str) -> RedirectResponse:
+        q = urlencode({"error": msg})
+        return RedirectResponse(f"{web}/login?{q}", status_code=302)
+
+    if error:
+        return _fail("Social sign-in was cancelled.")
+    if not code or not state:
+        return _fail("Social sign-in failed. Try again.")
+
+    cookie_state = request.cookies.get(oauth_service.OAUTH_STATE_COOKIE, "")
+    if not cookie_state or cookie_state != state:
+        return _fail("Sign-in session expired. Try again.")
+
+    try:
+        check_rate_limit(request, "oauth_callback")
+        parsed = oauth_service.parse_oauth_state(state, provider=provider)
+        profile = oauth_service.exchange_code(provider, code=code, code_verifier=parsed["code_verifier"])
+        user, created = oauth_service.upsert_oauth_user(
+            db,
+            profile,
+            ip=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+        )
+        # Privileged MFA same as password login
+        if mfa_service.role_name(user) in mfa_service.PRIVILEGED_ROLES and not user.mfa_enabled:
+            db.commit()
+            enroll = mfa_service.issue_mfa_enroll_challenge(user)
+            db.commit()
+            q = urlencode({"mfa_enrollment_required": "1", "mfa_enroll_token": enroll})
+            redirect = RedirectResponse(f"{web}/login?{q}", status_code=302)
+        elif user.mfa_enabled:
+            challenge = mfa_service.issue_mfa_challenge(user)
+            db.commit()
+            q = urlencode({"mfa_required": "1", "mfa_challenge_token": challenge})
+            redirect = RedirectResponse(f"{web}/login?{q}", status_code=302)
+        else:
+            tokens = auth_service.issue_session(
+                db, user, request.headers.get("user-agent"), request.client.host if request.client else None
+            )
+            db.commit()
+            next_path = "/onboarding" if created else parsed["next"]
+            redirect = RedirectResponse(f"{web}{next_path}", status_code=302)
+            _set_session_cookies(redirect, tokens)
+        redirect.delete_cookie(oauth_service.OAUTH_STATE_COOKIE, path="/api/auth/oauth")
+        return redirect
+    except HTTPException as exc:
+        db.rollback()
+        detail = exc.detail if isinstance(exc.detail, str) else "Social sign-in failed."
+        return _fail(detail)
+    except Exception:
+        db.rollback()
+        log.exception("oauth_callback_failed", provider=provider)
+        return _fail("Social sign-in failed. Try again.")
+
+
 @router.delete("/me")
 def delete_account(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     from app.models.assignment import Assignment
     from app.models.billing import Subscription
     from app.models.document import Document
+    from app.models.user import OAuthAccount
     from app.services.documents.storage import delete_bytes
 
     user.is_active = False
@@ -281,6 +384,7 @@ def delete_account(user: User = Depends(get_current_user), db: Session = Depends
     user.email = f"deleted-{user.id}@deleted.academiccheck.local"
     user.password_hash = None
     user.full_name = "Deleted user"
+    db.query(OAuthAccount).filter(OAuthAccount.user_id == user.id).delete()
     for assignment in db.query(Assignment).filter(Assignment.user_id == user.id).all():
         assignment.deleted_at = utcnow()
         assignment.title = "Deleted assignment"

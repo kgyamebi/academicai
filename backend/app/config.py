@@ -98,6 +98,14 @@ class Settings(BaseSettings):
     flutterwave_secret_key: str = ""
     flutterwave_webhook_hash: str = ""
 
+    # --- Social login (Google / Microsoft OAuth) ---
+    google_oauth_client_id: str = ""
+    google_oauth_client_secret: str = ""
+    microsoft_oauth_client_id: str = ""
+    microsoft_oauth_client_secret: str = ""
+    # Override if API public URL differs from APP_API_URL (rare). Callback = {base}/api/auth/oauth/{provider}/callback
+    oauth_redirect_base: str = ""
+
     crossref_mailto: str = "hello@academiccheck.ai"
     openalex_email: str = "hello@academiccheck.ai"
     semantic_scholar_api_key: str = ""
