@@ -8,6 +8,13 @@ import { ButtonLink } from "@/components/ui/Button";
  * Conversion asset for visitors before signup.
  */
 const SAMPLE = {
+  question:
+    "To what extent has mobile money improved financial inclusion for rural households in Ghana since 2015? Critically evaluate competing explanations and support your argument with evidence.",
+  briefFit: {
+    label: "Partially answers the brief",
+    detail:
+      "The draft covers mobile money and rural access, but stays descriptive. It does not take a clear position on “to what extent,” and competing explanations are named more than weighed against evidence.",
+  },
   score: 72,
   readiness: "Almost Ready",
   potential: 14,
@@ -63,11 +70,27 @@ export default function SampleReportPage() {
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-12 md:py-16">
         <p className="text-sm font-medium tracking-wide text-[var(--teal)]">Illustrative sample</p>
         <h1 className="mt-2 font-serif text-4xl md:text-5xl">Academic Performance Overview</h1>
-        <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--ink-muted)]">
-          This is a <strong className="font-medium text-[var(--ink)]">sample report layout</strong> — not a live
-          analysis of a real paper, and not a promise of any score. Use it to see how AcademicCheck AI presents
-          priorities, readiness, and next steps.
+        <p className="mt-4 max-w-2xl text-base leading-7 text-[var(--ink)]">
+          Most AI tools check writing. AcademicCheck checks whether you answered the assignment.
         </p>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink-muted)]">
+          This is a <strong className="font-medium text-[var(--ink)]">sample report layout</strong> — not a live
+          analysis of a real paper, and not a promise of any score. See how the diagnosis starts from the brief,
+          then ranks what to fix first.
+        </p>
+
+        <section className="ac-reveal mt-8" aria-labelledby="sample-question">
+          <h2 id="sample-question" className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-muted)]">
+            Assignment question
+          </h2>
+          <blockquote className="mt-3 border-l-2 border-[var(--teal)] pl-4 font-serif text-lg leading-8 text-[var(--ink)] md:text-xl">
+            {SAMPLE.question}
+          </blockquote>
+          <div className="mt-5 rounded-[var(--radius-sm)] border border-[var(--rule)] bg-[var(--paper-2)] px-4 py-4">
+            <p className="text-sm font-semibold text-[var(--crimson)]">{SAMPLE.briefFit.label}</p>
+            <p className="mt-2 text-sm leading-7 text-[var(--ink-muted)]">{SAMPLE.briefFit.detail}</p>
+          </div>
+        </section>
 
         <section className="ac-reveal mt-10 overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)]">
           <div className="grid gap-6 p-6 md:grid-cols-[auto_1fr] md:items-center md:p-8">

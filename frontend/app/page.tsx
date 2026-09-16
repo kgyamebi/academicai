@@ -76,6 +76,9 @@ export default function HomePage() {
               <p className="ac-enter ac-enter-delay-2 mt-5 max-w-lg text-lg leading-8 text-[var(--ink-muted)]">
                 {messages.heroSub}
               </p>
+              <p className="ac-enter ac-enter-delay-2 mt-3 max-w-lg text-sm leading-6 text-[var(--ink)]">
+                Your lecturer grades against the question. So do we.
+              </p>
               <div className="ac-enter ac-enter-delay-3 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <ButtonLink href="/check" variant="primary" className="px-6 text-base">
                   {messages.primaryCta}
