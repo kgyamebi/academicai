@@ -43,8 +43,8 @@ function ProviderIcon({ provider }: { provider: Provider }) {
 }
 
 export function SocialAuthButtons({ next = "/app/dashboard" }: { next?: string }) {
-  const [providers, setProviders] = useState<Provider[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  // Show both immediately so SSR/curl/first paint include the buttons; prune after providers API responds.
+  const [providers, setProviders] = useState<Provider[]>(["google", "microsoft"]);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,11 +54,10 @@ export function SocialAuthButtons({ next = "/app/dashboard" }: { next?: string }
         if (!res.ok) return;
         const data = (await res.json()) as { providers?: string[] };
         const list = (data.providers || []).filter((p): p is Provider => p === "google" || p === "microsoft");
-        if (!cancelled) setProviders(list);
+        if (!cancelled && list.length > 0) setProviders(list);
+        if (!cancelled && list.length === 0) setProviders([]);
       } catch {
-        /* buttons stay hidden when API unreachable */
-      } finally {
-        if (!cancelled) setLoaded(true);
+        /* keep optimistic buttons if API briefly unreachable */
       }
     })();
     return () => {
@@ -66,7 +65,7 @@ export function SocialAuthButtons({ next = "/app/dashboard" }: { next?: string }
     };
   }, []);
 
-  if (!loaded || providers.length === 0) return null;
+  if (providers.length === 0) return null;
 
   const q = encodeURIComponent(next);
 
