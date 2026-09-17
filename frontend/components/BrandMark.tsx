@@ -1,14 +1,15 @@
 /** Premium AcademicCheck monogram — ink seal + teal diagnostic check. */
 export function BrandMark({
   className = "h-8 w-8",
+  animated = false,
 }: {
   className?: string;
-  /** @deprecated Decorative animation removed — keep prop for call-site compatibility. */
+  /** One-shot check draw on auth — not a loop. */
   animated?: boolean;
 }) {
   return (
     <svg
-      className={className}
+      className={`${className}${animated ? " ac-brand-in" : ""}`}
       viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -31,6 +32,7 @@ export function BrandMark({
         fill="#F4F6F8"
       />
       <path
+        className={animated ? "ac-check-draw" : undefined}
         d="M22.5 33.5L29 40l13.5-16"
         stroke="#0F766E"
         strokeWidth="3.25"

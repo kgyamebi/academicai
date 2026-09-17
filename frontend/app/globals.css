@@ -127,11 +127,25 @@ body {
 @keyframes ac-settle {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes ac-sweep-once {
+  0% {
+    transform: translateX(-40%) skewX(-12deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(140%) skewX(-12deg);
+    opacity: 0;
   }
 }
 
@@ -156,8 +170,8 @@ body {
   0% {
     transform: scale(1);
   }
-  40% {
-    transform: scale(1.025);
+  35% {
+    transform: scale(1.04);
   }
   100% {
     transform: scale(1);
@@ -166,11 +180,201 @@ body {
 
 @keyframes ac-score-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.28);
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.32);
   }
   100% {
-    box-shadow: 0 0 0 16px rgba(15, 118, 110, 0);
+    box-shadow: 0 0 0 22px rgba(15, 118, 110, 0);
   }
+}
+
+@keyframes ac-score-trail-soft {
+  0%,
+  100% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes ac-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ac-brand-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ac-metric-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes ac-overall-tick {
+  from {
+    opacity: 0.35;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ac-settle {
+  animation: ac-settle var(--motion-med) var(--ease-out-expo) both;
+}
+
+.ac-settle-d1 {
+  animation-delay: 80ms;
+}
+
+.ac-settle-d2 {
+  animation-delay: 160ms;
+}
+
+.ac-settle-d3 {
+  animation-delay: 260ms;
+}
+
+.ac-reveal {
+  animation: ac-fade-up var(--motion-med) var(--ease-out-expo) both;
+}
+
+.ac-press:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.ac-skeleton {
+  background: linear-gradient(90deg, #e8edf2 0%, #f7f9fb 50%, #e8edf2 100%);
+  background-size: 200% 100%;
+  animation: ac-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Static ambient — paper + one intentional sweep */
+.ac-ambient {
+  background:
+    radial-gradient(ellipse 70% 50% at 80% 10%, rgba(15, 118, 110, 0.09), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 5% 90%, rgba(11, 18, 32, 0.045), transparent 50%),
+    linear-gradient(165deg, #eef3f6 0%, var(--paper) 48%, #eef2f5 100%);
+}
+
+.ac-ambient-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.ac-ambient-sweep {
+  position: absolute;
+  top: -10%;
+  left: 0;
+  width: 38%;
+  height: 120%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 48%,
+    transparent 72%
+  );
+  animation: ac-sweep-once 1.8s var(--ease-out-expo) 0.2s both;
+  pointer-events: none;
+}
+
+.ac-auth-panel {
+  animation: ac-settle 600ms var(--ease-out-expo) both;
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.04),
+    0 28px 56px -30px rgba(11, 18, 32, 0.22);
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.ac-auth-panel-shine {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 118, 110, 0.06) 0%,
+    transparent 42%,
+    transparent 100%
+  );
+}
+
+.ac-auth-panel-sweep {
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.65) 48%,
+    transparent 70%
+  );
+  animation: ac-sweep-once 1.4s var(--ease-out-expo) 0.45s both;
+}
+
+.ac-brand-in {
+  animation: ac-brand-in 520ms var(--ease-spring) both;
+}
+
+.ac-check-draw {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: ac-check-draw 780ms var(--ease-out-expo) 320ms forwards;
+}
+
+.ac-overall-score {
+  animation: ac-overall-tick 180ms var(--ease-out) both;
+}
+
+.ac-metric-bar {
+  transform-origin: left center;
+  animation: ac-metric-fill 700ms var(--ease-out-expo) both;
+}
+
+.ac-dim-veil {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 18, 32, 0.035);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms var(--ease-out);
+}
+
+.ac-dim-veil.is-on {
+  opacity: 1;
+}
+
+.ac-score-ring-wrap.is-landing {
+  animation: ac-score-land 560ms var(--ease-spring) both;
+}
+
+.ac-score-ring-wrap.is-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  animation: ac-score-pulse 900ms var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+.ac-score-trail {
+  animation: ac-score-trail-soft 900ms var(--ease-out) infinite;
 }
 
 @keyframes ac-check-pop {
@@ -193,88 +397,6 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.ac-settle {
-  animation: ac-settle var(--motion-med) var(--ease-out-expo) both;
-}
-
-.ac-reveal {
-  animation: ac-fade-up var(--motion-med) var(--ease-out-expo) both;
-}
-
-.ac-press:active {
-  transform: translateY(1px) scale(0.98);
-}
-
-.ac-skeleton {
-  background: linear-gradient(90deg, #e8edf2 0%, #f7f9fb 50%, #e8edf2 100%);
-  background-size: 200% 100%;
-  animation: ac-shimmer 1.4s ease-in-out infinite;
-  border-radius: var(--radius-sm);
-}
-
-/* Static ambient — no drifting orbs / sheen loops */
-.ac-ambient {
-  background:
-    radial-gradient(ellipse 70% 50% at 80% 10%, rgba(15, 118, 110, 0.08), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 5% 90%, rgba(11, 18, 32, 0.04), transparent 50%),
-    linear-gradient(165deg, #eef3f6 0%, var(--paper) 48%, #eef2f5 100%);
-}
-
-.ac-ambient-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
-  opacity: 0.85;
-  pointer-events: none;
-}
-
-.ac-auth-panel {
-  animation: ac-settle 520ms var(--ease-out-expo) both;
-  box-shadow:
-    0 1px 0 rgba(15, 23, 42, 0.04),
-    0 20px 40px -28px rgba(11, 18, 32, 0.14);
-  background: rgba(255, 255, 255, 0.96);
-}
-
-.ac-auth-panel-shine {
-  background: linear-gradient(
-    135deg,
-    rgba(15, 118, 110, 0.05) 0%,
-    transparent 42%,
-    transparent 100%
-  );
-}
-
-.ac-dim-veil {
-  position: absolute;
-  inset: 0;
-  background: rgba(11, 18, 32, 0.03);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 280ms var(--ease-out);
-}
-
-.ac-dim-veil.is-on {
-  opacity: 1;
-}
-
-.ac-score-ring-wrap.is-landing {
-  animation: ac-score-land 480ms var(--ease-spring) both;
-}
-
-.ac-score-ring-wrap.is-pulse::after {
-  content: "";
-  position: absolute;
-  inset: 8%;
-  border-radius: 50%;
-  animation: ac-score-pulse 700ms var(--ease-out) forwards;
-  pointer-events: none;
 }
 
 .ac-scan-rail {
@@ -450,18 +572,35 @@ body {
   }
 
   .ac-settle,
+  .ac-settle-d1,
+  .ac-settle-d2,
+  .ac-settle-d3,
   .ac-reveal,
   .ac-auth-panel,
+  .ac-ambient-sweep,
+  .ac-auth-panel-sweep,
+  .ac-brand-in,
+  .ac-check-draw,
   .ac-scan-rail::before,
   .ac-score-ring-wrap.is-landing,
   .ac-score-ring-wrap.is-pulse::after,
+  .ac-score-trail,
   .ac-scan-step-done,
   .ac-scan-check,
-  .ac-step-enter {
+  .ac-step-enter,
+  .ac-metric-bar {
     animation: none !important;
     opacity: 1;
     transform: none;
     box-shadow: none;
+  }
+
+  .ac-check-draw {
+    stroke-dashoffset: 0;
+  }
+
+  .ac-metric-bar {
+    transform: scaleX(1);
   }
 
   .ac-btn-micro:hover:not(:disabled),

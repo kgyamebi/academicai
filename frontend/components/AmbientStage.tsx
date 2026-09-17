@@ -3,8 +3,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Static ambient stage — paper atmosphere only.
- * No drifting orbs, sheen, or decorative loops.
+ * Ambient stage — quiet paper atmosphere with one intentional light sweep.
  */
 export function AmbientStage({
   children,
@@ -17,13 +16,14 @@ export function AmbientStage({
     <div className={`relative isolate overflow-hidden ${className}`}>
       <div className="ac-ambient pointer-events-none absolute inset-0" aria-hidden>
         <div className="ac-ambient-grid" />
+        <div className="ac-ambient-sweep" />
       </div>
       <div className="relative z-10">{children}</div>
     </div>
   );
 }
 
-/** Auth / onboarding panel with one quiet settle. */
+/** Auth panel — staggered settle that feels expensive, not busy. */
 export function AuthShell({
   children,
   eyebrow,
@@ -40,18 +40,19 @@ export function AuthShell({
       <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-14 md:py-20">
         <div className="ac-auth-panel ac-surface relative overflow-hidden p-6 md:p-8">
           <div className="ac-auth-panel-shine pointer-events-none absolute inset-0" aria-hidden />
+          <div className="ac-auth-panel-sweep pointer-events-none absolute inset-0" aria-hidden />
           {eyebrow ? (
-            <p className="relative text-sm font-medium tracking-wide text-[var(--teal)]">{eyebrow}</p>
+            <p className="ac-settle relative text-sm font-medium tracking-wide text-[var(--teal)]">{eyebrow}</p>
           ) : null}
           <h1
-            className={`relative font-serif text-3xl tracking-tight text-[var(--ink)] md:text-4xl ${eyebrow ? "mt-2" : ""}`}
+            className={`ac-settle ac-settle-d1 relative font-serif text-3xl tracking-tight text-[var(--ink)] md:text-4xl ${eyebrow ? "mt-2" : ""}`}
           >
             {title}
           </h1>
           {subtitle ? (
-            <p className="relative mt-3 text-sm leading-7 text-[var(--ink-muted)]">{subtitle}</p>
+            <p className="ac-settle ac-settle-d2 relative mt-3 text-sm leading-7 text-[var(--ink-muted)]">{subtitle}</p>
           ) : null}
-          <div className="relative mt-8">{children}</div>
+          <div className="ac-settle ac-settle-d3 relative mt-8">{children}</div>
         </div>
       </div>
     </AmbientStage>

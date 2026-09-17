@@ -94,6 +94,7 @@ function ReportPageInner() {
   const [versionMsg, setVersionMsg] = useState("");
   const [busyShare, setBusyShare] = useState(false);
   const [busyVersion, setBusyVersion] = useState(false);
+  const [overallDisplay, setOverallDisplay] = useState(0);
   const reportId = search.get("report");
   const assignmentId = params.id;
 
@@ -367,11 +368,18 @@ function ReportPageInner() {
           >
             <div className="ac-hero-plane absolute inset-0 opacity-80" aria-hidden />
             <div className="relative grid gap-6 p-6 md:grid-cols-[auto_1fr] md:items-center md:p-8">
-              <ScoreRing score={report.overall_score} label="Academic Health Score" size="lg" />
+              <ScoreRing
+                score={report.overall_score}
+                label="Academic Health Score"
+                size="lg"
+                compactLabel
+                playKey={report.id}
+                onDisplayChange={setOverallDisplay}
+              />
               <div>
-                <p id="perf-heading" className="font-serif text-3xl tabular-nums md:text-4xl">
-                  <span className="sr-only">{report.overall_score} </span>
-                  <span className="text-xl text-[var(--ink-muted)] md:text-2xl">Overall Score</span>
+                <p id="perf-heading" className="font-serif text-4xl tabular-nums tracking-tight md:text-5xl">
+                  <span className="inline-block tabular-nums">{overallDisplay}</span>{" "}
+                  <span className="text-xl font-normal text-[var(--ink-muted)] md:text-2xl">Overall Score</span>
                 </p>
                 <p className="mt-2 text-lg font-medium text-[var(--teal)]">
                   {health?.label || (report.overall_score >= 75 ? "Strong Draft" : "Developing Draft")}

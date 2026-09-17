@@ -62,7 +62,7 @@ export default function RegisterPage() {
           subtitle="Save assignments, reports and draft history. We do not use your work for model training unless you opt in."
         >
           <div className="mb-6 flex justify-center">
-            <BrandMark className="h-14 w-14" />
+            <BrandMark className="h-14 w-14" animated />
           </div>
           <SocialAuthButtons next="/onboarding" />
           <form onSubmit={onSubmit} className="mt-2 space-y-4">

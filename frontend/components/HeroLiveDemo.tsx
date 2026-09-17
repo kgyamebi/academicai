@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { prefersReducedMotion } from "@/lib/motion";
+import { animateValue, easeInOutCubic, prefersReducedMotion } from "@/lib/motion";
+
+const OVERALL = 84;
 
 const METRICS = [
   { label: "Question Alignment", value: 63 },
@@ -12,27 +14,29 @@ const METRICS = [
 
 const WEAK = ["Under-addresses evaluate command", "Two claims need deeper sources", "Style drift in references"];
 
-type Phase = "upload" | "analyzing" | "metrics" | "weak" | "hold";
+type Phase = "upload" | "analyzing" | "score" | "metrics" | "weak" | "hold";
 
 /**
- * Homepage live demo — one 8–10s loop that shows a diagnostic assembling.
- * Reduced motion: final assembled frame, no loop.
+ * Homepage live demo — 8–10s loop with overall score + metric bars.
  */
 export function HeroLiveDemo() {
   const [phase, setPhase] = useState<Phase>("upload");
   const [step, setStep] = useState(0);
   const [shownMetrics, setShownMetrics] = useState(0);
+  const [overall, setOverall] = useState(0);
 
   useEffect(() => {
     if (prefersReducedMotion()) {
       setPhase("weak");
       setShownMetrics(METRICS.length);
+      setOverall(OVERALL);
       setStep(4);
       return;
     }
 
     let cancelled = false;
     const timers: number[] = [];
+    let stopScore: (() => void) | undefined;
     const wait = (ms: number) =>
       new Promise<void>((resolve) => {
         timers.push(window.setTimeout(resolve, ms));
@@ -43,33 +47,45 @@ export function HeroLiveDemo() {
         setPhase("upload");
         setStep(0);
         setShownMetrics(0);
-        await wait(900);
+        setOverall(0);
+        await wait(800);
 
         setPhase("analyzing");
         for (let i = 0; i < 4; i += 1) {
           if (cancelled) return;
           setStep(i);
-          await wait(700);
+          await wait(650);
         }
+
+        setPhase("score");
+        stopScore = animateValue({
+          from: 0,
+          to: OVERALL,
+          duration: 1100,
+          ease: easeInOutCubic,
+          onUpdate: (v) => setOverall(Math.round(v)),
+        });
+        await wait(1300);
 
         setPhase("metrics");
         for (let i = 1; i <= METRICS.length; i += 1) {
           if (cancelled) return;
           setShownMetrics(i);
-          await wait(550);
+          await wait(480);
         }
 
         setPhase("weak");
-        await wait(1600);
+        await wait(1500);
 
         setPhase("hold");
-        await wait(900);
+        await wait(800);
       }
     }
 
     void loop();
     return () => {
       cancelled = true;
+      stopScore?.();
       timers.forEach((id) => window.clearTimeout(id));
     };
   }, []);
@@ -93,12 +109,14 @@ export function HeroLiveDemo() {
             ? "Student uploads paper…"
             : phase === "analyzing"
               ? "Running academic health scan…"
-              : "Report assembling"}
+              : phase === "score"
+                ? "Overall score landing…"
+                : "Report assembling"}
         </p>
       </div>
 
-      <div className="relative min-h-[280px] p-5">
-        {phase === "analyzing" || phase === "upload" ? (
+      <div className="relative min-h-[300px] p-5">
+        {(phase === "analyzing" || phase === "upload") && (
           <div className="space-y-3">
             {phase === "upload" ? (
               <p className="ac-settle text-sm text-[var(--ink-muted)]">essay_draft.docx · 2,400 words</p>
@@ -128,18 +146,36 @@ export function HeroLiveDemo() {
               );
             })}
           </div>
-        ) : null}
+        )}
 
-        {(phase === "metrics" || phase === "weak" || phase === "hold") && (
-          <div className="space-y-4">
-            <ul className="space-y-2.5">
-              {METRICS.slice(0, shownMetrics).map((m) => (
-                <li key={m.label} className="ac-settle flex items-center justify-between gap-3 text-sm">
-                  <span className="text-[var(--ink)]">{m.label}</span>
-                  <span className="font-serif tabular-nums text-[var(--teal)]">{m.value}%</span>
-                </li>
-              ))}
-            </ul>
+        {(phase === "score" || phase === "metrics" || phase === "weak" || phase === "hold") && (
+          <div className="space-y-5">
+            <div className="ac-settle flex items-end gap-3">
+              <p className="font-serif text-5xl tabular-nums tracking-tight text-[var(--ink)]">{overall}</p>
+              <div className="pb-1">
+                <p className="text-sm font-medium text-[var(--ink)]">Overall Score</p>
+                <p className="text-xs text-[var(--teal)]">Academic Health · Strong Draft</p>
+              </div>
+            </div>
+
+            {(phase === "metrics" || phase === "weak" || phase === "hold") && (
+              <ul className="space-y-3">
+                {METRICS.slice(0, shownMetrics).map((m) => (
+                  <li key={m.label} className="ac-settle">
+                    <div className="mb-1 flex items-center justify-between gap-3 text-sm">
+                      <span className="text-[var(--ink)]">{m.label}</span>
+                      <span className="font-serif tabular-nums text-[var(--teal)]">{m.value}%</span>
+                    </div>
+                    <div className="h-1 overflow-hidden rounded-full bg-[var(--rule)]">
+                      <div
+                        className="ac-metric-bar h-full rounded-full bg-[var(--teal)]"
+                        style={{ width: `${m.value}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {(phase === "weak" || phase === "hold") && (
               <div className="ac-settle border-t border-[var(--rule)] pt-4">

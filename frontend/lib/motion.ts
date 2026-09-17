@@ -22,6 +22,7 @@ export type AnimateValueOptions = {
   from?: number;
   to: number;
   duration?: number;
+  delay?: number;
   ease?: (t: number) => number;
   onUpdate: (value: number) => void;
   onComplete?: () => void;
@@ -31,6 +32,7 @@ export function animateValue({
   from = 0,
   to,
   duration = 900,
+  delay = 0,
   ease = easeOutExpo,
   onUpdate,
   onComplete,
@@ -42,19 +44,32 @@ export function animateValue({
   }
 
   let frame = 0;
-  const start = performance.now();
+  let start = 0;
+  let delayTimer: number | undefined;
 
-  const tick = (now: number) => {
-    const t = Math.min(1, (now - start) / duration);
-    onUpdate(from + (to - from) * ease(t));
-    if (t < 1) {
-      frame = requestAnimationFrame(tick);
-    } else {
-      onUpdate(to);
-      onComplete?.();
-    }
+  const run = () => {
+    start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      onUpdate(from + (to - from) * ease(t));
+      if (t < 1) {
+        frame = requestAnimationFrame(tick);
+      } else {
+        onUpdate(to);
+        onComplete?.();
+      }
+    };
+    frame = requestAnimationFrame(tick);
   };
 
-  frame = requestAnimationFrame(tick);
-  return () => cancelAnimationFrame(frame);
+  if (delay > 0) {
+    delayTimer = window.setTimeout(run, delay);
+  } else {
+    run();
+  }
+
+  return () => {
+    if (delayTimer) window.clearTimeout(delayTimer);
+    cancelAnimationFrame(frame);
+  };
 }
