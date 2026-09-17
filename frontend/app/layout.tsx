@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   description:
     "Get actionable feedback on your assignment’s thesis, argument, evidence, structure and citations before submission. Free first check.",
   applicationName: messages.product,
-  alternates: { canonical: "/" },
   icons: {
     icon: [{ url: "/brand/mark.png", type: "image/png", sizes: "512x512" }],
     apple: [{ url: "/brand/mark.png", type: "image/png", sizes: "180x180" }],

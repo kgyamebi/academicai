@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -40,6 +41,17 @@ const content: Record<string, { title: string; body: string }> = {
     body: "AcademicCheck AI helps you understand feedback and improve your own writing. It does not write an assignment for submission, invent sources, fabricate quotations or statistics, or guarantee a grade. Follow your institution’s policies.",
   },
 };
+
+export async function generateMetadata({ params }: { params: Promise<{ topic: string }> }): Promise<Metadata> {
+  const { topic } = await params;
+  const page = content[topic];
+  if (!page) return {};
+  return {
+    title: page.title,
+    description: page.body.slice(0, 155),
+    alternates: { canonical: `/help/${topic}` },
+  };
+}
 
 export default async function HelpTopic({ params }: { params: Promise<{ topic: string }> }) {
   const { topic } = await params;

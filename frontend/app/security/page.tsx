@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+
+export const metadata: Metadata = {
+  title: "Security",
+  description:
+    "How AcademicCheck AI protects coursework: tenant isolation, encrypted fields, and integrity-first defaults.",
+  alternates: { canonical: "/security" },
+};
 
 export default function SecurityPage() {
   return (

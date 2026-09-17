@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ButtonLink } from "@/components/ui/Button";
+
+export const metadata: Metadata = {
+  title: "About AcademicCheck AI",
+  description:
+    "AcademicCheck AI is an academic success workspace: diagnose drafts against the assignment question, fix what matters, and re-check progress — without ghostwriting.",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (

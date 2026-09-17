@@ -7,6 +7,10 @@ import { ButtonLink } from "@/components/ui/Button";
 import { checkerLandingPages, type CheckerLandingPage } from "@/lib/checkerLandingPages";
 import { apiUrl, siteUrl } from "@/lib/utils";
 
+export function generateStaticParams() {
+  return Object.keys(checkerLandingPages).map((slug) => ({ slug }));
+}
+
 async function loadPage(slug: string) {
   const res = await fetch(`${apiUrl()}/api/public/seo/${slug}`, { next: { revalidate: 300 } });
   if (!res.ok) return null;

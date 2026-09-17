@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+
+export const metadata: Metadata = {
+  title: "Terms of use",
+  description:
+    "Terms for AcademicCheck AI: diagnostic study aid, not an official grade, not ghostwriting, and not a misconduct detector.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function TermsPage() {
   return (

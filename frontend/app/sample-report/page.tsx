@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ButtonLink } from "@/components/ui/Button";
+
+export const metadata: Metadata = {
+  title: "Sample academic diagnostic report",
+  description:
+    "See how AcademicCheck AI scores a draft against the assignment question — illustrative sample, not a live analysis.",
+  alternates: { canonical: "/sample-report" },
+};
 
 /**
  * Illustrative sample only — not a live analysis, not a real student paper.

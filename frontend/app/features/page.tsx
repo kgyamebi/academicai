@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+
+export const metadata: Metadata = {
+  title: "Features — what AcademicCheck AI analyses",
+  description:
+    "Assignment relevance, thesis, argument, evidence, structure, academic writing, citations, and fix-first priorities — before you submit.",
+  alternates: { canonical: "/features" },
+};
 
 const features = [
   ["Assignment relevance", "Did the draft actually answer the question?"],

@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Email AcademicCheck AI about privacy, integrity, access, or data deletion — we reply as people.",
+  alternates: { canonical: "/contact" },
+};
 
 export default function ContactPage() {
   return (

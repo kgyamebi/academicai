@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ButtonLink } from "@/components/ui/Button";
+
+export const metadata: Metadata = {
+  title: "Pricing — free public launch",
+  description:
+    "AcademicCheck AI is free for students during the public launch. Fair-use limits apply; paid checkout is paused.",
+  alternates: { canonical: "/pricing" },
+};
 
 /** Public free launch — paid plans are informational only; no checkout. */
 export default function PricingPage() {

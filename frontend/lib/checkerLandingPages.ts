@@ -22,7 +22,7 @@ export type CheckerLandingPage = {
  * Used when production has no matching seo_pages DB row.
  * Database-managed SEO content still takes precedence when present.
  */
-export const checkerLandingPages: Record<string, CheckerLandingPage> = {
+const handCraftedPages: Record<string, CheckerLandingPage> = {
   "assignment-checker": {
     title: "Free Assignment Checker | Review Before You Submit | AcademicCheck AI",
     description:
@@ -355,3 +355,143 @@ export const checkerLandingPages: Record<string, CheckerLandingPage> = {
     cta: "Check my citations",
   },
 };
+
+type MoneySpec = {
+  slug: string;
+  label: string;
+  focus: string;
+  audience?: string;
+};
+
+const MONEY_SPECS: MoneySpec[] = [
+  { slug: "ai-essay-checker", label: "AI essay checker", focus: "whether the draft answers the brief—not generic AI writing polish alone" },
+  { slug: "essay-checker", label: "Essay checker", focus: "question fit, thesis strength, argument, evidence, and citation consistency" },
+  { slug: "academic-writing-checker", label: "Academic writing checker", focus: "clarity, structure, and whether claims stay academic rather than conversational" },
+  { slug: "ai-assignment-checker", label: "AI assignment checker", focus: "assignment-question relevance first, then thesis, evidence, and citations" },
+  { slug: "research-paper-checker", label: "Research paper checker", focus: "argument coherence, evidence integration, and reference consistency for longer papers" },
+  { slug: "dissertation-checker", label: "Dissertation checker", focus: "chapter-level argument, research question alignment, and citation hygiene on long drafts" },
+  { slug: "essay-grammar-checker", label: "Essay grammar checker", focus: "clarity issues that block marks—while still checking whether you answered the question" },
+  { slug: "academic-grammar-checker", label: "Academic grammar checker", focus: "formal clarity and sentence control without turning the draft into empty polish" },
+  { slug: "essay-structure-checker", label: "Essay structure checker", focus: "introduction–body–conclusion flow and whether each section serves the question" },
+  { slug: "thesis-statement-checker", label: "Thesis statement checker", focus: "whether the thesis is contestable and answers the command word" },
+  { slug: "argument-checker", label: "Argument checker", focus: "claim–reason–evidence links and missing counterargument" },
+  { slug: "paragraph-checker", label: "Paragraph checker", focus: "topic sentences, relevance to the thesis, and evidence that actually supports each claim" },
+  { slug: "apa-citation-checker", label: "APA citation checker", focus: "APA 7 in-text and reference-list consistency before you submit" },
+  { slug: "mla-citation-checker", label: "MLA citation checker", focus: "MLA 9 works-cited and in-text consistency" },
+  { slug: "harvard-citation-checker", label: "Harvard citation checker", focus: "Harvard author–date consistency across body and reference list" },
+  { slug: "grammar-checker", label: "Grammar checker for students", focus: "readable academic prose—paired with brief-fit diagnostics, not spellcheck alone" },
+  { slug: "ai-writing-checker", label: "AI writing checker", focus: "diagnostic feedback on your draft; not a misconduct verdict or AI detector score" },
+  { slug: "essay-checker-ghana", label: "Essay checker for Ghana", focus: "assignment-question fit for Ghanaian university essays and coursework", audience: "students in Ghana" },
+  { slug: "assignment-checker-ghana", label: "Assignment checker for Ghana", focus: "whether coursework answers the set question before submission", audience: "students in Ghana" },
+  { slug: "essay-checker-nigeria", label: "Essay checker for Nigeria", focus: "question fit, argument, and citations for Nigerian university essays", audience: "students in Nigeria" },
+  { slug: "assignment-checker-nigeria", label: "Assignment checker for Nigeria", focus: "assignment relevance and fix-first priorities for Nigerian coursework", audience: "students in Nigeria" },
+  { slug: "essay-checker-kenya", label: "Essay checker for Kenya", focus: "brief-fit diagnostics for Kenyan university essays and assignments", audience: "students in Kenya" },
+];
+
+function buildMoneyPage(spec: MoneySpec): CheckerLandingPage {
+  const who = spec.audience ? ` Built for ${spec.audience}.` : "";
+  return {
+    title: `${spec.label} | Free diagnostic before you submit | AcademicCheck AI`,
+    description: `Free ${spec.label.toLowerCase()}. AcademicCheck AI checks ${spec.focus}.${who} Diagnostic feedback—not an official grade.`,
+    heading: spec.label,
+    eyebrow: "Buyer-intent tool page",
+    intro: `Paste your draft with the assignment question. AcademicCheck AI checks ${spec.focus}, then ranks what to fix first.${who} Feedback is diagnostic, not an official grade.`,
+    checks: [
+      "Whether the draft responds to the assignment question and command words",
+      "Thesis, argument, evidence, and structure that markers usually reward",
+      "Citation and reference consistency for common university styles",
+    ],
+    howItWorks: [
+      {
+        step: "01",
+        title: "Add question + draft",
+        body: "Paste text or upload DOCX/PDF. Include the assignment question so relevance can be checked properly.",
+      },
+      {
+        step: "02",
+        title: "Get a diagnosis",
+        body: "Receive an Academic Health Score with Fix-First priorities—not vague tips alone.",
+      },
+      {
+        step: "03",
+        title: "Revise your own work",
+        body: "Use the report to improve writing you authored. AcademicCheck does not ghostwrite submissions.",
+      },
+    ],
+    sample: {
+      score: 74,
+      readiness: "Needs focused revision",
+      findings: [
+        {
+          title: "Question alignment",
+          detail: "The draft covers the topic but under-addresses the command word in the brief.",
+        },
+        {
+          title: "Evidence depth",
+          detail: "Key claims need closer source integration before the conclusion can persuade.",
+        },
+        {
+          title: "Citation consistency",
+          detail: "A few in-text citations and reference-list entries need a tidy pass.",
+        },
+      ],
+    },
+    sections: [
+      {
+        heading: `What a strong ${spec.label.toLowerCase()} actually checks`,
+        paragraphs: [
+          `Most tools polish sentences. Markers mark whether you answered the question. A useful ${spec.label.toLowerCase()} therefore starts with the brief: Does the work obey the command word? Does the thesis make a contestable claim?`,
+          `AcademicCheck AI is built around that order: question fit, thesis, argument, evidence, structure, writing, and citations—so limited revision time goes where marks are most often won or lost.`,
+        ],
+      },
+      {
+        heading: "How this differs from Grammarly or a generic chatbot",
+        paragraphs: [
+          "Grammar tools improve wording. Chatbots can imitate feedback in one session. AcademicCheck persists a diagnostic against your assignment question, ranks fixes, and keeps integrity boundaries: no ghostwriting, no invented references.",
+          "Use the report to revise your own work. Always follow your institution’s academic-integrity policies.",
+        ],
+      },
+      {
+        heading: "A practical pre-submission workflow",
+        paragraphs: [
+          "Freeze the argument before obsessing over commas. Run the check with the full question and draft. Fix the top priorities, then re-check once so edits did not create new gaps.",
+          "Scores are AI-assisted diagnostic indicators—not a prediction of your lecturer’s grade.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: `Is this ${spec.label.toLowerCase()} free?`,
+        answer: "Yes during the public free launch, subject to fair-use limits so the service stays reliable.",
+      },
+      {
+        question: "Does it write my essay for me?",
+        answer: "No. It diagnoses your draft. You revise. Ghostwritten submissions are an integrity failure.",
+      },
+      {
+        question: "Is the score an official grade?",
+        answer: "No. It is diagnostic feedback to guide revision before you submit.",
+      },
+      {
+        question: "Do I need the assignment question?",
+        answer: "Yes for the best result. Without the brief, tools can only polish prose—not check whether you answered the set question.",
+      },
+    ],
+    related: [
+      { href: "/assignment-checker", label: "Assignment checker" },
+      { href: "/thesis-checker", label: "Thesis checker" },
+      { href: "/citation-checker", label: "Citation checker" },
+      { href: "/sample-report", label: "Sample diagnostic report" },
+    ],
+    cta: "Check my draft",
+  };
+}
+
+const generatedPages = Object.fromEntries(MONEY_SPECS.map((spec) => [spec.slug, buildMoneyPage(spec)]));
+
+/** All money-page fallbacks: hand-crafted hubs + generated landings for sitemap coverage. */
+export const checkerLandingPages: Record<string, CheckerLandingPage> = {
+  ...handCraftedPages,
+  ...generatedPages,
+};
+
