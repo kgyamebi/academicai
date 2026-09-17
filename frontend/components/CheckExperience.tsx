@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { AmbientStage } from "@/components/AmbientStage";
 import { AnalysisRitual, type UploadPhase } from "@/components/AnalysisRitual";
 import { useAuth } from "@/components/AuthProvider";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -171,16 +172,17 @@ export function CheckExperience({ embedded = false }: { embedded?: boolean }) {
   return (
     <>
       {!embedded && <SiteHeader />}
-      <main
-        id={embedded ? undefined : "main-content"}
-        tabIndex={embedded ? undefined : -1}
-        className="mx-auto max-w-3xl px-4 py-12 md:py-16"
-      >
-        <p className="ac-enter text-sm font-medium tracking-wide text-[var(--teal)]">Free public check</p>
-        <h1 className="ac-enter ac-enter-delay-1 mt-3 font-serif text-4xl md:text-5xl">Check your assignment</h1>
-        <p className="ac-enter ac-enter-delay-2 mt-4 max-w-2xl text-[var(--ink-muted)] leading-7">
-          No account required for a first look. Create a free account later to save the full report and keep improving.
-        </p>
+      <AmbientStage>
+        <main
+          id={embedded ? undefined : "main-content"}
+          tabIndex={embedded ? undefined : -1}
+          className="mx-auto max-w-3xl px-4 py-12 md:py-16"
+        >
+          <p className="ac-enter text-sm font-medium tracking-wide text-[var(--teal)]">Free public check</p>
+          <h1 className="ac-enter ac-enter-delay-1 mt-3 font-serif text-4xl md:text-5xl">Check your assignment</h1>
+          <p className="ac-enter ac-enter-delay-2 mt-4 max-w-2xl text-[var(--ink-muted)] leading-7">
+            No account required for a first look. Create a free account later to save the full report and keep improving.
+          </p>
 
         <form
           className="ac-enter ac-enter-delay-3 mt-10 space-y-7"
@@ -284,7 +286,12 @@ export function CheckExperience({ embedded = false }: { embedded?: boolean }) {
             </p>
           ) : null}
 
-          <Button type="submit" busy={busy} className="w-full sm:w-auto sm:min-w-[220px]" variant="primary">
+          <Button
+            type="submit"
+            busy={busy}
+            className="ac-cta-glow w-full sm:w-auto sm:min-w-[220px]"
+            variant="primary"
+          >
             {phase === "failed" ? "Try again" : "Start analysis"}
           </Button>
         </form>
@@ -315,7 +322,8 @@ export function CheckExperience({ embedded = false }: { embedded?: boolean }) {
             to keep your workspace.
           </p>
         )}
-      </main>
+        </main>
+      </AmbientStage>
     </>
   );
 }

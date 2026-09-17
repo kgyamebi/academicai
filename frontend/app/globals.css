@@ -93,7 +93,7 @@ body {
 @keyframes ac-fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -119,24 +119,102 @@ body {
   }
 }
 
+@keyframes ac-orb-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(4%, -6%, 0) scale(1.06);
+  }
+}
+
+@keyframes ac-orb-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-5%, 4%, 0) scale(1.08);
+  }
+}
+
+@keyframes ac-orb-drift-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, 5%, 0) scale(1.04);
+  }
+}
+
+@keyframes ac-sheen-sweep {
+  0% {
+    transform: translateX(-30%) rotate(12deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.55;
+  }
+  55% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(130%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes ac-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ac-mark-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes ac-check-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 .ac-enter {
-  animation: ac-fade-up 480ms var(--ease-out) both;
+  animation: ac-fade-up 560ms var(--ease-out) both;
 }
 
 .ac-enter-delay-1 {
-  animation-delay: 80ms;
+  animation-delay: 90ms;
 }
 
 .ac-enter-delay-2 {
-  animation-delay: 160ms;
+  animation-delay: 170ms;
 }
 
 .ac-enter-delay-3 {
-  animation-delay: 240ms;
+  animation-delay: 260ms;
+}
+
+.ac-enter-delay-4 {
+  animation-delay: 340ms;
 }
 
 .ac-reveal {
-  animation: ac-fade-up 420ms var(--ease-out) both;
+  animation: ac-fade-up 480ms var(--ease-out) both;
 }
 
 .ac-press:active {
@@ -167,6 +245,133 @@ body {
   border-radius: var(--radius-sm);
 }
 
+/* Ambient stage — login / register / onboarding atmosphere */
+.ac-ambient {
+  background:
+    radial-gradient(ellipse 70% 50% at 80% 10%, rgba(15, 118, 110, 0.12), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 5% 90%, rgba(11, 18, 32, 0.06), transparent 50%),
+    linear-gradient(165deg, #eef3f6 0%, var(--paper) 48%, #eef2f5 100%);
+}
+
+.ac-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  will-change: transform;
+}
+
+.ac-orb-a {
+  top: -8%;
+  right: -6%;
+  width: min(52vw, 420px);
+  height: min(52vw, 420px);
+  background: rgba(15, 118, 110, 0.22);
+  animation: ac-orb-drift-a 18s var(--ease-out) infinite;
+}
+
+.ac-orb-b {
+  bottom: 5%;
+  left: -10%;
+  width: min(48vw, 380px);
+  height: min(48vw, 380px);
+  background: rgba(13, 148, 136, 0.14);
+  animation: ac-orb-drift-b 22s var(--ease-out) infinite;
+}
+
+.ac-orb-c {
+  top: 42%;
+  left: 48%;
+  width: min(36vw, 280px);
+  height: min(36vw, 280px);
+  background: rgba(11, 18, 32, 0.06);
+  animation: ac-orb-drift-c 26s var(--ease-out) infinite;
+}
+
+.ac-ambient-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
+  opacity: 0.9;
+}
+
+.ac-ambient-sheen {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 45%;
+  height: 140%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 45%,
+    transparent 70%
+  );
+  animation: ac-sheen-sweep 14s var(--ease-out) infinite;
+  pointer-events: none;
+}
+
+.ac-auth-panel {
+  animation: ac-panel-in 700ms var(--ease-out) both;
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.04),
+    0 24px 48px -28px rgba(11, 18, 32, 0.18);
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.ac-auth-panel-shine {
+  background: linear-gradient(
+    135deg,
+    rgba(15, 118, 110, 0.06) 0%,
+    transparent 42%,
+    transparent 100%
+  );
+}
+
+.ac-brand-float {
+  animation: ac-mark-breathe 5.5s var(--ease-out) infinite;
+  transform-origin: center;
+}
+
+.ac-check-animated {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: ac-check-draw 900ms var(--ease-out) 400ms forwards;
+}
+
+.ac-cta-glow {
+  position: relative;
+  overflow: hidden;
+  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+
+.ac-cta-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.28) 48%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  transition: transform 650ms var(--ease-out);
+}
+
+.ac-cta-glow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px -12px rgba(15, 118, 110, 0.55);
+}
+
+.ac-cta-glow:hover::after {
+  transform: translateX(120%);
+}
+
 /* Hero atmosphere — cool paper plane, not purple */
 .ac-hero-plane {
   background:
@@ -181,6 +386,14 @@ body {
     linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 85%);
+}
+
+.ac-hero-orbs .ac-orb-a {
+  opacity: 0.85;
+}
+
+.ac-hero-orbs .ac-orb-b {
+  opacity: 0.7;
 }
 
 .prose-academic h1,
@@ -280,11 +493,24 @@ body {
   .ac-enter-delay-1,
   .ac-enter-delay-2,
   .ac-enter-delay-3,
+  .ac-enter-delay-4,
   .ac-reveal,
-  .ac-pulse {
+  .ac-pulse,
+  .ac-orb-a,
+  .ac-orb-b,
+  .ac-orb-c,
+  .ac-ambient-sheen,
+  .ac-auth-panel,
+  .ac-brand-float,
+  .ac-check-animated,
+  .ac-cta-glow::after {
     animation: none !important;
     opacity: 1;
     transform: none;
     box-shadow: none;
+  }
+
+  .ac-check-animated {
+    stroke-dashoffset: 0;
   }
 }

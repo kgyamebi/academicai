@@ -3,7 +3,9 @@
 import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { AuthShell } from "@/components/AmbientStage";
 import { useAuth } from "@/components/AuthProvider";
+import { BrandMark } from "@/components/BrandMark";
 import { PasswordField } from "@/components/PasswordField";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
@@ -37,11 +39,15 @@ function LoginForm() {
   }
 
   return (
-    <>
-      <h1 className="font-serif text-3xl">Sign in</h1>
-      <div className="mt-8">
-        <SocialAuthButtons next="/app/dashboard" />
+    <AuthShell
+      eyebrow="Welcome back"
+      title="Sign in"
+      subtitle="Pick up your workspace — reports, drafts, and Fix-First actions waiting."
+    >
+      <div className="mb-6 flex justify-center">
+        <BrandMark className="h-14 w-14" animated />
       </div>
+      <SocialAuthButtons next="/app/dashboard" />
       <form onSubmit={onSubmit} className="mt-2 space-y-4" noValidate>
         <label className="block text-sm" htmlFor="email">
           Email
@@ -53,7 +59,7 @@ function LoginForm() {
             required
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "login-error" : undefined}
-            className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3"
+            className="ac-field mt-1"
           />
         </label>
         <PasswordField
@@ -70,22 +76,22 @@ function LoginForm() {
             {error}
           </p>
         )}
-        <button type="submit" className="ac-hit w-full rounded-md bg-[var(--teal)] text-white">
+        <button type="submit" className="ac-hit ac-cta-glow w-full rounded-md bg-[var(--teal)] text-white">
           Continue with Email
         </button>
       </form>
       <p className="mt-4 text-sm">
-        <Link href="/forgot-password" className="underline">
+        <Link href="/forgot-password" className="text-[var(--teal)] underline-offset-4 hover:underline">
           Forgot password
         </Link>
       </p>
-      <p className="mt-2 text-sm">
+      <p className="mt-2 text-sm text-[var(--ink-muted)]">
         New here?{" "}
-        <Link href="/register" className="underline">
+        <Link href="/register" className="text-[var(--teal)] underline-offset-4 hover:underline">
           Create a free account
         </Link>
       </p>
-    </>
+    </AuthShell>
   );
 }
 
@@ -93,8 +99,14 @@ export default function LoginPage() {
   return (
     <>
       <SiteHeader compact />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-md px-4 py-16">
-        <Suspense fallback={<h1 className="font-serif text-3xl">Sign in</h1>}>
+      <main id="main-content" tabIndex={-1}>
+        <Suspense
+          fallback={
+            <div className="mx-auto max-w-md px-4 py-16">
+              <h1 className="font-serif text-3xl">Sign in</h1>
+            </div>
+          }
+        >
           <LoginForm />
         </Suspense>
       </main>

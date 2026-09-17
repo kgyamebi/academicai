@@ -65,6 +65,12 @@ export default function HomePage() {
         {/* HERO + PROOF */}
         <section className="ac-hero-plane relative overflow-hidden">
           <div className="ac-hero-grid pointer-events-none absolute inset-0" aria-hidden />
+          <div className="ac-hero-orbs pointer-events-none absolute inset-0" aria-hidden>
+            <div className="ac-orb ac-orb-a" />
+            <div className="ac-orb ac-orb-b" />
+            <div className="ac-orb ac-orb-c" />
+            <div className="ac-ambient-sheen" />
+          </div>
           <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-16 md:grid-cols-[1.05fr_0.95fr] md:items-center md:py-24">
             <div>
               <p className="ac-enter font-serif text-4xl tracking-tight text-[var(--ink)] md:text-6xl">
@@ -80,7 +86,7 @@ export default function HomePage() {
                 Your lecturer grades against the question. So do we.
               </p>
               <div className="ac-enter ac-enter-delay-3 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <ButtonLink href="/check" variant="primary" className="px-6 text-base">
+                <ButtonLink href="/check" variant="primary" className="ac-cta-glow px-6 text-base">
                   {messages.primaryCta}
                 </ButtonLink>
                 <ButtonLink href="/sample-report" variant="secondary" className="px-6 text-base">
