@@ -1,8 +1,17 @@
+"use client";
+
 import Script from "next/script";
+
+declare global {
+  interface Window {
+    __AC_GTAG_READY?: boolean;
+  }
+}
 
 /**
  * Loads the Google tag (gtag.js) when NEXT_PUBLIC_GOOGLE_ADS_ID is set.
- * Enables Enhanced Conversions user_data on conversion events.
+ * Sets window.__AC_GTAG_READY only after the real googletagmanager script loads
+ * (the inline stub alone is not enough to send conversions).
  */
 export function GoogleAdsInit() {
   const id = (process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "").trim();
@@ -10,7 +19,13 @@ export function GoogleAdsInit() {
 
   return (
     <>
-      <Script src={`https://www.googletagmanager.com/gtag/js?id=${id}`} strategy="afterInteractive" />
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${id}`}
+        strategy="afterInteractive"
+        onLoad={() => {
+          if (typeof window !== "undefined") window.__AC_GTAG_READY = true;
+        }}
+      />
       <Script id="google-ads-init" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];

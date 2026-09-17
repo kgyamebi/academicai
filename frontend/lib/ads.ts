@@ -8,6 +8,7 @@ declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
+    __AC_GTAG_READY?: boolean;
   }
 }
 
@@ -24,18 +25,34 @@ function signupSendTo() {
   return `${id}/${label}`;
 }
 
-function waitForGtag(ms = 4000): Promise<boolean> {
+/** Wait until the real googletagmanager script has loaded — not just the inline stub. */
+function waitForGtag(ms = 8000): Promise<boolean> {
   if (typeof window === "undefined") return Promise.resolve(false);
-  if (typeof window.gtag === "function") return Promise.resolve(true);
+  if (window.__AC_GTAG_READY && typeof window.gtag === "function") return Promise.resolve(true);
   return new Promise((resolve) => {
     const started = Date.now();
     const tick = () => {
-      if (typeof window.gtag === "function") {
+      if (window.__AC_GTAG_READY && typeof window.gtag === "function") {
         resolve(true);
         return;
       }
+      // Fallback: script element finished loading even if onLoad missed
+      const el = document.querySelector('script[src*="googletagmanager.com/gtag/js"]') as HTMLScriptElement | null;
+      if (el && typeof window.gtag === "function") {
+        const loaded = el.getAttribute("data-nscript") || el.getAttribute("src");
+        if (loaded && (el as HTMLScriptElement & { dataset?: DOMStringMap }).dataset) {
+          /* continue */
+        }
+        // If transfer already happened, treat as ready after a short settle
+        const entries = performance.getEntriesByName(el.src, "resource") as PerformanceResourceTiming[];
+        if (entries.some((e) => e.transferSize > 0 || e.responseStatus === 200)) {
+          window.__AC_GTAG_READY = true;
+          resolve(true);
+          return;
+        }
+      }
       if (Date.now() - started >= ms) {
-        resolve(false);
+        resolve(Boolean(window.__AC_GTAG_READY && typeof window.gtag === "function"));
         return;
       }
       window.setTimeout(tick, 50);
@@ -46,7 +63,7 @@ function waitForGtag(ms = 4000): Promise<boolean> {
 
 /**
  * Fire once per browser session after a successful new-account registration.
- * Resolves after Google's event_callback (or a short timeout) so redirects don't kill the hit.
+ * Only marks the session as sent when Google's event_callback runs (real delivery).
  */
 export async function trackAdsSignup(opts?: { email?: string | null; method?: string }): Promise<void> {
   if (typeof window === "undefined") return;
@@ -69,13 +86,15 @@ export async function trackAdsSignup(opts?: { email?: string | null; method?: st
 
   await new Promise<void>((resolve) => {
     let done = false;
-    const finish = () => {
+    const finish = (markSent: boolean) => {
       if (done) return;
       done = true;
-      try {
-        sessionStorage.setItem(STORAGE_KEY, "1");
-      } catch {
-        /* ignore */
+      if (markSent) {
+        try {
+          sessionStorage.setItem(STORAGE_KEY, "1");
+        } catch {
+          /* ignore */
+        }
       }
       resolve();
     };
@@ -84,16 +103,16 @@ export async function trackAdsSignup(opts?: { email?: string | null; method?: st
       send_to: sendTo,
       value: 1.0,
       currency: "USD",
-      event_callback: finish,
-      event_timeout: 2000,
+      event_callback: () => finish(true),
+      event_timeout: 5000,
     });
 
     window.gtag!("event", "sign_up", {
       method: opts?.method || "email",
     });
 
-    // Don't block the UX forever if callback never runs.
-    window.setTimeout(finish, 2000);
+    // Do NOT mark sent on timeout — allow onboarding beacon to retry.
+    window.setTimeout(() => finish(false), 5000);
   });
 }
 
