@@ -25,7 +25,7 @@ export default function RegisterPage() {
       });
       track("signup", "/register");
       trackAdsSignup({ email, method: "email" });
-      window.location.href = "/onboarding";
+      window.location.href = "/app/dashboard";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the account.");
     }
@@ -39,7 +39,7 @@ export default function RegisterPage() {
           Save assignments, reports and draft history. We do not use your work for model training unless you opt in.
         </p>
         <div className="mt-8">
-          <SocialAuthButtons next="/onboarding" />
+          <SocialAuthButtons next="/app/dashboard" />
         </div>
         <form onSubmit={onSubmit} className="mt-2 space-y-4">
           <label className="block text-sm" htmlFor="full_name">

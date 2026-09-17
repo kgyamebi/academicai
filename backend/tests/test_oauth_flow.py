@@ -130,7 +130,7 @@ def test_oauth_callback_success_sets_session(client, google_env):
             follow_redirects=False,
         )
     assert res.status_code == 302
-    assert res.headers["location"].endswith("/onboarding")
+    assert res.headers["location"].endswith("/app/dashboard?signup=1")
     assert "ac_access" in res.cookies
     assert "ac_refresh" in res.cookies
 

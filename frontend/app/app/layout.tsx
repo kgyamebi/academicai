@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
+import { SignupConversionBeacon } from "@/components/SignupConversionBeacon";
 import { api, signOut } from "@/lib/api";
 
 const sideNav = [
@@ -93,6 +94,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div id="main-content" tabIndex={-1} className="flex-1 px-4 py-6 pb-28 md:px-10 md:py-8 md:pb-8">
+          <Suspense fallback={null}>
+            <SignupConversionBeacon />
+          </Suspense>
           {showBanner ? <EmailVerifyBanner email={me.pending_email || me.email || ""} /> : null}
           {children}
         </div>
