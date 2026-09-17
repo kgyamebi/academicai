@@ -64,14 +64,19 @@ function waitForGtag(ms = 8000): Promise<boolean> {
 /**
  * Fire once per browser session after a successful new-account registration.
  * Only marks the session as sent when Google's event_callback runs (real delivery).
+ * Pass force:true (onboarding ?signup=1) to retry even if an earlier attempt failed.
  */
-export async function trackAdsSignup(opts?: { email?: string | null; method?: string }): Promise<void> {
+export async function trackAdsSignup(opts?: {
+  email?: string | null;
+  method?: string;
+  force?: boolean;
+}): Promise<void> {
   if (typeof window === "undefined") return;
   const sendTo = signupSendTo();
   if (!sendTo) return;
 
   try {
-    if (sessionStorage.getItem(STORAGE_KEY) === "1") return;
+    if (!opts?.force && sessionStorage.getItem(STORAGE_KEY) === "1") return;
   } catch {
     /* private mode */
   }

@@ -7,7 +7,6 @@ import { PasswordField } from "@/components/PasswordField";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { api, track } from "@/lib/api";
-import { trackAdsSignup } from "@/lib/ads";
 
 export default function RegisterPage() {
   const { signedIn, status } = useAuth();
@@ -45,9 +44,7 @@ export default function RegisterPage() {
         }),
       });
       track("signup", "/register");
-      // Land on onboarding with ?signup=1 so the beacon can fire on a stable page
-      // (immediate redirect used to cancel the Ads conversion ping).
-      await trackAdsSignup({ email, method: "email" });
+      // Fire conversion on onboarding (?signup=1) so Tag Assistant can see it on a stable page.
       window.location.href = "/onboarding?signup=1";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the account.");
