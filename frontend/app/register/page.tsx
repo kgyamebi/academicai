@@ -45,8 +45,10 @@ export default function RegisterPage() {
         }),
       });
       track("signup", "/register");
-      trackAdsSignup({ email, method: "email" });
-      window.location.href = "/onboarding";
+      // Land on onboarding with ?signup=1 so the beacon can fire on a stable page
+      // (immediate redirect used to cancel the Ads conversion ping).
+      await trackAdsSignup({ email, method: "email" });
+      window.location.href = "/onboarding?signup=1";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the account.");
     }

@@ -6,7 +6,8 @@ import { api } from "@/lib/api";
 import { trackAdsSignup } from "@/lib/ads";
 
 /**
- * Fires Google Ads sign_up once when landing with ?signup=1 (OAuth new accounts).
+ * Fires Google Ads sign_up once when landing with ?signup=1
+ * (email register + OAuth new accounts).
  */
 export function SignupConversionBeacon() {
   const params = useSearchParams();
@@ -22,7 +23,7 @@ export function SignupConversionBeacon() {
       } catch {
         /* still fire conversion without enhanced email */
       }
-      if (!cancelled) trackAdsSignup({ email, method: "oauth" });
+      if (!cancelled) await trackAdsSignup({ email, method: "oauth" });
       if (typeof window !== "undefined" && window.history.replaceState) {
         const url = new URL(window.location.href);
         url.searchParams.delete("signup");
