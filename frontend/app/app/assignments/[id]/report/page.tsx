@@ -261,8 +261,11 @@ function ReportPageInner() {
         Save Version
       </Button>
       <ButtonLink href={`/app/assignments/${assignmentId}/check`} variant="ghost" className="w-full border border-[var(--rule)]">
-        Run New Analysis
+        Re-score revised draft
       </ButtonLink>
+      <p className="text-xs leading-5 text-[var(--ink-muted)]">
+        Upload your improved draft for a fresh score and “what improved” deltas.
+      </p>
       {shareMsg ? (
         <p role="status" className="text-xs leading-5 text-[var(--ink-muted)]">
           {shareMsg}
@@ -596,15 +599,18 @@ function ReportPageInner() {
             <h2 id="progress-heading" className="font-serif text-2xl">
               Academic Progress
             </h2>
+            <p className="mt-1 text-sm text-[var(--ink-muted)]">
+              Re-scoring after revisions — how this draft compares to your previous analysis.
+            </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <div className="rounded-[var(--radius-sm)] border border-[var(--rule)] px-3 py-3">
-                <p className="text-xs uppercase tracking-wide text-[var(--ink-muted)]">Previous analysis</p>
+                <p className="text-xs uppercase tracking-wide text-[var(--ink-muted)]">Previous draft</p>
                 <p className="mt-1 font-serif text-2xl tabular-nums">
                   {progress?.previous_score != null ? progress.previous_score : "—"}
                 </p>
               </div>
               <div className="rounded-[var(--radius-sm)] border border-[var(--rule)] px-3 py-3">
-                <p className="text-xs uppercase tracking-wide text-[var(--ink-muted)]">Current analysis</p>
+                <p className="text-xs uppercase tracking-wide text-[var(--ink-muted)]">This draft</p>
                 <p className="mt-1 font-serif text-2xl tabular-nums">{progress?.current_score ?? report.overall_score}</p>
               </div>
               <div className="rounded-[var(--radius-sm)] border border-[var(--rule)] px-3 py-3">
@@ -626,26 +632,66 @@ function ReportPageInner() {
               </div>
             </div>
             {(progress?.category_changes || []).length ? (
-              <ul className="mt-5 space-y-2">
-                {progress!.category_changes.map((c) => (
-                  <li key={c.category} className="flex items-center justify-between gap-3 text-sm">
-                    <span>{categoryLabel(c.category)}</span>
-                    <span className="tabular-nums text-[var(--ink-muted)]">
-                      {c.previous} → {c.current}{" "}
-                      <span className={c.delta >= 0 ? "text-[var(--forest)]" : "text-[var(--crimson)]"}>
-                        ({c.delta >= 0 ? "+" : ""}
-                        {c.delta})
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <>
+                <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--forest)]">What improved</p>
+                    <ul className="mt-2 space-y-1.5 text-sm">
+                      {progress!.category_changes
+                        .filter((c) => c.delta > 0)
+                        .map((c) => (
+                          <li key={`up-${c.category}`} className="flex justify-between gap-3">
+                            <span>{categoryLabel(c.category)}</span>
+                            <span className="tabular-nums text-[var(--forest)]">
+                              +{c.delta} ({c.previous} → {c.current})
+                            </span>
+                          </li>
+                        ))}
+                      {!progress!.category_changes.some((c) => c.delta > 0) ? (
+                        <li className="text-[var(--ink-muted)]">No gains yet — keep revising Fix-First items.</li>
+                      ) : null}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--amber)]">Still needs work</p>
+                    <ul className="mt-2 space-y-1.5 text-sm">
+                      {progress!.category_changes
+                        .filter((c) => c.delta <= 0 || c.current < 70)
+                        .slice(0, 5)
+                        .map((c) => (
+                          <li key={`need-${c.category}`} className="flex justify-between gap-3">
+                            <span>{categoryLabel(c.category)}</span>
+                            <span className="tabular-nums text-[var(--ink-muted)]">
+                              {c.previous} → {c.current}{" "}
+                              <span className={c.delta >= 0 ? "text-[var(--forest)]" : "text-[var(--crimson)]"}>
+                                ({c.delta >= 0 ? "+" : ""}
+                                {c.delta})
+                              </span>
+                            </span>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              </>
             ) : (
               <p className="mt-4 text-sm text-[var(--ink-muted)]">
                 Re-check after revisions to unlock category-by-category growth, plus weekly and monthly trends on your dashboard.
               </p>
             )}
             <div className="mt-4 flex flex-wrap gap-3 text-sm">
+              <Link
+                href={`/app/assignments/${assignmentId}/check`}
+                className="font-medium text-[var(--teal)] underline-offset-4 hover:underline"
+              >
+                Re-score a revised draft
+              </Link>
+              <Link
+                href={`/app/assignments/${assignmentId}/versions`}
+                className="font-medium text-[var(--teal)] underline-offset-4 hover:underline"
+              >
+                Draft progress & compare
+              </Link>
               <Link href="/app/dashboard" className="font-medium text-[var(--teal)] underline-offset-4 hover:underline">
                 Weekly & monthly growth on dashboard
               </Link>

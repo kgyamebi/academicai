@@ -592,14 +592,14 @@ export default function DashboardPage() {
       {/* SECTION 6 — Improvement Momentum */}
       <section aria-labelledby="momentum-heading" className="grid gap-4 lg:grid-cols-2">
         <div className="ac-surface p-5 md:p-6">
-          <SectionHeading id="momentum-heading" title="Improvement Momentum" subtitle="Progress you can feel." />
+          <SectionHeading id="momentum-heading" title="Improvement Momentum" subtitle="Draft-by-draft progress you can feel." />
           <div className="mt-5 grid grid-cols-2 gap-4">
             <MetricStat label="Weekly progress" value={weekly} />
             <MetricStat label="Monthly progress" value={monthly} />
           </div>
           {data.improvement_trend?.length ? (
             <div className="mt-6">
-              <p className="text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Score trend</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Revision progress</p>
               <div className="mt-3">
                 <Sparkline values={data.improvement_trend} className="h-16" />
               </div>
@@ -609,10 +609,37 @@ export default function DashboardPage() {
                     key={`${v}-${i}`}
                     className="flex-1 rounded-t bg-[var(--teal)]/60 transition-all"
                     style={{ height: `${Math.max(10, v)}%` }}
-                    title={`${v}`}
+                    title={`Draft ${i + 1}: ${v}`}
                   />
                 ))}
               </div>
+              <div className="mt-2 flex justify-between gap-1 text-[10px] text-[var(--ink-muted)]">
+                {data.improvement_trend.map((v, i) => (
+                  <span key={`lbl-${v}-${i}`} className="flex-1 text-center tabular-nums">
+                    D{i + 1}
+                  </span>
+                ))}
+              </div>
+              {data.improvement_trend.length >= 2 ? (
+                <p className="mt-3 text-sm text-[var(--ink-muted)]">
+                  Draft 1 → Draft {data.improvement_trend.length}:{" "}
+                  <span
+                    className={
+                      data.improvement_trend[data.improvement_trend.length - 1]! -
+                        data.improvement_trend[0]! >=
+                      0
+                        ? "font-medium text-[var(--forest)]"
+                        : "font-medium text-[var(--crimson)]"
+                    }
+                  >
+                    {data.improvement_trend[data.improvement_trend.length - 1]! - data.improvement_trend[0]! >= 0
+                      ? "+"
+                      : ""}
+                    {data.improvement_trend[data.improvement_trend.length - 1]! - data.improvement_trend[0]!} pts
+                  </span>{" "}
+                  overall
+                </p>
+              ) : null}
             </div>
           ) : (
             <p className="mt-6 text-sm text-[var(--ink-muted)]">Trends appear after two or more analyses.</p>
