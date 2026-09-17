@@ -1,8 +1,10 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
+import { PasswordField } from "@/components/PasswordField";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { api, track } from "@/lib/api";
@@ -10,7 +12,14 @@ import { api, track } from "@/lib/api";
 function LoginForm() {
   const params = useSearchParams();
   const oauthError = params.get("error") || "";
+  const { signedIn, status } = useAuth();
   const [error, setError] = useState(oauthError);
+
+  useEffect(() => {
+    if (status === "ready" && signedIn) {
+      window.location.replace("/app/dashboard");
+    }
+  }, [status, signedIn]);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -47,19 +56,15 @@ function LoginForm() {
             className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3"
           />
         </label>
-        <label className="block text-sm" htmlFor="password">
-          Password
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? "login-error" : undefined}
-            className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3"
-          />
-        </label>
+        <PasswordField
+          id="password"
+          name="password"
+          label="Password"
+          autoComplete="current-password"
+          required
+          invalid={Boolean(error)}
+          describedBy={error ? "login-error" : undefined}
+        />
         {error && (
           <p id="login-error" className="text-sm text-[var(--crimson)]" role="alert">
             {error}

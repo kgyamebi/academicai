@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { BrandMark } from "@/components/BrandMark";
 import { ButtonLink } from "@/components/ui/Button";
 
@@ -16,9 +17,11 @@ const links = [
 
 export function SiteHeader({ compact = false }: { compact?: boolean }) {
   const path = usePathname();
+  const { user, status, signedIn, needsVerify, signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
+  const authReady = status === "ready";
 
   useEffect(() => {
     if (!open) return;
@@ -37,7 +40,7 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
     <header className="sticky top-0 z-40 border-b border-[var(--rule)]/80 bg-[var(--paper-2)]/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link
-          href="/"
+          href={signedIn ? "/app/dashboard" : "/"}
           className="group flex items-center gap-2.5 font-serif text-xl tracking-tight text-[var(--ink)]"
           aria-label="AcademicCheck AI home"
         >
@@ -75,12 +78,58 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
               Menu
             </button>
           )}
-          <Link href="/login" className="ac-hit hidden rounded-[var(--radius-sm)] px-3 text-[var(--ink-muted)] hover:text-[var(--ink)] sm:inline-flex">
-            Sign in
-          </Link>
-          <ButtonLink href="/check" variant="primary" className="px-3.5">
-            Check assignment
-          </ButtonLink>
+          {!authReady ? (
+            <span className="hidden h-5 w-24 animate-pulse rounded bg-[var(--rule)] sm:inline-block" aria-hidden />
+          ) : signedIn ? (
+            <>
+              <span
+                className="hidden max-w-[9rem] truncate text-xs text-[var(--ink-muted)] sm:inline"
+                title={user?.email || undefined}
+              >
+                {needsVerify ? "Signed in · verify email" : user?.email || "Signed in"}
+              </span>
+              {needsVerify ? (
+                <Link
+                  href="/app/settings"
+                  className="ac-hit hidden rounded-[var(--radius-sm)] px-2 text-xs text-[var(--amber)] hover:text-[var(--ink)] sm:inline-flex"
+                  title="Confirm your email to unlock all features"
+                >
+                  Verify
+                </Link>
+              ) : null}
+              <Link
+                href="/app/dashboard"
+                className="ac-hit hidden rounded-[var(--radius-sm)] px-3 text-[var(--ink-muted)] hover:text-[var(--ink)] sm:inline-flex"
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                className="ac-hit hidden rounded-[var(--radius-sm)] px-3 text-[var(--ink-muted)] hover:text-[var(--ink)] sm:inline-flex"
+                onClick={async () => {
+                  await signOut();
+                  window.location.href = "/";
+                }}
+              >
+                Sign out
+              </button>
+              <ButtonLink href="/check" variant="primary" className="px-3.5">
+                Check assignment
+              </ButtonLink>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="ac-hit hidden rounded-[var(--radius-sm)] px-3 text-[var(--ink-muted)] hover:text-[var(--ink)] sm:inline-flex"
+              >
+                Sign in
+              </Link>
+              <ButtonLink href="/check" variant="primary" className="px-3.5">
+                Check assignment
+              </ButtonLink>
+            </>
+          )}
         </div>
       </div>
       {!compact && open && (
@@ -96,9 +145,44 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
               {l.label}
             </Link>
           ))}
-          <Link href="/login" className="ac-hit justify-start rounded-[var(--radius-sm)] px-3" onClick={() => setOpen(false)}>
-            Sign in
-          </Link>
+          {!authReady ? null : signedIn ? (
+            <>
+              <p className="px-3 py-1 text-xs text-[var(--ink-muted)]">
+                {needsVerify ? "Signed in · verify email" : `Signed in${user?.email ? ` as ${user.email}` : ""}`}
+              </p>
+              {needsVerify ? (
+                <Link
+                  href="/app/settings"
+                  className="ac-hit justify-start rounded-[var(--radius-sm)] px-3"
+                  onClick={() => setOpen(false)}
+                >
+                  Verify email
+                </Link>
+              ) : null}
+              <Link
+                href="/app/dashboard"
+                className="ac-hit justify-start rounded-[var(--radius-sm)] px-3"
+                onClick={() => setOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                className="ac-hit w-full justify-start rounded-[var(--radius-sm)] px-3 text-left"
+                onClick={async () => {
+                  setOpen(false);
+                  await signOut();
+                  window.location.href = "/";
+                }}
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className="ac-hit justify-start rounded-[var(--radius-sm)] px-3" onClick={() => setOpen(false)}>
+              Sign in
+            </Link>
+          )}
         </nav>
       )}
     </header>

@@ -356,7 +356,7 @@ def oauth_callback(provider: str, request: Request, db: Session = Depends(get_db
                 db, user, request.headers.get("user-agent"), request.client.host if request.client else None
             )
             db.commit()
-            next_path = "/app/dashboard?signup=1" if created else parsed["next"]
+            next_path = "/onboarding?signup=1" if created else parsed["next"]
             redirect = RedirectResponse(f"{web}{next_path}", status_code=302)
             _set_session_cookies(redirect, tokens)
         redirect.delete_cookie(oauth_service.OAUTH_STATE_COOKIE, path="/api/auth/oauth")

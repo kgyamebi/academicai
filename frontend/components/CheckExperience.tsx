@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnalysisRitual, type UploadPhase } from "@/components/AnalysisRitual";
+import { useAuth } from "@/components/AuthProvider";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/Button";
 import { Dropzone } from "@/components/ui/Dropzone";
@@ -28,6 +29,7 @@ const STYLES = [
 type Job = { id: string; status: string; stage: string; report_id?: string | null; error?: string | null };
 
 export function CheckExperience({ embedded = false }: { embedded?: boolean }) {
+  const { user, signedIn, needsVerify } = useAuth();
   const [question, setQuestion] = useState("");
   const [text, setText] = useState("");
   const [level, setLevel] = useState("undergraduate");
@@ -287,13 +289,32 @@ export function CheckExperience({ embedded = false }: { embedded?: boolean }) {
           </Button>
         </form>
 
-        <p className="mt-8 text-sm text-[var(--ink-muted)]">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-[var(--teal)] underline-offset-4 hover:underline">
-            Sign in
-          </Link>{" "}
-          to keep your workspace.
-        </p>
+        {signedIn ? (
+          <p className="mt-8 text-sm text-[var(--ink-muted)]">
+            Signed in as{" "}
+            <span className="font-medium text-[var(--ink)]">{user?.email || user?.full_name || "your account"}</span>
+            {" · "}
+            <Link href="/app/dashboard" className="font-medium text-[var(--teal)] underline-offset-4 hover:underline">
+              Dashboard
+            </Link>
+            {needsVerify ? (
+              <>
+                {" · "}
+                <Link href="/app/settings" className="font-medium text-[var(--amber)] underline-offset-4 hover:underline">
+                  Waiting for email verification
+                </Link>
+              </>
+            ) : null}
+          </p>
+        ) : (
+          <p className="mt-8 text-sm text-[var(--ink-muted)]">
+            Already have an account?{" "}
+            <Link href="/login" className="font-medium text-[var(--teal)] underline-offset-4 hover:underline">
+              Sign in
+            </Link>{" "}
+            to keep your workspace.
+          </p>
+        )}
       </main>
     </>
   );

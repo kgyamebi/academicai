@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { apiUrl } from "@/lib/utils";
+import { api } from "@/lib/api";
 import { trackAdsSignup } from "@/lib/ads";
 
 /**
@@ -17,16 +17,12 @@ export function SignupConversionBeacon() {
     (async () => {
       let email: string | undefined;
       try {
-        const res = await fetch(`${apiUrl()}/api/auth/me`, { credentials: "include" });
-        if (res.ok) {
-          const me = (await res.json()) as { email?: string };
-          email = me.email;
-        }
+        const me = await api<{ email?: string }>("/api/auth/me");
+        email = me.email || undefined;
       } catch {
         /* still fire conversion without enhanced email */
       }
       if (!cancelled) trackAdsSignup({ email, method: "oauth" });
-      // Drop the query flag so refresh does not re-signal intent (sessionStorage also guards).
       if (typeof window !== "undefined" && window.history.replaceState) {
         const url = new URL(window.location.href);
         url.searchParams.delete("signup");

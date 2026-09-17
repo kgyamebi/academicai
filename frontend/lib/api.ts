@@ -6,6 +6,17 @@ function csrfToken() {
   return match ? decodeURIComponent(match[1]) : "";
 }
 
+/** Auth endpoints where a 401 is expected and must not trigger refresh+retry. */
+function skipRefresh(path: string) {
+  return (
+    path.startsWith("/api/auth/refresh") ||
+    path.startsWith("/api/auth/login") ||
+    path.startsWith("/api/auth/register") ||
+    path.startsWith("/api/auth/logout") ||
+    path.startsWith("/api/auth/guest")
+  );
+}
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
   if (!(init.body instanceof FormData) && !headers.has("Content-Type")) {
@@ -14,7 +25,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const csrf = csrfToken();
   if (csrf) headers.set("X-CSRF-Token", csrf);
   const response = await fetchWithTimeout(`${apiUrl()}${path}`, { ...init, headers, credentials: "include" });
-  if (response.status === 401 && typeof window !== "undefined" && !path.startsWith("/api/auth")) {
+  if (response.status === 401 && typeof window !== "undefined" && !skipRefresh(path)) {
     const refreshed = await fetchWithTimeout(`${apiUrl()}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": csrf } : {}) },
@@ -26,9 +37,6 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       if (!retry.ok) throw await errorFrom(retry);
       if (retry.status === 204) return {} as T;
       return parseBody<T>(retry);
-    }
-    if (typeof window !== "undefined" && !path.startsWith("/api/auth")) {
-      /* session is gone; caller handles empty state */
     }
   }
   if (!response.ok) throw await errorFrom(response);
@@ -72,9 +80,18 @@ async function errorFrom(response: Response) {
   }
 }
 
+/**
+ * Ensure a session exists for guest checks.
+ * Tries /me (with refresh). Never creates a guest if a signed-in refresh still works —
+ * that previously wiped real accounts when the access cookie expired.
+ */
 export async function ensureGuest() {
-  const me = await fetch(`${apiUrl()}/api/auth/me`, { credentials: "include" });
-  if (me.ok) return;
+  try {
+    await api("/api/auth/me");
+    return;
+  } catch {
+    /* no session — create guest below */
+  }
   await api("/api/auth/guest", { method: "POST" });
 }
 

@@ -3,6 +3,7 @@ import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { messages } from "@/lib/i18n";
 import { siteUrl } from "@/lib/utils";
+import { AuthProvider } from "@/components/AuthProvider";
 import { SentryInit } from "@/components/SentryInit";
 import { GoogleAdsInit } from "@/components/GoogleAdsInit";
 
@@ -60,7 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to main content
         </a>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

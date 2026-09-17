@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
 import { SignupConversionBeacon } from "@/components/SignupConversionBeacon";
-import { api, signOut } from "@/lib/api";
 
 const sideNav = [
   { href: "/app/dashboard", label: "Dashboard" },
@@ -27,34 +27,28 @@ function active(path: string, href: string) {
   return path === href || path.startsWith(`${href}/`);
 }
 
-type Me = {
-  email?: string | null;
-  is_guest?: boolean;
-  email_verified?: boolean;
-  pending_email?: string | null;
-};
-
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const [me, setMe] = useState<Me | null>(null);
-
-  useEffect(() => {
-    api<Me>("/api/auth/me")
-      .then(setMe)
-      .catch(() => setMe(null));
-  }, [path]);
-
-  const showBanner =
-    me && !me.is_guest && me.email && (!me.email_verified || Boolean(me.pending_email));
+  const { user, signedIn, needsVerify, signOut } = useAuth();
 
   return (
     <div className="min-h-screen md:grid md:grid-cols-[240px_1fr]">
       <aside className="hidden border-r border-[var(--rule)] bg-[var(--paper-2)] md:block">
         <div className="px-5 py-5 font-serif text-lg">
-          <Link href="/">
+          <Link href={signedIn ? "/app/dashboard" : "/"}>
             AcademicCheck <span className="text-[var(--teal)]">AI</span>
           </Link>
         </div>
+        {signedIn && user?.email ? (
+          <div className="mx-3 mb-3 rounded-[var(--radius-sm)] border border-[var(--rule)] bg-[var(--paper)] px-3 py-2">
+            <p className="truncate text-xs font-medium text-[var(--ink)]" title={user.email}>
+              {user.full_name || user.email}
+            </p>
+            <p className="mt-0.5 text-[11px] text-[var(--ink-muted)]">
+              {needsVerify ? "Signed in · verify email" : "Signed in"}
+            </p>
+          </div>
+        ) : null}
         <nav className="flex flex-col gap-1 px-3 pb-3" aria-label="App">
           {sideNav.map((item) => (
             <Link
@@ -70,16 +64,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {item.label}
             </Link>
           ))}
-          <button
-            type="button"
-            className="ac-hit justify-start rounded-[var(--radius-sm)] px-3 text-left text-sm text-[var(--ink-muted)] hover:bg-black/[0.04] hover:text-[var(--ink)]"
-            onClick={async () => {
-              await signOut();
-              window.location.href = "/";
-            }}
-          >
-            Sign out
-          </button>
+          {signedIn ? (
+            <button
+              type="button"
+              className="ac-hit justify-start rounded-[var(--radius-sm)] px-3 text-left text-sm text-[var(--ink-muted)] hover:bg-black/[0.04] hover:text-[var(--ink)]"
+              onClick={async () => {
+                await signOut();
+                window.location.href = "/";
+              }}
+            >
+              Sign out
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="ac-hit justify-start rounded-[var(--radius-sm)] px-3 text-sm text-[var(--ink-muted)] hover:bg-black/[0.04] hover:text-[var(--ink)]"
+            >
+              Sign in
+            </Link>
+          )}
         </nav>
       </aside>
 
@@ -97,7 +100,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Suspense fallback={null}>
             <SignupConversionBeacon />
           </Suspense>
-          {showBanner ? <EmailVerifyBanner email={me.pending_email || me.email || ""} /> : null}
+          {needsVerify && user ? (
+            <EmailVerifyBanner email={user.pending_email || user.email || ""} />
+          ) : null}
           {children}
         </div>
 

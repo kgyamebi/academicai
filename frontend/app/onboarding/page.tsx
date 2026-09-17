@@ -2,6 +2,8 @@
 
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/components/AuthProvider";
+import { EmailVerifyBanner } from "@/components/EmailVerifyBanner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SignupConversionBeacon } from "@/components/SignupConversionBeacon";
 import { Button } from "@/components/ui/Button";
@@ -44,6 +46,7 @@ const GOALS = [
 const STEPS = ["Level", "Field", "Citations", "Goals", "First check"] as const;
 
 export default function OnboardingPage() {
+  const { user, signedIn, needsVerify } = useAuth();
   const [step, setStep] = useState(0);
   const [level, setLevel] = useState("undergraduate");
   const [area, setArea] = useState(AREAS[0]);
@@ -61,7 +64,7 @@ export default function OnboardingPage() {
     } catch {
       /* ignore */
     }
-    window.location.href = "/check?onboarded=1";
+    window.location.href = "/app/dashboard";
   }
 
   return (
@@ -71,11 +74,20 @@ export default function OnboardingPage() {
         <SignupConversionBeacon />
       </Suspense>
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-xl px-4 py-12 md:py-16">
-        <p className="text-sm font-medium tracking-wide text-[var(--teal)]">Welcome</p>
+        <p className="text-sm font-medium tracking-wide text-[var(--teal)]">
+          {signedIn ? "You’re signed in" : "Welcome"}
+        </p>
         <h1 className="mt-2 font-serif text-4xl">Set up your success workspace</h1>
         <p className="mt-3 text-sm leading-7 text-[var(--ink-muted)]">
-          Two minutes. Then your first diagnostic check — no jargon gauntlet.
+          {signedIn
+            ? `Account ready${user?.email ? ` for ${user.email}` : ""}. Two minutes here, then your dashboard.`
+            : "Two minutes. Then your first diagnostic check — no jargon gauntlet."}
         </p>
+        {needsVerify ? (
+          <div className="mt-6">
+            <EmailVerifyBanner email={user?.pending_email || user?.email || ""} />
+          </div>
+        ) : null}
 
         <div className="mt-8" aria-hidden>
           <div className="h-1.5 overflow-hidden rounded-full bg-[var(--rule)]">
@@ -90,78 +102,72 @@ export default function OnboardingPage() {
           {step === 0 && (
             <fieldset>
               <legend className="font-serif text-2xl">What’s your academic level?</legend>
-              <div className="mt-5 grid gap-2">
-                {LEVELS.map(([v, l]) => (
-                  <label key={v} className={`ac-hit cursor-pointer justify-start rounded-[var(--radius-sm)] border px-4 text-sm ${level === v ? "border-[var(--teal)] bg-[var(--teal-soft)]" : "border-[var(--rule)]"}`}>
-                    <input type="radio" className="sr-only" name="level" checked={level === v} onChange={() => setLevel(v)} />
-                    {l}
+              <div className="mt-4 grid gap-2">
+                {LEVELS.map(([value, label]) => (
+                  <label key={value} className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--rule)] px-3 py-2.5 has-[:checked]:border-[var(--teal)]">
+                    <input
+                      type="radio"
+                      name="level"
+                      value={value}
+                      checked={level === value}
+                      onChange={() => setLevel(value)}
+                    />
+                    <span className="text-sm">{label}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
           )}
-
           {step === 1 && (
             <fieldset>
-              <legend className="font-serif text-2xl">What do you study?</legend>
-              <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                {AREAS.map((a) => (
-                  <label key={a} className={`ac-hit cursor-pointer justify-start rounded-[var(--radius-sm)] border px-4 text-sm ${area === a ? "border-[var(--teal)] bg-[var(--teal-soft)]" : "border-[var(--rule)]"}`}>
-                    <input type="radio" className="sr-only" name="area" checked={area === a} onChange={() => setArea(a)} />
-                    {a}
+              <legend className="font-serif text-2xl">Which field are you writing in?</legend>
+              <div className="mt-4 grid gap-2">
+                {AREAS.map((item) => (
+                  <label key={item} className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--rule)] px-3 py-2.5 has-[:checked]:border-[var(--teal)]">
+                    <input type="radio" name="area" value={item} checked={area === item} onChange={() => setArea(item)} />
+                    <span className="text-sm">{item}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
           )}
-
           {step === 2 && (
             <fieldset>
-              <legend className="font-serif text-2xl">Preferred citation style</legend>
-              <div className="mt-5 grid gap-2">
-                {STYLES.map(([v, l]) => (
-                  <label key={v} className={`ac-hit cursor-pointer justify-start rounded-[var(--radius-sm)] border px-4 text-sm ${style === v ? "border-[var(--teal)] bg-[var(--teal-soft)]" : "border-[var(--rule)]"}`}>
-                    <input type="radio" className="sr-only" name="style" checked={style === v} onChange={() => setStyle(v)} />
-                    {l}
+              <legend className="font-serif text-2xl">Preferred citation style?</legend>
+              <div className="mt-4 grid gap-2">
+                {STYLES.map(([value, label]) => (
+                  <label key={value} className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--rule)] px-3 py-2.5 has-[:checked]:border-[var(--teal)]">
+                    <input
+                      type="radio"
+                      name="style"
+                      value={value}
+                      checked={style === value}
+                      onChange={() => setStyle(value)}
+                    />
+                    <span className="text-sm">{label}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
           )}
-
           {step === 3 && (
             <fieldset>
               <legend className="font-serif text-2xl">What’s your main goal right now?</legend>
-              <div className="mt-5 grid gap-2">
-                {GOALS.map((g) => (
-                  <label key={g} className={`ac-hit cursor-pointer justify-start rounded-[var(--radius-sm)] border px-4 text-sm ${goal === g ? "border-[var(--teal)] bg-[var(--teal-soft)]" : "border-[var(--rule)]"}`}>
-                    <input type="radio" className="sr-only" name="goal" checked={goal === g} onChange={() => setGoal(g)} />
-                    {g}
+              <div className="mt-4 grid gap-2">
+                {GOALS.map((item) => (
+                  <label key={item} className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--rule)] px-3 py-2.5 has-[:checked]:border-[var(--teal)]">
+                    <input type="radio" name="goal" value={item} checked={goal === item} onChange={() => setGoal(item)} />
+                    <span className="text-sm">{item}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
           )}
-
           {step === 4 && (
             <div>
               <h2 className="font-serif text-2xl">You’re ready for your first check</h2>
-              <ul className="mt-4 space-y-2 text-sm leading-7 text-[var(--ink-muted)]">
-                <li>
-                  <strong className="text-[var(--ink)]">Level:</strong> {LEVELS.find((x) => x[0] === level)?.[1]}
-                </li>
-                <li>
-                  <strong className="text-[var(--ink)]">Field:</strong> {area}
-                </li>
-                <li>
-                  <strong className="text-[var(--ink)]">Citations:</strong> {STYLES.find((x) => x[0] === style)?.[1]}
-                </li>
-                <li>
-                  <strong className="text-[var(--ink)]">Goal:</strong> {goal}
-                </li>
-              </ul>
               <p className="mt-4 text-sm leading-7 text-[var(--ink)]">
-                Next you’ll paste a question and draft. We’ll pre-fill your level and citation style.
+                Next you’ll land on your dashboard — signed in — then you can run your first check anytime.
               </p>
             </div>
           )}
@@ -182,7 +188,7 @@ export default function OnboardingPage() {
             </Button>
           ) : (
             <Button type="button" variant="primary" onClick={finish}>
-              Start first analysis
+              Go to dashboard
             </Button>
           )}
         </div>

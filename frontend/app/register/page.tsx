@@ -1,16 +1,37 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/components/AuthProvider";
+import { PasswordField } from "@/components/PasswordField";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { api, track } from "@/lib/api";
 import { trackAdsSignup } from "@/lib/ads";
 
 export default function RegisterPage() {
+  const { signedIn, status } = useAuth();
   const [error, setError] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+
+  useEffect(() => {
+    if (status === "ready" && signedIn) {
+      window.location.replace("/app/dashboard");
+    }
+  }, [status, signedIn]);
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError("");
+    if (password !== confirm) {
+      setError("Passwords do not match. Re-type them carefully.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Use at least 8 characters for your password.");
+      return;
+    }
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email") || "");
     try {
@@ -18,18 +39,19 @@ export default function RegisterPage() {
         method: "POST",
         body: JSON.stringify({
           email,
-          password: form.get("password"),
+          password,
           full_name: form.get("full_name"),
           country: form.get("country"),
         }),
       });
       track("signup", "/register");
       trackAdsSignup({ email, method: "email" });
-      window.location.href = "/app/dashboard";
+      window.location.href = "/onboarding";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the account.");
     }
   }
+
   return (
     <>
       <SiteHeader compact />
@@ -39,7 +61,7 @@ export default function RegisterPage() {
           Save assignments, reports and draft history. We do not use your work for model training unless you opt in.
         </p>
         <div className="mt-8">
-          <SocialAuthButtons next="/app/dashboard" />
+          <SocialAuthButtons next="/onboarding" />
         </div>
         <form onSubmit={onSubmit} className="mt-2 space-y-4">
           <label className="block text-sm" htmlFor="full_name">
@@ -65,23 +87,33 @@ export default function RegisterPage() {
               className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3"
             />
           </label>
-          <label className="block text-sm" htmlFor="password">
-            Password
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              minLength={8}
-              required
-              aria-invalid={Boolean(error)}
-              aria-describedby={error ? "password-hint register-error" : "password-hint"}
-              className="mt-1 w-full rounded-md border border-[var(--rule)] bg-white p-3"
-            />
-          </label>
+          <PasswordField
+            id="password"
+            name="password"
+            label="Password"
+            autoComplete="new-password"
+            minLength={8}
+            required
+            invalid={Boolean(error)}
+            describedBy={error ? "password-hint register-error" : "password-hint"}
+            value={password}
+            onChange={setPassword}
+          />
           <p id="password-hint" className="text-sm text-[var(--ink-muted)]">
-            Use at least 8 characters. A password manager can fill this field.
+            Use at least 8 characters. Tap the eye to show what you typed.
           </p>
+          <PasswordField
+            id="password_confirm"
+            name="password_confirm"
+            label="Confirm password"
+            autoComplete="new-password"
+            minLength={8}
+            required
+            invalid={Boolean(error)}
+            describedBy={error ? "register-error" : undefined}
+            value={confirm}
+            onChange={setConfirm}
+          />
           <label className="block text-sm" htmlFor="country">
             Country (optional)
             <input
