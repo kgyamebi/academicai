@@ -5,23 +5,26 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { api, track } from "@/lib/api";
+import { trackAdsSignup } from "@/lib/ads";
 
 export default function RegisterPage() {
   const [error, setError] = useState("");
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
+    const email = String(form.get("email") || "");
     try {
       await api("/api/auth/register", {
         method: "POST",
         body: JSON.stringify({
-          email: form.get("email"),
+          email,
           password: form.get("password"),
           full_name: form.get("full_name"),
           country: form.get("country"),
         }),
       });
       track("signup", "/register");
+      trackAdsSignup({ email, method: "email" });
       window.location.href = "/onboarding";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the account.");

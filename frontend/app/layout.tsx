@@ -4,6 +4,7 @@ import "./globals.css";
 import { messages } from "@/lib/i18n";
 import { siteUrl } from "@/lib/utils";
 import { SentryInit } from "@/components/SentryInit";
+import { GoogleAdsInit } from "@/components/GoogleAdsInit";
 
 const sans = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-sans" });
 const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif" });
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body className="min-h-screen antialiased">
         <SentryInit />
+        <GoogleAdsInit />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-[var(--paper-2)] focus:px-3 focus:py-2"

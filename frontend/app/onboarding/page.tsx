@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SignupConversionBeacon } from "@/components/SignupConversionBeacon";
 import { Button } from "@/components/ui/Button";
 
 const LEVELS = [
@@ -66,6 +67,9 @@ export default function OnboardingPage() {
   return (
     <>
       <SiteHeader compact />
+      <Suspense fallback={null}>
+        <SignupConversionBeacon />
+      </Suspense>
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-xl px-4 py-12 md:py-16">
         <p className="text-sm font-medium tracking-wide text-[var(--teal)]">Welcome</p>
         <h1 className="mt-2 font-serif text-4xl">Set up your success workspace</h1>
