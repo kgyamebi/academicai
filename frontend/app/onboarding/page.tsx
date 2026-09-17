@@ -78,13 +78,13 @@ export default function OnboardingPage() {
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-xl px-4 py-12 md:py-16">
           <div className="ac-auth-panel ac-surface relative overflow-hidden p-6 md:p-8">
             <div className="ac-auth-panel-shine pointer-events-none absolute inset-0" aria-hidden />
-            <p className="ac-enter relative text-sm font-medium tracking-wide text-[var(--teal)]">
+          <p className="relative text-sm font-medium tracking-wide text-[var(--teal)]">
               {signedIn ? "You’re signed in" : "Welcome"}
             </p>
-            <h1 className="ac-enter ac-enter-delay-1 relative mt-2 font-serif text-4xl">
+            <h1 className="relative mt-2 font-serif text-4xl">
               Set up your success workspace
             </h1>
-            <p className="ac-enter ac-enter-delay-2 relative mt-3 text-sm leading-7 text-[var(--ink-muted)]">
+            <p className="relative mt-3 text-sm leading-7 text-[var(--ink-muted)]">
               {signedIn
                 ? `Account ready${user?.email ? ` for ${user.email}` : ""}. Two minutes here, then your dashboard.`
                 : "Two minutes. Then your first diagnostic check — no jargon gauntlet."}
@@ -95,10 +95,10 @@ export default function OnboardingPage() {
               </div>
             ) : null}
 
-            <div className="ac-enter ac-enter-delay-3 relative mt-8" aria-hidden>
+            <div className="relative mt-8" aria-hidden>
               <div className="h-1.5 overflow-hidden rounded-full bg-[var(--rule)]">
                 <div
-                  className="h-full rounded-full bg-[var(--teal)] transition-all duration-500 ease-out"
+                  className="ac-progress-liquid h-full rounded-full bg-[var(--teal)]"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -107,7 +107,7 @@ export default function OnboardingPage() {
               </p>
             </div>
 
-            <div className="ac-enter ac-enter-delay-3 relative mt-8">
+            <div key={step} className="ac-step-enter relative mt-8">
               {step === 0 && (
                 <fieldset>
                   <legend className="font-serif text-2xl">What’s your academic level?</legend>
@@ -219,13 +219,12 @@ export default function OnboardingPage() {
                 <Button
                   type="button"
                   variant="primary"
-                  className="ac-cta-glow"
                   onClick={() => setStep((s) => Math.min(STEPS.length - 1, s + 1))}
                 >
                   Continue
                 </Button>
               ) : (
-                <Button type="button" variant="primary" className="ac-cta-glow" onClick={finish}>
+                <Button type="button" variant="primary" onClick={finish}>
                   Go to dashboard
                 </Button>
               )}

@@ -27,7 +27,7 @@ export default function ForgotPage() {
           subtitle="We’ll email a secure link if an account exists for that address."
         >
           <div className="mb-6 flex justify-center">
-            <BrandMark className="h-12 w-12" animated />
+            <BrandMark className="h-12 w-12" />
           </div>
           {done ? (
             <p className="text-sm leading-7 text-[var(--ink)]" role="status" aria-live="polite">
@@ -46,7 +46,7 @@ export default function ForgotPage() {
                   className="ac-field mt-1"
                 />
               </label>
-              <button type="submit" className="ac-hit ac-cta-glow w-full rounded-md bg-[var(--teal)] text-white">
+              <button type="submit" className="ac-hit ac-btn-micro w-full rounded-md bg-[var(--teal)] text-white">
                 Send reset link
               </button>
             </form>

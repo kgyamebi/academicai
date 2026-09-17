@@ -18,16 +18,14 @@ export default function PricingPage() {
       <SiteHeader />
       <AmbientStage>
         <main id="main-content" tabIndex={-1} className="mx-auto max-w-3xl px-4 py-16 md:py-20">
-          <p className="ac-enter text-sm font-medium tracking-wide text-[var(--teal)]">Access</p>
-          <h1 className="ac-enter ac-enter-delay-1 mt-3 font-serif text-4xl md:text-5xl">
-            Free public launch
-          </h1>
-          <p className="ac-enter ac-enter-delay-2 mt-4 text-[var(--ink-muted)] leading-7">
+          <p className="text-sm font-medium tracking-wide text-[var(--teal)]">Access</p>
+          <h1 className="mt-3 font-serif text-4xl md:text-5xl">Free public launch</h1>
+          <p className="mt-4 text-[var(--ink-muted)] leading-7">
             AcademicCheck AI is launching free for students. Paid plans are paused — there is no checkout and no
             subscription flow in this release. Limits may apply so the service stays reliable for everyone.
           </p>
 
-          <article className="ac-enter ac-enter-delay-3 ac-auth-panel mt-10 rounded-[var(--radius-lg)] border border-[var(--teal)] p-6 md:p-8">
+          <article className="ac-auth-panel mt-10 rounded-[var(--radius-lg)] border border-[var(--teal)] p-6 md:p-8">
             <h2 className="font-serif text-2xl">What you get today</h2>
             <ul className="mt-4 space-y-3 text-sm leading-7 text-[var(--ink)]">
               <li>Guest and registered checks against your assignment question</li>
@@ -36,7 +34,7 @@ export default function PricingPage() {
               <li>Integrity-first feedback — not an official grade</li>
             </ul>
             <div className="mt-8">
-              <ButtonLink href="/check" variant="primary" className="ac-cta-glow px-6">
+              <ButtonLink href="/check" variant="primary" className="px-6">
                 Start a free check
               </ButtonLink>
             </div>

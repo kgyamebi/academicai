@@ -25,7 +25,7 @@ export const Button = forwardRef<
       aria-busy={busy || undefined}
       disabled={props.disabled || busy}
       className={cn(
-        "ac-hit inline-flex gap-2 rounded-[var(--radius-sm)] px-4 text-sm font-medium transition-colors duration-150",
+        "ac-hit ac-btn-micro inline-flex gap-2 rounded-[var(--radius-sm)] px-4 text-sm font-medium",
         styles[variant],
         className,
       )}
@@ -50,7 +50,7 @@ export function ButtonLink({
     <Link
       href={href}
       className={cn(
-        "ac-hit inline-flex gap-2 rounded-[var(--radius-sm)] px-4 text-sm font-medium transition-colors duration-150",
+        "ac-hit ac-btn-micro inline-flex gap-2 rounded-[var(--radius-sm)] px-4 text-sm font-medium",
         styles[variant],
         className,
       )}

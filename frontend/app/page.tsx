@@ -1,23 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HeroLiveDemo } from "@/components/HeroLiveDemo";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ButtonLink } from "@/components/ui/Button";
 import { messages } from "@/lib/i18n";
 import { siteUrl } from "@/lib/utils";
-
-/** Static report preview — proof above the fold; not live user data. */
-const PREVIEW = {
-  score: 84,
-  readiness: "Strong Draft",
-  potential: 12,
-  minutes: 20,
-  fixes: [
-    { title: "Strengthen thesis", lift: "+8", time: "5 min" },
-    { title: "Deepen evidence", lift: "+11", time: "15 min" },
-    { title: "Tighten citations", lift: "+6", time: "10 min" },
-  ],
-};
 
 const HOME_TITLE = "Free Assignment, Thesis & Citation Checker | AcademicCheck AI";
 const HOME_DESCRIPTION =
@@ -62,31 +50,22 @@ export default function HomePage() {
       <SiteHeader />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <main id="main-content" tabIndex={-1}>
-        {/* HERO + PROOF */}
         <section className="ac-hero-plane relative overflow-hidden">
           <div className="ac-hero-grid pointer-events-none absolute inset-0" aria-hidden />
-          <div className="ac-hero-orbs pointer-events-none absolute inset-0" aria-hidden>
-            <div className="ac-orb ac-orb-a" />
-            <div className="ac-orb ac-orb-b" />
-            <div className="ac-orb ac-orb-c" />
-            <div className="ac-ambient-sheen" />
-          </div>
           <div className="relative mx-auto grid max-w-6xl gap-12 px-4 py-16 md:grid-cols-[1.05fr_0.95fr] md:items-center md:py-24">
             <div>
-              <p className="ac-enter font-serif text-4xl tracking-tight text-[var(--ink)] md:text-6xl">
+              <p className="font-serif text-4xl tracking-tight text-[var(--ink)] md:text-6xl">
                 AcademicCheck <span className="text-[var(--teal)]">AI</span>
               </p>
-              <h1 className="ac-enter ac-enter-delay-1 mt-5 max-w-xl font-serif text-3xl leading-tight text-[var(--ink)] md:text-5xl">
+              <h1 className="mt-5 max-w-xl font-serif text-3xl leading-tight text-[var(--ink)] md:text-5xl">
                 {messages.heroTitle}
               </h1>
-              <p className="ac-enter ac-enter-delay-2 mt-5 max-w-lg text-lg leading-8 text-[var(--ink-muted)]">
-                {messages.heroSub}
-              </p>
-              <p className="ac-enter ac-enter-delay-2 mt-3 max-w-lg text-sm leading-6 text-[var(--ink)]">
+              <p className="mt-5 max-w-lg text-lg leading-8 text-[var(--ink-muted)]">{messages.heroSub}</p>
+              <p className="mt-3 max-w-lg text-sm leading-6 text-[var(--ink)]">
                 Your lecturer grades against the question. So do we.
               </p>
-              <div className="ac-enter ac-enter-delay-3 mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <ButtonLink href="/check" variant="primary" className="ac-cta-glow px-6 text-base">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <ButtonLink href="/check" variant="primary" className="px-6 text-base">
                   {messages.primaryCta}
                 </ButtonLink>
                 <ButtonLink href="/sample-report" variant="secondary" className="px-6 text-base">
@@ -96,60 +75,8 @@ export default function HomePage() {
               <p className="mt-6 text-xs leading-5 text-[var(--ink-muted)]">{messages.disclaimer}</p>
             </div>
 
-            {/* Report preview — blurred depth + readable core */}
-            <aside
-              className="ac-enter ac-enter-delay-2 relative"
-              aria-label="Sample academic performance report preview"
-            >
-              <div className="absolute -inset-2 rounded-[var(--radius-lg)] bg-[var(--teal-soft)]/40 blur-sm" aria-hidden />
-              <div className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)] shadow-[var(--shadow-1)]">
-                <div className="border-b border-[var(--rule)] bg-[var(--paper)] px-5 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--teal)]">Report preview</p>
-                  <p className="mt-1 text-sm text-[var(--ink-muted)]">What a diagnosis looks like — illustrative sample</p>
-                </div>
-                <div className="grid gap-4 p-5 sm:grid-cols-[auto_1fr] sm:items-center">
-                  <div className="flex h-24 w-24 items-center justify-center rounded-full border-[6px] border-[var(--teal)]/30">
-                    <span className="font-serif text-3xl tabular-nums">{PREVIEW.score}</span>
-                  </div>
-                  <div>
-                    <p className="font-serif text-xl">Academic Health Score</p>
-                    <p className="mt-1 text-sm font-medium text-[var(--teal)]">{PREVIEW.readiness}</p>
-                    <p className="mt-2 text-sm text-[var(--ink-muted)]">
-                      Improvement potential +{PREVIEW.potential} · ~{PREVIEW.minutes} minutes
-                    </p>
-                  </div>
-                </div>
-                <div className="border-t border-[var(--rule)] px-5 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-muted)]">Top 3 Fix-First</p>
-                  <ol className="mt-3 space-y-2">
-                    {PREVIEW.fixes.map((f, i) => (
-                      <li key={f.title} className="flex items-center justify-between gap-3 text-sm">
-                        <span>
-                          <span className="font-serif text-[var(--teal)]">{String(i + 1).padStart(2, "0")}</span> {f.title}
-                        </span>
-                        <span className="tabular-nums text-[var(--forest)]">
-                          {f.lift} · {f.time}
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-                <div className="grid grid-cols-2 gap-px border-t border-[var(--rule)] bg-[var(--rule)] text-sm">
-                  <div className="bg-[var(--paper-2)] px-4 py-3">
-                    <p className="text-xs text-[var(--ink-muted)]">Question alignment</p>
-                    <p className="mt-1 font-medium">Reviewed</p>
-                  </div>
-                  <div className="bg-[var(--paper-2)] px-4 py-3">
-                    <p className="text-xs text-[var(--ink-muted)]">Citation review</p>
-                    <p className="mt-1 font-medium">Flagged gaps</p>
-                  </div>
-                </div>
-                {/* Soft blur band — proof without oversharing */}
-                <div
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-[var(--paper-2)]/70 backdrop-blur-[2px]"
-                  aria-hidden
-                />
-              </div>
+            <aside className="relative" aria-label="Live demonstration of AcademicCheck diagnostics">
+              <HeroLiveDemo />
             </aside>
           </div>
         </section>

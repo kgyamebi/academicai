@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { animateValue, easeOutExpo, prefersReducedMotion } from "@/lib/motion";
 
 const LABELS: Record<string, string> = {
   relevance: "Question Relevance",
@@ -25,16 +27,66 @@ export function scoreTone(score: number) {
   return "var(--crimson)";
 }
 
-/** Pure SVG radar — no chart library dependency. */
+/** Pure SVG radar — axes expand with stagger when animate is true. */
 export function RadarChart({
   scores,
   className,
+  animate = true,
 }: {
   scores: { category: string; score: number }[];
   className?: string;
+  animate?: boolean;
 }) {
   const items = scores.slice(0, 8);
+  const [progress, setProgress] = useState<number[]>(items.map(() => (animate ? 0 : 1)));
+  const [visibleAxes, setVisibleAxes] = useState(animate ? 0 : items.length);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const played = useRef(false);
+
+  useEffect(() => {
+    if (!animate || prefersReducedMotion() || items.length < 3) {
+      setProgress(items.map(() => 1));
+      setVisibleAxes(items.length);
+      return;
+    }
+
+    const el = rootRef.current;
+    if (!el) return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || played.current) return;
+        played.current = true;
+        io.disconnect();
+
+        items.forEach((_, i) => {
+          window.setTimeout(() => {
+            setVisibleAxes(i + 1);
+            animateValue({
+              from: 0,
+              to: 1,
+              duration: 620,
+              ease: easeOutExpo,
+              onUpdate: (v) => {
+                setProgress((prev) => {
+                  const next = [...prev];
+                  next[i] = v;
+                  return next;
+                });
+              },
+            });
+          }, i * 140);
+        });
+      },
+      { threshold: 0.35 },
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, [animate, items.length]);
+
   if (items.length < 3) return null;
+
   const size = 220;
   const cx = size / 2;
   const cy = size / 2;
@@ -47,11 +99,13 @@ export function RadarChart({
     return [cx + Math.cos(angle) * r, cy + Math.sin(angle) * r] as const;
   }
 
-  const poly = items.map((s, i) => point(i, s.score).join(",")).join(" ");
+  const poly = items
+    .map((s, i) => point(i, s.score * (progress[i] ?? 0)).join(","))
+    .join(" ");
   const rings = [25, 50, 75, 100];
 
   return (
-    <div className={cn("mx-auto w-full max-w-[280px]", className)}>
+    <div ref={rootRef} className={cn("mx-auto w-full max-w-[280px]", className)}>
       <svg viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Category radar chart of diagnostic scores" className="w-full">
         {rings.map((ring) => (
           <polygon
@@ -68,17 +122,134 @@ export function RadarChart({
         })}
         <polygon points={poly} fill="rgba(15, 118, 110, 0.18)" stroke="var(--teal)" strokeWidth="2" />
         {items.map((s, i) => {
-          const [x, y] = point(i, s.score);
-          return <circle key={s.category} cx={x} cy={y} r="3.5" fill="var(--teal)" />;
+          const [x, y] = point(i, s.score * (progress[i] ?? 0));
+          return (
+            <circle
+              key={s.category}
+              cx={x}
+              cy={y}
+              r="3.5"
+              fill="var(--teal)"
+              style={{ opacity: (progress[i] ?? 0) > 0.15 ? 1 : 0 }}
+            />
+          );
         })}
       </svg>
       <ul className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1 text-[11px] text-[var(--ink-muted)]">
-        {items.map((s) => (
-          <li key={s.category}>
+        {items.map((s, i) => (
+          <li
+            key={s.category}
+            style={{
+              opacity: i < visibleAxes ? 1 : 0.25,
+              transition: "opacity 320ms var(--ease-out-expo)",
+            }}
+          >
             {categoryLabel(s.category)} · {s.score}
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+/** Progressive Assignment Fit block for the report. */
+export function FitReportUnfold({
+  question,
+  fitScore,
+  concepts,
+  scores,
+}: {
+  question?: string | null;
+  fitScore: number;
+  concepts: string[];
+  scores: { category: string; score: number }[];
+}) {
+  const [stage, setStage] = useState(0);
+  const [fitDisplay, setFitDisplay] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const played = useRef(false);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) {
+      setStage(4);
+      setFitDisplay(fitScore);
+      return;
+    }
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting || played.current) return;
+        played.current = true;
+        io.disconnect();
+        setStage(1);
+        window.setTimeout(() => setStage(2), 450);
+        window.setTimeout(() => setStage(3), 900);
+        window.setTimeout(() => {
+          setStage(4);
+          animateValue({
+            from: 0,
+            to: fitScore,
+            duration: 900,
+            ease: easeOutExpo,
+            onUpdate: (v) => setFitDisplay(Math.round(v)),
+          });
+        }, 1300);
+      },
+      { threshold: 0.3 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [fitScore]);
+
+  return (
+    <div ref={rootRef} className="ac-surface space-y-5 p-5 md:p-6">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--teal)]">Assignment Fit</p>
+        <h3 className="mt-1 font-serif text-xl">How well the draft meets the brief</h3>
+      </div>
+
+      {stage >= 1 && question ? (
+        <div className="ac-settle rounded-[var(--radius-sm)] border border-[var(--rule)] bg-[var(--paper)] px-4 py-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--ink-muted)]">Assignment brief</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--ink)] line-clamp-4">{question}</p>
+        </div>
+      ) : null}
+
+      {stage >= 2 ? (
+        <div className="ac-settle relative h-px overflow-hidden bg-[var(--rule)]" aria-hidden>
+          <div
+            className="absolute inset-y-0 left-0 w-1/3 bg-[var(--teal)]/40"
+            style={{ animation: "ac-fade-in 600ms var(--ease-out-expo) both" }}
+          />
+        </div>
+      ) : null}
+
+      {stage >= 3 && concepts.length ? (
+        <ul className="ac-settle flex flex-wrap gap-2">
+          {concepts.map((c) => (
+            <li
+              key={c}
+              className="rounded-md border border-[var(--rule)] bg-[var(--teal-soft)]/50 px-2.5 py-1 text-xs text-[var(--ink)]"
+            >
+              {c}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {stage >= 4 ? (
+        <div className="ac-settle">
+          <p className="font-serif text-3xl tabular-nums text-[var(--teal)]">
+            {fitDisplay}
+            <span className="text-lg text-[var(--ink-muted)]">%</span>
+          </p>
+          <p className="mt-1 text-sm text-[var(--ink-muted)]">Assignment Fit</p>
+          <div className="mt-5">
+            <RadarChart scores={scores} />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

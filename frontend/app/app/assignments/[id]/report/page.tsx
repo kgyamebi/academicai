@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { AnalysisRitual } from "@/components/AnalysisRitual";
 import { CategoryAccordion } from "@/components/report/CategoryAccordion";
-import { RadarChart, ScoreHeatmap, SeverityBucket, categoryLabel } from "@/components/report/visuals";
+import { FitReportUnfold, ScoreHeatmap, SeverityBucket, categoryLabel } from "@/components/report/visuals";
 import { FindingCard } from "@/components/FindingCard";
 import { PriorityFixes, buildPriorityFixes } from "@/components/PriorityFixes";
 import { ScoreRing } from "@/components/ScoreRing";
-import { AnimatedNumber, ProgressBar } from "@/components/dashboard/primitives";
+import { ProgressBar } from "@/components/dashboard/primitives";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { EmptyState, Skeleton } from "@/components/ui/EmptyState";
 import { api, track } from "@/lib/api";
@@ -360,14 +360,17 @@ function ReportPageInner() {
           {/* TOP — Performance Overview */}
           <section
             aria-labelledby="perf-heading"
-            className={cn("ac-enter relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)]", tab === "findings" && "hidden lg:block")}
+            className={cn(
+              "ac-reveal relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)]",
+              tab === "findings" && "hidden lg:block",
+            )}
           >
             <div className="ac-hero-plane absolute inset-0 opacity-80" aria-hidden />
             <div className="relative grid gap-6 p-6 md:grid-cols-[auto_1fr] md:items-center md:p-8">
               <ScoreRing score={report.overall_score} label="Academic Health Score" size="lg" />
               <div>
                 <p id="perf-heading" className="font-serif text-3xl tabular-nums md:text-4xl">
-                  <AnimatedNumber value={report.overall_score} />{" "}
+                  <span className="sr-only">{report.overall_score} </span>
                   <span className="text-xl text-[var(--ink-muted)] md:text-2xl">Overall Score</span>
                 </p>
                 <p className="mt-2 text-lg font-medium text-[var(--teal)]">
@@ -534,10 +537,19 @@ function ReportPageInner() {
               </span>
             </summary>
             <div className="space-y-8 border-t border-[var(--rule)] px-5 py-6">
-              <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
-                <RadarChart scores={report.scores} />
-                <ScoreHeatmap scores={report.scores} />
-              </div>
+              <FitReportUnfold
+                question={report.question?.interpretation}
+                fitScore={
+                  report.scores.find((s) => s.category === "relevance")?.score ??
+                  Math.round(report.overall_score * 0.95)
+                }
+                concepts={[
+                  ...(report.question?.command_words || []),
+                  ...(report.question?.required || []).slice(0, 4),
+                ].slice(0, 6)}
+                scores={report.scores}
+              />
+              <ScoreHeatmap scores={report.scores} />
             </div>
           </details>
 

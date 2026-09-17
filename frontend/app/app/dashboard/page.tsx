@@ -7,7 +7,6 @@ import { ScoreRing } from "@/components/ScoreRing";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState, Skeleton } from "@/components/ui/EmptyState";
 import {
-  AnimatedNumber,
   MiniRing,
   ProgressBar,
   SectionHeading,
@@ -117,7 +116,7 @@ export default function DashboardPage() {
         <h1 className="font-serif text-3xl md:text-4xl">Dashboard</h1>
         <section
           role="alert"
-          className="ac-enter relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)]"
+          className="ac-reveal relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)]"
         >
           <div className="ac-hero-plane absolute inset-0 opacity-90" aria-hidden />
           <div className="relative grid gap-6 p-6 md:grid-cols-[1.2fr_0.8fr] md:items-center md:p-8">
@@ -209,7 +208,7 @@ export default function DashboardPage() {
       {/* SECTION 1 — Welcome — h1 name "Dashboard" required by a11y cert */}
       <section
         aria-labelledby="welcome-heading"
-        className="ac-enter relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)]"
+        className="ac-reveal relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)]"
       >
         <div className="ac-hero-plane absolute inset-0 opacity-90" aria-hidden />
         <div className="ac-hero-grid absolute inset-0" aria-hidden />
@@ -228,9 +227,7 @@ export default function DashboardPage() {
               {health != null ? (
                 <>
                   Your Academic Health Score is{" "}
-                  <span className="font-semibold text-[var(--ink)]">
-                    <AnimatedNumber value={health} />
-                  </span>
+                  <span className="font-semibold tabular-nums text-[var(--ink)]">{health}</span>
                   {monthly != null ? (
                     <>
                       {" "}
@@ -270,7 +267,7 @@ export default function DashboardPage() {
       </section>
 
       {/* TODAY FOCUS + CONTINUE LAST */}
-      <section aria-labelledby="today-focus" className="ac-enter ac-enter-delay-1 grid gap-4 lg:grid-cols-2">
+      <section aria-labelledby="today-focus" className="ac-reveal grid gap-4 lg:grid-cols-2">
         <div className="ac-surface border-[var(--teal)]/30 p-5 md:p-6">
           <p className="text-sm font-semibold tracking-wide text-[var(--teal)]">Today Focus</p>
           <h2 id="today-focus" className="mt-2 font-serif text-2xl">
@@ -431,7 +428,7 @@ export default function DashboardPage() {
       </section>
 
       {/* SECTION 3 — Academic Health */}
-      <section aria-labelledby="health-heading" className="ac-enter ac-enter-delay-2">
+      <section aria-labelledby="health-heading" className="ac-reveal">
         <SectionHeading
           id="health-heading"
           title="Academic Health"

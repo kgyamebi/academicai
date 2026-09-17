@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { animateValue, easeOutExpo } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export function AnimatedNumber({
   value,
   className,
   suffix = "",
-  duration = 700,
+  duration = 900,
 }: {
   value: number;
   className?: string;
@@ -17,23 +18,13 @@ export function AnimatedNumber({
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
-    const reduce =
-      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setDisplay(value);
-      return;
-    }
-    let frame = 0;
-    const start = performance.now();
-    const from = 0;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(Math.round(from + (value - from) * eased));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
+    return animateValue({
+      from: 0,
+      to: value,
+      duration,
+      ease: easeOutExpo,
+      onUpdate: (v) => setDisplay(Math.round(v)),
+    });
   }, [value, duration]);
 
   return (
@@ -127,36 +118,72 @@ export function ProgressBar({ value, tone }: { value: number; tone?: string }) {
 }
 
 export function Sparkline({ values, className }: { values: number[]; className?: string }) {
+  const pathRef = useRef<SVGPolylineElement>(null);
+  const [drawn, setDrawn] = useState(false);
+  const [pointsVisible, setPointsVisible] = useState(0);
+
+  useEffect(() => {
+    const el = pathRef.current;
+    if (!el || !values.length) return;
+    const length = el.getTotalLength?.() ?? 0;
+    if (length > 0) {
+      el.style.strokeDasharray = `${length}`;
+      el.style.strokeDashoffset = `${length}`;
+      requestAnimationFrame(() => {
+        el.style.transition = "stroke-dashoffset 900ms var(--ease-out-expo)";
+        el.style.strokeDashoffset = "0";
+      });
+    }
+    setDrawn(true);
+    values.forEach((_, i) => {
+      window.setTimeout(() => setPointsVisible(i + 1), 200 + i * 160);
+    });
+  }, [values]);
+
   if (!values.length) return null;
   const max = Math.max(...values, 1);
   const min = Math.min(...values, 0);
   const span = Math.max(1, max - min);
   const w = 160;
   const h = 48;
-  const points = values
-    .map((v, i) => {
-      const x = values.length === 1 ? w / 2 : (i / (values.length - 1)) * w;
-      const y = h - ((v - min) / span) * (h - 8) - 4;
-      return `${x},${y}`;
-    })
-    .join(" ");
+  const pts = values.map((v, i) => {
+    const x = values.length === 1 ? w / 2 : (i / (values.length - 1)) * w;
+    const y = h - ((v - min) / span) * (h - 8) - 4;
+    return { x, y, v };
+  });
+  const points = pts.map((p) => `${p.x},${p.y}`).join(" ");
+  const improvement = values.length > 1 ? Math.round(values[values.length - 1]! - values[0]!) : 0;
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className={cn("w-full", className)} role="img" aria-label="Score trend chart">
-      <polyline
-        fill="none"
-        stroke="var(--teal)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        points={points}
-      />
-      {values.map((v, i) => {
-        const x = values.length === 1 ? w / 2 : (i / (values.length - 1)) * w;
-        const y = h - ((v - min) / span) * (h - 8) - 4;
-        return <circle key={`${v}-${i}`} cx={x} cy={y} r="2.5" fill="var(--teal)" />;
-      })}
-    </svg>
+    <div className={cn("relative", className)}>
+      <svg viewBox={`0 0 ${w} ${h}`} className="w-full" role="img" aria-label="Score trend chart">
+        <polyline
+          ref={pathRef}
+          fill="none"
+          stroke="var(--teal)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          points={points}
+        />
+        {pts.map((p, i) => (
+          <circle
+            key={`${p.v}-${i}`}
+            cx={p.x}
+            cy={p.y}
+            r="2.5"
+            fill="var(--teal)"
+            style={{
+              opacity: i < pointsVisible ? 1 : 0,
+              transition: "opacity 280ms var(--ease-out)",
+            }}
+          />
+        ))}
+      </svg>
+      {drawn && improvement > 0 ? (
+        <p className="ac-settle mt-1 text-xs font-medium text-[var(--forest)]">+{improvement} pts</p>
+      ) : null}
+    </div>
   );
 }
 

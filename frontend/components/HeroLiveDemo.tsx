@@ -1,0 +1,159 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { prefersReducedMotion } from "@/lib/motion";
+
+const METRICS = [
+  { label: "Question Alignment", value: 63 },
+  { label: "Thesis Strength", value: 78 },
+  { label: "Evidence Quality", value: 54 },
+  { label: "Citation Quality", value: 91 },
+] as const;
+
+const WEAK = ["Under-addresses evaluate command", "Two claims need deeper sources", "Style drift in references"];
+
+type Phase = "upload" | "analyzing" | "metrics" | "weak" | "hold";
+
+/**
+ * Homepage live demo — one 8–10s loop that shows a diagnostic assembling.
+ * Reduced motion: final assembled frame, no loop.
+ */
+export function HeroLiveDemo() {
+  const [phase, setPhase] = useState<Phase>("upload");
+  const [step, setStep] = useState(0);
+  const [shownMetrics, setShownMetrics] = useState(0);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) {
+      setPhase("weak");
+      setShownMetrics(METRICS.length);
+      setStep(4);
+      return;
+    }
+
+    let cancelled = false;
+    const timers: number[] = [];
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        timers.push(window.setTimeout(resolve, ms));
+      });
+
+    async function loop() {
+      while (!cancelled) {
+        setPhase("upload");
+        setStep(0);
+        setShownMetrics(0);
+        await wait(900);
+
+        setPhase("analyzing");
+        for (let i = 0; i < 4; i += 1) {
+          if (cancelled) return;
+          setStep(i);
+          await wait(700);
+        }
+
+        setPhase("metrics");
+        for (let i = 1; i <= METRICS.length; i += 1) {
+          if (cancelled) return;
+          setShownMetrics(i);
+          await wait(550);
+        }
+
+        setPhase("weak");
+        await wait(1600);
+
+        setPhase("hold");
+        await wait(900);
+      }
+    }
+
+    void loop();
+    return () => {
+      cancelled = true;
+      timers.forEach((id) => window.clearTimeout(id));
+    };
+  }, []);
+
+  const scanLabels = [
+    "Analyzing Assignment Brief…",
+    "Evaluating Thesis…",
+    "Reviewing Evidence…",
+    "Checking Citations…",
+  ];
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)] shadow-[var(--shadow-1)]"
+      aria-label="Live demonstration of an AcademicCheck diagnostic report"
+    >
+      <div className="border-b border-[var(--rule)] bg-[var(--paper)] px-5 py-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--teal)]">Live diagnostic</p>
+        <p className="mt-1 text-sm text-[var(--ink-muted)]">
+          {phase === "upload"
+            ? "Student uploads paper…"
+            : phase === "analyzing"
+              ? "Running academic health scan…"
+              : "Report assembling"}
+        </p>
+      </div>
+
+      <div className="relative min-h-[280px] p-5">
+        {phase === "analyzing" || phase === "upload" ? (
+          <div className="space-y-3">
+            {phase === "upload" ? (
+              <p className="ac-settle text-sm text-[var(--ink-muted)]">essay_draft.docx · 2,400 words</p>
+            ) : null}
+            {scanLabels.map((label, i) => {
+              const done = step > i;
+              const active = step === i && phase === "analyzing";
+              if (phase === "upload" && i > 0) return null;
+              return (
+                <div
+                  key={label}
+                  className={`flex items-center gap-3 text-sm ${done || active ? "ac-step-enter" : "opacity-40"}`}
+                >
+                  <span
+                    className={`grid h-5 w-5 place-items-center rounded-full text-[10px] ${
+                      done
+                        ? "bg-[var(--forest)] text-white"
+                        : active
+                          ? "border border-[var(--teal)] text-[var(--teal)]"
+                          : "border border-[var(--rule)]"
+                    }`}
+                  >
+                    {done ? "✓" : ""}
+                  </span>
+                  <span className={active ? "font-medium text-[var(--ink)]" : "text-[var(--ink)]"}>{label}</span>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+
+        {(phase === "metrics" || phase === "weak" || phase === "hold") && (
+          <div className="space-y-4">
+            <ul className="space-y-2.5">
+              {METRICS.slice(0, shownMetrics).map((m) => (
+                <li key={m.label} className="ac-settle flex items-center justify-between gap-3 text-sm">
+                  <span className="text-[var(--ink)]">{m.label}</span>
+                  <span className="font-serif tabular-nums text-[var(--teal)]">{m.value}%</span>
+                </li>
+              ))}
+            </ul>
+
+            {(phase === "weak" || phase === "hold") && (
+              <div className="ac-settle border-t border-[var(--rule)] pt-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-muted)]">Weak areas found</p>
+                <ul className="mt-2 space-y-1.5 text-sm text-[var(--ink)]">
+                  {WEAK.map((w) => (
+                    <li key={w}>· {w}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

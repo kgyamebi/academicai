@@ -16,27 +16,27 @@ type DisplayStep = {
   match: RegExp;
 };
 
-/** User-facing ritual steps — more granular than API phases. */
+/** Diagnostic checklist — more granular than API phases. */
 const DISPLAY_STEPS: DisplayStep[] = [
-  { id: "uploading", label: "Uploading", match: /upload/i },
-  { id: "processing", label: "Processing", match: /extract|document|queued|process/i },
-  { id: "structure", label: "Analyzing Structure", match: /structure|question|thesis|interpret/i },
-  { id: "arguments", label: "Analyzing Arguments", match: /argument|evidence|writ|grammar|analy/i },
-  { id: "citations", label: "Checking Citations", match: /citation|reference/i },
-  { id: "generating", label: "Generating Report", match: /complet|report|scor|build|generat/i },
+  { id: "brief", label: "Analyzing Assignment Brief", match: /upload|extract|document|queued|process/i },
+  { id: "thesis", label: "Evaluating Thesis", match: /thesis|structure|interpret/i },
+  { id: "evidence", label: "Reviewing Evidence", match: /argument|evidence|writ|grammar|analy/i },
+  { id: "alignment", label: "Checking Question Alignment", match: /question|relevance|align/i },
+  { id: "citations", label: "Detecting Citation Quality", match: /citation|reference/i },
+  { id: "report", label: "Assembling Diagnostic Report", match: /complet|report|scor|build|generat/i },
 ];
 
 const PHASE_COPY: Record<UploadPhase, { title: string; body: string }> = {
   idle: { title: "Ready when you are", body: "Paste a draft or upload a file to begin." },
   dragging: { title: "Drop to upload", body: "Release to attach your PDF, DOCX, TXT, or MD file." },
-  uploading: { title: "Uploading", body: "Sending your draft securely…" },
-  processing: { title: "Processing", body: "Extracting text and validating the document…" },
-  analyzing: { title: "Analyzing", body: "Reviewing structure, arguments, and citations…" },
-  generating: { title: "Generating report", body: "Assembling your Academic Performance Overview…" },
-  completed: { title: "Report ready", body: "Your Academic Performance Overview is ready." },
+  uploading: { title: "Receiving draft", body: "Sending your work securely for diagnosis…" },
+  processing: { title: "Preparing document", body: "Extracting text and validating the file…" },
+  analyzing: { title: "Running academic health scan", body: "Assessing brief fit, thesis, evidence, and citations…" },
+  generating: { title: "Building your report", body: "Assembling the Academic Performance Overview…" },
+  completed: { title: "Diagnosis complete", body: "Your Academic Performance Overview is ready." },
   failed: {
     title: "Analysis could not finish",
-    body: "Something went wrong. Use Try again, or open your dashboard — you will not be left on a spinning screen.",
+    body: "Something went wrong. Use Try again, or open your dashboard — you will not be left waiting.",
   },
 };
 
@@ -54,7 +54,7 @@ function resolvePhase(phase: UploadPhase | undefined, stage?: string, status?: s
 function activeDisplayIndex(phase: UploadPhase, stage?: string, status?: string): number {
   if (phase === "completed") return DISPLAY_STEPS.length - 1;
   if (phase === "uploading") return 0;
-  if (phase === "processing") return 1;
+  if (phase === "processing") return 0;
   if (phase === "generating") return DISPLAY_STEPS.length - 1;
   const raw = `${stage || ""} ${status || ""} ${phase}`;
   const idx = DISPLAY_STEPS.findIndex((s) => s.match.test(raw));
@@ -98,16 +98,22 @@ export function AnalysisRitual({
           : "pending",
   }));
 
+  const scanning = !completed && !failed;
+
   return (
-    <div className="ac-reveal ac-surface p-5 md:p-6" aria-live="polite" aria-busy={!completed && !failed}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <div
+      className="ac-reveal ac-surface relative overflow-hidden p-5 md:p-6"
+      aria-live="polite"
+      aria-busy={scanning}
+    >
+      {scanning ? <div className="ac-scan-rail" aria-hidden /> : null}
+
+      <div className="relative flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-[var(--teal)]">{copy.title}</p>
-          <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">
-            {completed || failed ? copy.body : `${copy.body}`}
-          </p>
+          <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">{copy.body}</p>
         </div>
-        {!completed && !failed ? (
+        {scanning ? (
           <p className="text-xs font-medium tabular-nums text-[var(--ink-muted)]" aria-hidden>
             {progressPct}%
           </p>
@@ -115,7 +121,7 @@ export function AnalysisRitual({
       </div>
 
       <div
-        className="mt-4 h-1.5 overflow-hidden rounded-full bg-[var(--rule)]"
+        className="relative mt-4 h-1.5 overflow-hidden rounded-full bg-[var(--rule)]"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={100}
@@ -123,25 +129,40 @@ export function AnalysisRitual({
         aria-label="Analysis progress"
       >
         <div
-          className={`h-full rounded-full transition-[width] duration-500 ease-out ${failed ? "bg-[var(--crimson)]" : "bg-[var(--teal)]"}`}
+          className={`ac-progress-liquid h-full rounded-full ${failed ? "bg-[var(--crimson)]" : "bg-[var(--teal)]"}`}
           style={{ width: `${progressPct}%` }}
         />
       </div>
 
-      <ol className="mt-5 space-y-3">
+      <ol className="relative mt-5 space-y-2.5">
         {steps.map((step) => (
-          <li key={step.id} className="flex items-center gap-3 text-sm">
+          <li
+            key={step.id}
+            className={`flex items-center gap-3 text-sm ${
+              step.state === "done" ? "ac-scan-step-done" : step.state === "active" ? "ac-step-enter" : ""
+            }`}
+          >
             <span
-              className={`h-2.5 w-2.5 shrink-0 rounded-full transition-colors ${
+              className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-semibold ${
                 step.state === "done"
-                  ? "bg-[var(--forest)]"
+                  ? "bg-[var(--forest)] text-white"
                   : step.state === "active"
-                    ? "bg-[var(--teal)] ac-pulse"
-                    : "bg-[var(--rule)]"
+                    ? "border border-[var(--teal)] text-[var(--teal)]"
+                    : "border border-[var(--rule)] text-transparent"
               }`}
               aria-hidden
-            />
-            <span className={step.state === "pending" ? "text-[var(--ink-muted)]" : "text-[var(--ink)]"}>
+            >
+              {step.state === "done" ? <span className="ac-scan-check">✓</span> : step.state === "active" ? "·" : ""}
+            </span>
+            <span
+              className={
+                step.state === "pending"
+                  ? "text-[var(--ink-muted)]"
+                  : step.state === "done"
+                    ? "text-[var(--ink)]"
+                    : "font-medium text-[var(--ink)]"
+              }
+            >
               {step.label}
               {step.state === "active" ? <span className="sr-only"> (current)</span> : null}
               {step.state === "done" ? <span className="sr-only"> (done)</span> : null}
@@ -153,7 +174,7 @@ export function AnalysisRitual({
       {failed && onRetry ? (
         <button
           type="button"
-          className="ac-hit ac-press mt-5 rounded-[var(--radius-sm)] border border-[var(--rule)] bg-[var(--paper-2)] px-4 text-sm font-medium"
+          className="ac-hit ac-btn-micro ac-press mt-5 rounded-[var(--radius-sm)] border border-[var(--rule)] bg-[var(--paper-2)] px-4 text-sm font-medium"
           onClick={onRetry}
         >
           Retry analysis

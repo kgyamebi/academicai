@@ -18,6 +18,11 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
+  --motion-fast: 160ms;
+  --motion-med: 420ms;
+  --motion-slow: 900ms;
 }
 
 html {
@@ -76,7 +81,7 @@ body {
   background: var(--paper-2);
   padding: 0.75rem 0.875rem;
   color: var(--ink);
-  transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+  transition: border-color var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
 }
 
 .ac-field:hover {
@@ -89,11 +94,11 @@ body {
   box-shadow: 0 0 0 3px var(--teal-soft);
 }
 
-/* Motion */
+/* Motion — sparse utilities only */
 @keyframes ac-fade-up {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -119,123 +124,87 @@ body {
   }
 }
 
-@keyframes ac-orb-drift-a {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(4%, -6%, 0) scale(1.06);
-  }
-}
-
-@keyframes ac-orb-drift-b {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(-5%, 4%, 0) scale(1.08);
-  }
-}
-
-@keyframes ac-orb-drift-c {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(3%, 5%, 0) scale(1.04);
-  }
-}
-
-@keyframes ac-sheen-sweep {
-  0% {
-    transform: translateX(-30%) rotate(12deg);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.55;
-  }
-  55% {
-    opacity: 0.35;
-  }
-  100% {
-    transform: translateX(130%) rotate(12deg);
-    opacity: 0;
-  }
-}
-
-@keyframes ac-panel-in {
+@keyframes ac-settle {
   from {
     opacity: 0;
-    transform: translateY(22px) scale(0.985);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-@keyframes ac-mark-breathe {
-  0%,
+@keyframes ac-scan-line {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.55;
+  }
+  88% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(400%);
+    opacity: 0;
+  }
+}
+
+@keyframes ac-score-land {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.025);
+  }
   100% {
     transform: scale(1);
   }
-  50% {
-    transform: scale(1.03);
+}
+
+@keyframes ac-score-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.28);
+  }
+  100% {
+    box-shadow: 0 0 0 16px rgba(15, 118, 110, 0);
   }
 }
 
-@keyframes ac-check-draw {
+@keyframes ac-check-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
   to {
-    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-.ac-enter {
-  animation: ac-fade-up 560ms var(--ease-out) both;
+@keyframes ac-step-lock {
+  from {
+    opacity: 0.55;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.ac-enter-delay-1 {
-  animation-delay: 90ms;
-}
-
-.ac-enter-delay-2 {
-  animation-delay: 170ms;
-}
-
-.ac-enter-delay-3 {
-  animation-delay: 260ms;
-}
-
-.ac-enter-delay-4 {
-  animation-delay: 340ms;
+.ac-settle {
+  animation: ac-settle var(--motion-med) var(--ease-out-expo) both;
 }
 
 .ac-reveal {
-  animation: ac-fade-up 480ms var(--ease-out) both;
+  animation: ac-fade-up var(--motion-med) var(--ease-out-expo) both;
 }
 
 .ac-press:active {
-  transform: translateY(1px);
-}
-
-.ac-pulse {
-  box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.45);
-  animation: ac-pulse-ring 1.6s var(--ease-out) infinite;
-}
-
-@keyframes ac-pulse-ring {
-  0% {
-    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(15, 118, 110, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(15, 118, 110, 0);
-  }
+  transform: translateY(1px) scale(0.98);
 }
 
 .ac-skeleton {
@@ -245,46 +214,12 @@ body {
   border-radius: var(--radius-sm);
 }
 
-/* Ambient stage — login / register / onboarding atmosphere */
+/* Static ambient — no drifting orbs / sheen loops */
 .ac-ambient {
   background:
-    radial-gradient(ellipse 70% 50% at 80% 10%, rgba(15, 118, 110, 0.12), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 5% 90%, rgba(11, 18, 32, 0.06), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 80% 10%, rgba(15, 118, 110, 0.08), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 5% 90%, rgba(11, 18, 32, 0.04), transparent 50%),
     linear-gradient(165deg, #eef3f6 0%, var(--paper) 48%, #eef2f5 100%);
-}
-
-.ac-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(48px);
-  will-change: transform;
-}
-
-.ac-orb-a {
-  top: -8%;
-  right: -6%;
-  width: min(52vw, 420px);
-  height: min(52vw, 420px);
-  background: rgba(15, 118, 110, 0.22);
-  animation: ac-orb-drift-a 18s var(--ease-out) infinite;
-}
-
-.ac-orb-b {
-  bottom: 5%;
-  left: -10%;
-  width: min(48vw, 380px);
-  height: min(48vw, 380px);
-  background: rgba(13, 148, 136, 0.14);
-  animation: ac-orb-drift-b 22s var(--ease-out) infinite;
-}
-
-.ac-orb-c {
-  top: 42%;
-  left: 48%;
-  width: min(36vw, 280px);
-  height: min(36vw, 280px);
-  background: rgba(11, 18, 32, 0.06);
-  animation: ac-orb-drift-c 26s var(--ease-out) infinite;
 }
 
 .ac-ambient-grid {
@@ -295,88 +230,121 @@ body {
     linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
-  opacity: 0.9;
-}
-
-.ac-ambient-sheen {
-  position: absolute;
-  top: -20%;
-  left: 0;
-  width: 45%;
-  height: 140%;
-  background: linear-gradient(
-    105deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.45) 45%,
-    transparent 70%
-  );
-  animation: ac-sheen-sweep 14s var(--ease-out) infinite;
+  opacity: 0.85;
   pointer-events: none;
 }
 
 .ac-auth-panel {
-  animation: ac-panel-in 700ms var(--ease-out) both;
+  animation: ac-settle 520ms var(--ease-out-expo) both;
   box-shadow:
     0 1px 0 rgba(15, 23, 42, 0.04),
-    0 24px 48px -28px rgba(11, 18, 32, 0.18);
-  backdrop-filter: blur(8px);
-  background: rgba(255, 255, 255, 0.92);
+    0 20px 40px -28px rgba(11, 18, 32, 0.14);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .ac-auth-panel-shine {
   background: linear-gradient(
     135deg,
-    rgba(15, 118, 110, 0.06) 0%,
+    rgba(15, 118, 110, 0.05) 0%,
     transparent 42%,
     transparent 100%
   );
 }
 
-.ac-brand-float {
-  animation: ac-mark-breathe 5.5s var(--ease-out) infinite;
-  transform-origin: center;
-}
-
-.ac-check-animated {
-  stroke-dasharray: 48;
-  stroke-dashoffset: 48;
-  animation: ac-check-draw 900ms var(--ease-out) 400ms forwards;
-}
-
-.ac-cta-glow {
-  position: relative;
-  overflow: hidden;
-  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
-}
-
-.ac-cta-glow::after {
-  content: "";
+.ac-dim-veil {
   position: absolute;
   inset: 0;
+  background: rgba(11, 18, 32, 0.03);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms var(--ease-out);
+}
+
+.ac-dim-veil.is-on {
+  opacity: 1;
+}
+
+.ac-score-ring-wrap.is-landing {
+  animation: ac-score-land 480ms var(--ease-spring) both;
+}
+
+.ac-score-ring-wrap.is-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  animation: ac-score-pulse 700ms var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+.ac-scan-rail {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ac-scan-rail::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 28%;
   background: linear-gradient(
-    110deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.28) 48%,
-    transparent 62%
+    180deg,
+    transparent,
+    rgba(15, 118, 110, 0.07),
+    transparent
   );
-  transform: translateX(-120%);
-  transition: transform 650ms var(--ease-out);
+  animation: ac-scan-line 2.8s var(--ease-out) infinite;
 }
 
-.ac-cta-glow:hover {
+.ac-scan-step-done {
+  animation: ac-step-lock 380ms var(--ease-out-expo) both;
+}
+
+.ac-scan-check {
+  animation: ac-check-pop 280ms var(--ease-spring) both;
+}
+
+.ac-step-enter {
+  animation: ac-settle 380ms var(--ease-out-expo) both;
+}
+
+.ac-step-exit {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+}
+
+.ac-progress-liquid {
+  transition: width 520ms var(--ease-out-expo);
+}
+
+.ac-btn-micro {
+  transition:
+    transform var(--motion-fast) var(--ease-spring),
+    box-shadow var(--motion-fast) var(--ease-out),
+    background-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out);
+}
+
+.ac-btn-micro:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 10px 28px -12px rgba(15, 118, 110, 0.55);
+  box-shadow: 0 8px 20px -14px rgba(11, 18, 32, 0.35);
 }
 
-.ac-cta-glow:hover::after {
-  transform: translateX(120%);
+.ac-btn-micro:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: none;
 }
 
-/* Hero atmosphere — cool paper plane, not purple */
+/* Hero atmosphere — static paper plane */
 .ac-hero-plane {
   background:
-    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(15, 118, 110, 0.08), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 10% 80%, rgba(15, 23, 42, 0.05), transparent 50%),
+    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(15, 118, 110, 0.07), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 10% 80%, rgba(15, 23, 42, 0.04), transparent 50%),
     linear-gradient(180deg, #eef2f5 0%, var(--paper) 55%, var(--paper) 100%);
 }
 
@@ -386,14 +354,6 @@ body {
     linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 85%);
-}
-
-.ac-hero-orbs .ac-orb-a {
-  opacity: 0.85;
-}
-
-.ac-hero-orbs .ac-orb-b {
-  opacity: 0.7;
 }
 
 .prose-academic h1,
@@ -489,28 +449,23 @@ body {
     scroll-behavior: auto !important;
   }
 
-  .ac-enter,
-  .ac-enter-delay-1,
-  .ac-enter-delay-2,
-  .ac-enter-delay-3,
-  .ac-enter-delay-4,
+  .ac-settle,
   .ac-reveal,
-  .ac-pulse,
-  .ac-orb-a,
-  .ac-orb-b,
-  .ac-orb-c,
-  .ac-ambient-sheen,
   .ac-auth-panel,
-  .ac-brand-float,
-  .ac-check-animated,
-  .ac-cta-glow::after {
+  .ac-scan-rail::before,
+  .ac-score-ring-wrap.is-landing,
+  .ac-score-ring-wrap.is-pulse::after,
+  .ac-scan-step-done,
+  .ac-scan-check,
+  .ac-step-enter {
     animation: none !important;
     opacity: 1;
     transform: none;
     box-shadow: none;
   }
 
-  .ac-check-animated {
-    stroke-dashoffset: 0;
+  .ac-btn-micro:hover:not(:disabled),
+  .ac-btn-micro:active:not(:disabled) {
+    transform: none;
   }
 }

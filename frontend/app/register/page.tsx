@@ -62,7 +62,7 @@ export default function RegisterPage() {
           subtitle="Save assignments, reports and draft history. We do not use your work for model training unless you opt in."
         >
           <div className="mb-6 flex justify-center">
-            <BrandMark className="h-14 w-14" animated />
+            <BrandMark className="h-14 w-14" />
           </div>
           <SocialAuthButtons next="/onboarding" />
           <form onSubmit={onSubmit} className="mt-2 space-y-4">
@@ -125,7 +125,7 @@ export default function RegisterPage() {
                 {error}
               </p>
             )}
-            <button type="submit" className="ac-hit ac-cta-glow w-full rounded-md bg-[var(--teal)] text-white">
+            <button type="submit" className="ac-hit ac-btn-micro w-full rounded-md bg-[var(--teal)] text-white">
               Continue with Email
             </button>
           </form>
