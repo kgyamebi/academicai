@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
 import { api, signOut as apiSignOut } from "@/lib/api";
 
 export type AuthUser = {
@@ -23,8 +22,16 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const loadingStub: AuthContextValue = {
+  user: null,
+  status: "loading",
+  signedIn: false,
+  needsVerify: false,
+  refresh: async () => {},
+  signOut: async () => {},
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const path = usePathname();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [status, setStatus] = useState<"loading" | "ready">("loading");
 
@@ -51,10 +58,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!cancelled) setStatus("ready");
       }
     })();
+
+    const onFocus = () => {
+      void refresh();
+    };
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("pageshow", onFocus);
+
     return () => {
       cancelled = true;
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("pageshow", onFocus);
     };
-  }, [path]);
+  }, [refresh]);
 
   const signOut = useCallback(async () => {
     await apiSignOut();
@@ -74,9 +90,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return ctx;
+  return useContext(AuthContext) ?? loadingStub;
 }
