@@ -33,6 +33,16 @@ const nextConfig: NextConfig = {
                 "https://pagead2.googlesyndication.com",
                 "https://googleads.g.doubleclick.net",
               ].join(" "),
+              // Ads Tag diagnostics checks script-src-elem explicitly (not only script-src).
+              [
+                "script-src-elem 'self' 'unsafe-inline'",
+                "https://www.googletagmanager.com",
+                "https://*.googletagmanager.com",
+                "https://www.googleadservices.com",
+                "https://www.google.com",
+                "https://pagead2.googlesyndication.com",
+                "https://googleads.g.doubleclick.net",
+              ].join(" "),
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               [
@@ -46,6 +56,7 @@ const nextConfig: NextConfig = {
                 "https://pagead2.googlesyndication.com",
                 "https://googleads.g.doubleclick.net",
                 "https://*.g.doubleclick.net",
+                "https://ad.doubleclick.net",
                 "https://www.google-analytics.com",
                 "https://*.google-analytics.com",
                 "https://www.google.co.uk",
