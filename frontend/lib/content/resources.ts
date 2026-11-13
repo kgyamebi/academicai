@@ -384,6 +384,195 @@ A useful checker explains **why** a section is weak and what to change. A harmfu
 
 AcademicCheck is built around those rules. Start with the [sample report](/sample-report) or [check your draft](/check).`,
   },
+  {
+    slug: "what-does-evaluate-mean",
+    title: "What “evaluate” means in an assignment",
+    description: "How to answer an evaluate question: criteria, judgement, and a conclusion that takes a side.",
+    category: "assignment-questions",
+    keywords: ["what does evaluate mean in an essay", "evaluate command word", "how to evaluate in an assignment"],
+    readingMinutes: 7,
+    updated: "2026-11-13",
+    relatedSlugs: ["command-words-in-assignments", "what-does-critically-discuss-mean"],
+    body: `## Evaluate means judge
+
+An evaluate question asks you to weigh something against criteria and reach a judgement. A description of the topic, however detailed, does not answer it.
+
+## A paragraph that evaluates
+
+1. Name the criterion (effectiveness, fairness, evidence quality, cost).
+2. Apply it to the thing you were asked about.
+3. Say how well it meets the criterion, and with what limit.
+
+## The conclusion has to decide
+
+End with a position: how far the claim holds, and under what conditions. “There are many views” is not an evaluation.
+
+## Check the draft
+
+Paste the question and the essay at [the assignment checker](/check). Look first at whether the command word was answered.
+
+Related: [command words](/resources/command-words-in-assignments) · [critically discuss](/resources/what-does-critically-discuss-mean)`,
+  },
+  {
+    slug: "what-does-analyse-mean",
+    title: "What “analyse” means in an essay",
+    description: "Analyse means break a claim into parts and explain how they relate. It is not a longer summary.",
+    category: "assignment-questions",
+    keywords: ["what does analyse mean in an essay", "analyze command word university", "how to analyse an assignment"],
+    readingMinutes: 6,
+    updated: "2026-11-13",
+    relatedSlugs: ["command-words-in-assignments", "what-does-evaluate-mean"],
+    body: `## Analyse means take it apart
+
+You identify the parts of an argument, text, data set, or policy, and you explain how those parts produce the result. A summary says what is there. Analysis says how it works.
+
+## A simple test
+
+Cover your paragraph and ask: did I explain a relationship, or did I only retell content? If you only retold it, the command word is still unanswered.
+
+## Where marks go
+
+Markers reward the explanation after the example. Quote or describe briefly, then spend the sentences on why that piece matters to the question.
+
+When the draft is complete, [check question fit](/check).`,
+  },
+  {
+    slug: "compare-and-contrast-essays",
+    title: "How to write a compare and contrast essay",
+    description: "Organise a comparison by criteria, not by retelling subject A and then subject B.",
+    category: "essay-writing",
+    keywords: ["compare and contrast essay", "how to compare and contrast", "comparison essay structure"],
+    readingMinutes: 7,
+    updated: "2026-11-13",
+    relatedSlugs: ["university-essay-structure", "command-words-in-assignments"],
+    body: `## Compare by criterion
+
+A weak comparison writes everything about A, then everything about B. A stronger one picks criteria — cost, evidence, ethics, outcome — and discusses both subjects under each criterion.
+
+## Thesis first
+
+The introduction should say what the comparison shows, not only that two things will be compared. “This essay will compare X and Y” is a topic, not a thesis.
+
+## Conclusion
+
+State which differences matter for the question. Do not repeat both summaries.
+
+Structure help: [university essay structure](/resources/university-essay-structure). Then [check the draft](/check).`,
+  },
+  {
+    slug: "to-what-extent-essays",
+    title: "How to answer “to what extent”",
+    description: "To what extent needs a degree of agreement, limits, and a final judgement.",
+    category: "assignment-questions",
+    keywords: ["to what extent essay", "how to answer to what extent", "to what extent meaning"],
+    readingMinutes: 6,
+    updated: "2026-11-13",
+    relatedSlugs: ["what-does-evaluate-mean", "command-words-in-assignments"],
+    body: `## Extent is a scale
+
+The question wants to know how far a statement holds. Your thesis should place the claim on that scale: largely, partly, or only in limited cases.
+
+## Show the limit
+
+A paragraph that only supports the statement has not answered “extent.” Include the condition where the claim weakens, and say how much that condition matters.
+
+## Last sentence
+
+Repeat the degree of agreement in plain language. Avoid a new idea in the final paragraph.
+
+[Check whether the draft answers the extent question](/check).`,
+  },
+  {
+    slug: "how-to-write-a-literature-review",
+    title: "How to write a literature review",
+    description: "Group sources by theme, state the gap, and keep every section tied to the research question.",
+    category: "essay-writing",
+    keywords: ["how to write a literature review", "literature review structure", "literature review vs summary"],
+    readingMinutes: 8,
+    updated: "2026-11-13",
+    relatedSlugs: ["apa-7-citation-guide", "thesis-statement-examples"],
+    body: `## Do not list papers
+
+A literature review synthesises. Each paragraph should put two or more sources in relation: they agree, they conflict, or one extends the other.
+
+## A usable shape
+
+1. Research question and why the field matters.
+2. Themes or debates, not a chronological dump of every paper.
+3. The gap your project addresses.
+4. A short close that points into your method or argument.
+
+## Citations
+
+Every in-text citation needs a reference. A review with a long list and broken matches looks careless even when the synthesis is good.
+
+Guide the draft through the [literature review checker](/literature-review-checker) or [start a check](/check).`,
+  },
+  {
+    slug: "how-to-write-a-reflective-essay",
+    title: "How to write a reflective essay",
+    description: "Move from what happened, to why it mattered, to what you will do differently.",
+    category: "essay-writing",
+    keywords: ["how to write a reflective essay", "reflective writing university", "reflection vs description"],
+    readingMinutes: 6,
+    updated: "2026-11-13",
+    relatedSlugs: ["what-does-analyse-mean", "command-words-in-assignments"],
+    body: `## Three moves
+
+1. **What happened** — a specific incident, short.
+2. **Why it mattered** — analysis, often using a model your module named.
+3. **What changes** — a concrete next action, not “I learned a lot.”
+
+## Where students stall
+
+The story runs for pages and the analysis is one sentence. Reverse the proportion. The incident is evidence. The mark sits in the interpretation.
+
+Use the [reflective essay checker](/reflective-essay-checker) before you submit, or [check the draft](/check).`,
+  },
+  {
+    slug: "how-to-write-a-lab-report",
+    title: "How to write a lab report",
+    description: "Aim, method, results, and a discussion that interprets the data against the aim.",
+    category: "essay-writing",
+    keywords: ["how to write a lab report", "lab report discussion", "lab report structure university"],
+    readingMinutes: 7,
+    updated: "2026-11-13",
+    relatedSlugs: ["what-does-analyse-mean", "apa-7-citation-guide"],
+    body: `## Keep the jobs separate
+
+- **Method:** what you did, so someone else could follow it.
+- **Results:** what you observed, without explaining it yet.
+- **Discussion:** what the results mean for the aim, including limits and comparison with expected theory.
+
+## The usual miss
+
+The discussion repeats the results in words. Add a claim: did the result support the aim, and what could have distorted it?
+
+Do not invent data. Review the report you wrote with the [lab report checker](/lab-report-checker).`,
+  },
+  {
+    slug: "how-to-answer-a-case-study",
+    title: "How to answer a case study question",
+    description: "Apply a framework to facts from the case, then recommend in the form the question asks.",
+    category: "assignment-questions",
+    keywords: ["how to answer a case study", "case study essay structure", "case study analysis university"],
+    readingMinutes: 7,
+    updated: "2026-11-13",
+    relatedSlugs: ["what-does-evaluate-mean", "command-words-in-assignments"],
+    body: `## Theory has to touch the case
+
+Define a framework in a few lines, then use case facts as evidence. A page of theory with no company, patient, or client detail does not answer a case question.
+
+## Match the command
+
+If the question says recommend, the ending must choose. If it says evaluate, the ending must judge against criteria. A summary of the case is not either of those.
+
+## Evidence
+
+When you use a figure from the case, cite it the way your module requires. Unsupported numbers read as invented.
+
+[Check a case-study draft](/case-study-checker).`,
+  },
 ];
 
 export function getResource(slug: string): Guide | undefined {

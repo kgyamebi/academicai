@@ -9,7 +9,7 @@ import { siteUrl } from "@/lib/utils";
 
 const HOME_TITLE = "Free Assignment, Thesis & Citation Checker | AcademicCheck AI";
 const HOME_DESCRIPTION =
-  "Get actionable feedback on your assignment’s thesis, argument, evidence, structure and citations before submission. Free first check.";
+  "Get actionable feedback on your assignment’s thesis, argument, evidence, structure and citations before submission. Fully free.";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
@@ -160,11 +160,25 @@ export default function HomePage() {
           </div>
         </section>
 
+        <section className="mx-auto max-w-6xl px-4 pb-4 pt-16">
+          <h2 className="font-serif text-2xl">Guides students search before a deadline</h2>
+          <ul className="mt-5 grid gap-2 text-sm sm:grid-cols-2">
+            <li><Link className="text-[var(--teal)] underline-offset-4 hover:underline" href="/resources/what-does-evaluate-mean">What “evaluate” means</Link></li>
+            <li><Link className="text-[var(--teal)] underline-offset-4 hover:underline" href="/resources/what-does-analyse-mean">What “analyse” means</Link></li>
+            <li><Link className="text-[var(--teal)] underline-offset-4 hover:underline" href="/resources/to-what-extent-essays">How to answer “to what extent”</Link></li>
+            <li><Link className="text-[var(--teal)] underline-offset-4 hover:underline" href="/resources/compare-and-contrast-essays">Compare and contrast essays</Link></li>
+            <li><Link className="text-[var(--teal)] underline-offset-4 hover:underline" href="/literature-review-checker">Literature review checker</Link></li>
+            <li><Link className="text-[var(--teal)] underline-offset-4 hover:underline" href="/reflective-essay-checker">Reflective essay checker</Link></li>
+            <li><Link className="text-[var(--teal)] underline-offset-4 hover:underline" href="/lab-report-checker">Lab report checker</Link></li>
+            <li><Link className="text-[var(--teal)] underline-offset-4 hover:underline" href="/case-study-checker">Case study checker</Link></li>
+          </ul>
+        </section>
+
         <section className="mx-auto max-w-6xl px-4 py-16">
           <div className="flex flex-col items-start justify-between gap-6 rounded-[var(--radius-lg)] border border-[var(--rule)] bg-[var(--paper-2)] p-8 md:flex-row md:items-center">
             <div>
               <h2 className="font-serif text-2xl md:text-3xl">Ready for a clear next step?</h2>
-              <p className="mt-2 text-sm text-[var(--ink-muted)]">First check available without an account.</p>
+              <p className="mt-2 text-sm text-[var(--ink-muted)]">Every feature is free. No account required to start.</p>
             </div>
             <ButtonLink href="/check" variant="primary" className="px-6">
               Check my assignment

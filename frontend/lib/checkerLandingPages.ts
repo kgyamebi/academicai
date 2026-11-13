@@ -107,7 +107,7 @@ const handCraftedPages: Record<string, CheckerLandingPage> = {
       {
         question: "Is the assignment checker free?",
         answer:
-          "You can start with a free first check without buying a plan. Create an account if you want to save work and return to reports later.",
+          "Yes. Every feature is free right now, with no monthly check cap. You can start without an account.",
       },
       {
         question: "Does the assignment checker give a grade?",
@@ -353,6 +353,278 @@ const handCraftedPages: Record<string, CheckerLandingPage> = {
       { href: "/sample-report", label: "Sample diagnostic report" },
     ],
     cta: "Check my citations",
+  },
+  "literature-review-checker": {
+    title: "Free Literature Review Checker | AcademicCheck AI",
+    description:
+      "Check whether your literature review synthesises sources, answers the research question, and cites consistently. Diagnostic feedback, not a grade.",
+    heading: "Literature review checker",
+    eyebrow: "Before you submit the review",
+    intro:
+      "A literature review is judged on synthesis, not on how many papers you summarise. Paste the research question and the draft. AcademicCheck looks at whether sources are compared, whether the gap is clear, and whether citations match the reference list.",
+    checks: [
+      "Whether paragraphs compare sources instead of listing them one by one",
+      "Whether the review stays tied to the research question",
+      "Citation and reference consistency across a long source list",
+    ],
+    howItWorks: [
+      {
+        step: "01",
+        title: "Add the question and draft",
+        body: "Paste the research question or chapter brief with the review. A review without a question cannot be checked for relevance.",
+      },
+      {
+        step: "02",
+        title: "See synthesis gaps",
+        body: "The report flags description-heavy sections and ranks what to revise first.",
+      },
+      {
+        step: "03",
+        title: "Rewrite the weak paragraphs",
+        body: "You keep authorship. The checker does not draft the review for you.",
+      },
+    ],
+    sample: {
+      score: 71,
+      readiness: "Needs synthesis, not more sources",
+      findings: [
+        { title: "Source listing", detail: "Three paragraphs summarise one paper each and never compare them." },
+        { title: "Research question", detail: "The gap is named in the introduction and then disappears." },
+        { title: "References", detail: "Four in-text citations have no matching reference-list entry." },
+      ],
+    },
+    sections: [
+      {
+        heading: "What markers look for in a literature review",
+        paragraphs: [
+          "A strong review groups sources by theme or debate. It says how studies agree, where they conflict, and what is still missing. A weak review reads like annotated bibliography paragraphs placed in a row.",
+          "Before you add another paper, check whether the ones you already have are in conversation. AcademicCheck is useful at that moment: it shows whether the draft still answers the question you set.",
+        ],
+      },
+      {
+        heading: "A revision order that saves time",
+        paragraphs: [
+          "First, write one sentence that states the gap. Then make every theme paragraph end by relating back to that sentence. Only after the argument is stable should you tidy APA, Harvard, or the style your department requires.",
+          "Run the checker once on the full draft, revise the top priorities, and run it again. The second pass is where orphaned citations usually show up.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is the literature review checker free?",
+        answer: "Yes. Full analysis, citations, PDF export, and draft comparison are free right now, with no monthly cap.",
+      },
+      {
+        question: "Will it write my literature review?",
+        answer: "No. It diagnoses the draft you wrote. You revise the synthesis yourself.",
+      },
+      {
+        question: "Does a high score mean my supervisor will pass it?",
+        answer: "No. The score is a diagnostic, not an official mark.",
+      },
+    ],
+    related: [
+      { href: "/resources/how-to-write-a-literature-review", label: "How to write a literature review" },
+      { href: "/citation-checker", label: "Citation checker" },
+      { href: "/thesis-checker", label: "Thesis checker" },
+      { href: "/check", label: "Check a draft" },
+    ],
+    cta: "Check my literature review",
+  },
+  "reflective-essay-checker": {
+    title: "Free Reflective Essay Checker | AcademicCheck AI",
+    description:
+      "Check a reflective essay for a real critical incident, analysis, and a link back to the brief. Not a grade and not a rewrite.",
+    heading: "Reflective essay checker",
+    eyebrow: "Reflection, not a diary",
+    intro:
+      "Reflective essays lose marks when they stay at story level. Paste the brief and the draft. AcademicCheck checks whether you describe an experience, analyse it, and connect it to the module outcome.",
+    checks: [
+      "Whether the draft goes beyond narration into analysis",
+      "Whether the reflection answers the set brief",
+      "Whether the conclusion states what will change in practice",
+    ],
+    howItWorks: [
+      {
+        step: "01",
+        title: "Paste the brief",
+        body: "Include the learning outcome or question. Reflection without a target is hard to assess.",
+      },
+      {
+        step: "02",
+        title: "Find the descriptive stretch",
+        body: "The report highlights sections that retell events without explaining why they matter.",
+      },
+      {
+        step: "03",
+        title: "Add the analysis yourself",
+        body: "You write the judgement. The tool does not invent a model or a quote for you.",
+      },
+    ],
+    sample: {
+      score: 68,
+      readiness: "Story is clear; analysis is thin",
+      findings: [
+        { title: "Description", detail: "The first half retells the shift and never names what was learned." },
+        { title: "Theory", detail: "A model is mentioned once and not used to interpret the incident." },
+        { title: "Future practice", detail: "The ending summarises the story instead of stating a change." },
+      ],
+    },
+    sections: [
+      {
+        heading: "Description, analysis, and future action",
+        paragraphs: [
+          "A workable reflective paragraph has three moves: what happened, why it mattered, and what you will do differently. Markers can see when the middle move is missing, even if the prose is fluent.",
+          "If your module names a model, use it to interpret the incident. Naming the model in the introduction and never returning to it does not count as application.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Is this free?",
+        answer: "Yes. You can check a reflective draft now, with no account required for the first session.",
+      },
+      {
+        question: "Can it turn my notes into a reflective essay?",
+        answer: "No. It reviews a draft you have written. It does not ghostwrite the essay.",
+      },
+    ],
+    related: [
+      { href: "/resources/how-to-write-a-reflective-essay", label: "How to write a reflective essay" },
+      { href: "/assignment-checker", label: "Assignment checker" },
+      { href: "/check", label: "Check a draft" },
+    ],
+    cta: "Check my reflection",
+  },
+  "lab-report-checker": {
+    title: "Free Lab Report Checker | AcademicCheck AI",
+    description:
+      "Check a lab report for aim, method, results, and a discussion that actually interprets the data. Diagnostic only.",
+    heading: "Lab report checker",
+    eyebrow: "Results need interpretation",
+    intro:
+      "Lab reports lose marks when the discussion repeats the results. Paste the aim and the report. AcademicCheck checks whether the method is followable, whether results are reported before interpretation, and whether the discussion answers the aim.",
+    checks: [
+      "Whether the discussion interprets results instead of repeating them",
+      "Whether the report stays aligned with the stated aim",
+      "Whether citations in the introduction and discussion are consistent",
+    ],
+    howItWorks: [
+      {
+        step: "01",
+        title: "Include the aim",
+        body: "Paste the practical brief or aim with the report so the discussion can be checked against it.",
+      },
+      {
+        step: "02",
+        title: "See the weak section",
+        body: "The report ranks whether method, results, or discussion needs work first.",
+      },
+      {
+        step: "03",
+        title: "Revise that section",
+        body: "You rewrite the science. The checker does not invent data or references.",
+      },
+    ],
+    sample: {
+      score: 73,
+      readiness: "Results are fine; discussion is thin",
+      findings: [
+        { title: "Aim", detail: "The aim asks about temperature, but the discussion explains equipment instead." },
+        { title: "Results", detail: "Figures are described again in the discussion without a claim." },
+        { title: "Sources", detail: "Two comparison studies are cited and missing from the reference list." },
+      ],
+    },
+    sections: [
+      {
+        heading: "The section markers read twice",
+        paragraphs: [
+          "Method and raw results are necessary. The mark often sits in the discussion: what the result means, how it compares with expected theory, and what limited the experiment. If that section only restates numbers, the report is unfinished.",
+          "Do not ask a tool to fabricate results. AcademicCheck reviews the report you wrote from the experiment you did.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Will it calculate my results?",
+        answer: "No. It reviews how the report presents and interprets results you already have.",
+      },
+      {
+        question: "Is the lab report check free?",
+        answer: "Yes. There is no monthly check cap during this free period.",
+      },
+    ],
+    related: [
+      { href: "/resources/how-to-write-a-lab-report", label: "How to write a lab report" },
+      { href: "/citation-checker", label: "Citation checker" },
+      { href: "/check", label: "Check a draft" },
+    ],
+    cta: "Check my lab report",
+  },
+  "case-study-checker": {
+    title: "Free Case Study Checker | AcademicCheck AI",
+    description:
+      "Check whether a case study applies theory to the case, answers the question, and cites the case evidence. Not a grade.",
+    heading: "Case study checker",
+    eyebrow: "Theory has to meet the case",
+    intro:
+      "Case studies fail when theory and the case never meet. Paste the question and the draft. AcademicCheck checks whether you use the case as evidence, apply a framework, and reach a recommendation the question asked for.",
+    checks: [
+      "Whether theory is applied to case facts, not explained in the abstract",
+      "Whether the recommendation answers the question",
+      "Whether case evidence and external sources are cited consistently",
+    ],
+    howItWorks: [
+      {
+        step: "01",
+        title: "Paste the case question",
+        body: "The question decides whether you should recommend, evaluate, or compare options.",
+      },
+      {
+        step: "02",
+        title: "Find unused theory",
+        body: "The diagnosis shows frameworks that are defined and then abandoned.",
+      },
+      {
+        step: "03",
+        title: "Tie each claim to the case",
+        body: "You write the application. The tool does not invent case facts.",
+      },
+    ],
+    sample: {
+      score: 70,
+      readiness: "Framework is named; case is thin",
+      findings: [
+        { title: "Application", detail: "SWOT is defined for a page and never used on the company." },
+        { title: "Question", detail: "The brief asks for a recommendation. The ending only summarises theory." },
+        { title: "Evidence", detail: "Case figures are mentioned with no source line." },
+      ],
+    },
+    sections: [
+      {
+        heading: "Apply, then recommend",
+        paragraphs: [
+          "A case paragraph should name a concept, point at a fact from the case, and say what that fact implies. A recommendation should follow from those implications and match the command word in the question.",
+          "If you cannot point to a sentence in the case, the claim is unsupported. Fix that before you polish the prose.",
+        ],
+      },
+    ],
+    faqs: [
+      {
+        question: "Can it solve the case for me?",
+        answer: "No. It reviews your analysis. You decide the recommendation.",
+      },
+      {
+        question: "Is it free?",
+        answer: "Yes. Case-study checks are included, with no monthly cap right now.",
+      },
+    ],
+    related: [
+      { href: "/resources/how-to-answer-a-case-study", label: "How to answer a case study" },
+      { href: "/assignment-checker", label: "Assignment checker" },
+      { href: "/check", label: "Check a draft" },
+    ],
+    cta: "Check my case study",
   },
 };
 
