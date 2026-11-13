@@ -45,7 +45,7 @@ def test_upload_accepts_plain_text():
     assert validated.extension == ".txt"
 
 
-def test_entitlements_block_oversize_and_rubric_on_free(client):
+def test_entitlements_block_oversize_and_allow_full_features_while_free(client):
     client.post(
         "/api/auth/register",
         json={"email": "entitle@example.com", "password": "password12", "full_name": "Ent"},
@@ -57,12 +57,9 @@ def test_entitlements_block_oversize_and_rubric_on_free(client):
         raise AssertionError("Oversize documents must be rejected")
     except Exception as exc:
         assert getattr(exc, "status_code", 0) == 402
-    try:
-        assert_can_analyze(db, user, 200, "rubric")
-        raise AssertionError("Free plan must not receive rubric analysis")
-    except Exception as exc:
-        assert getattr(exc, "status_code", 0) == 402
-    assert monthly_quota_exhausted(db, user) in {True, False}
+    plan = assert_can_analyze(db, user, 200, "rubric")
+    assert plan is not None
+    assert monthly_quota_exhausted(db, user) is False
     db.close()
 
 

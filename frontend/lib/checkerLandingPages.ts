@@ -462,7 +462,7 @@ function buildMoneyPage(spec: MoneySpec): CheckerLandingPage {
     faqs: [
       {
         question: `Is this ${spec.label.toLowerCase()} free?`,
-        answer: "Yes during the public free launch, subject to fair-use limits so the service stays reliable.",
+        answer: "Yes. Every feature is free right now, including full analysis, coach, citations, PDF export, and draft comparison. There is no monthly check cap.",
       },
       {
         question: "Does it write my essay for me?",

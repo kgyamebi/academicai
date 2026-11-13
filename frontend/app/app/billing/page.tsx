@@ -7,7 +7,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/EmptyState";
 
 type Billing = {
-  plan: { slug: string; name: string; checks_per_month: number; max_words: number };
+  plan: { slug: string; name: string; checks_per_month: number | null; max_words: number; unlimited?: boolean };
   subscription: { status: string; checks_used: number; period_end?: string | null };
   credits: number;
 };
@@ -48,10 +48,10 @@ export default function BillingPage() {
   return (
     <main className="mx-auto max-w-3xl space-y-8">
       <div>
-        <p className="text-sm font-medium tracking-wide text-[var(--teal)]">Free public launch</p>
+        <p className="text-sm font-medium tracking-wide text-[var(--teal)]">Fully free</p>
         <h1 className="mt-2 font-serif text-3xl md:text-4xl">Plan usage</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--ink-muted)]">
-          Subscriptions and checkout are disabled for this launch. You can still see your current plan limits and usage.
+          Every feature is free. There is no monthly check cap and no checkout.
         </p>
       </div>
 
@@ -62,17 +62,16 @@ export default function BillingPage() {
         <p className="mt-3 text-sm leading-7">
           <span className="font-medium">{data.plan.name}</span>
           {" · "}
-          {data.subscription.checks_used}/{data.plan.checks_per_month} checks used
-          {" · "}
-          {Math.round(data.credits)} credits
+          {data.plan.unlimited || data.plan.checks_per_month == null
+            ? "Unlimited checks"
+            : `${data.subscription.checks_used}/${data.plan.checks_per_month} checks used`}
         </p>
       </section>
 
       <section className="rounded-[var(--radius-md)] border border-dashed border-[var(--rule)] bg-[var(--paper-2)] p-6" role="status">
         <h2 className="font-serif text-xl">Purchases unavailable</h2>
         <p className="mt-2 text-sm leading-7 text-[var(--ink-muted)]">
-          Paid upgrades are intentionally off. There are no checkout buttons in this release — so you never hit a dead
-          payment flow.
+          Paid upgrades are off. Full analysis, coach, PDF export, sharing, and draft comparison are included.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <ButtonLink href="/check" variant="primary">

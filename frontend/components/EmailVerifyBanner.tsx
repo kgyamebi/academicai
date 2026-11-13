@@ -29,10 +29,9 @@ export function EmailVerifyBanner({ email }: { email: string }) {
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-medium text-[var(--ink)]">Verify your email to unlock all AcademicCheck AI features</p>
+          <p className="font-medium text-[var(--ink)]">Confirm {email} so we can reach you</p>
           <p className="mt-1 text-[var(--ink-muted)]">
-            PDF exports, sharing, version history, and future billing stay locked until{" "}
-            <span className="text-[var(--ink)]">{email}</span> is confirmed.{" "}
+            Every feature is already open. Verification only confirms this inbox for password resets and account email.{" "}
             <Link href="/verify-email" className="text-[var(--teal)] underline-offset-2 hover:underline">
               Verification help
             </Link>

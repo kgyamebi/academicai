@@ -99,14 +99,43 @@ def plan_for(db: Session, user: User) -> Plan:
     )
 
 
+LAUNCH_FEATURES = (
+    "grammar",
+    "structure",
+    "question",
+    "basic_feedback",
+    "full_analysis",
+    "rubric",
+    "compare",
+    "coach",
+    "ai_indicator",
+    "pdf_report",
+    "citation_verify",
+    "history",
+    "priority",
+)
+
+
 def features_for(plan: Plan) -> dict:
     base = DEFAULT_FEATURES.get(plan.slug, DEFAULT_FEATURES["free"])
     merged = {**base, **(plan.features or {})}
+    if get_settings().features_fully_free:
+        for key in LAUNCH_FEATURES:
+            merged[key] = True
     return merged
 
 
 def assert_can_analyze(db: Session, user: User, word_count: int, analysis_type: str = "full") -> Plan:
     plan = plan_for(db, user)
+    settings = get_settings()
+    if settings.features_fully_free:
+        cap = settings.free_launch_max_words
+        if word_count > cap:
+            raise HTTPException(
+                status.HTTP_402_PAYMENT_REQUIRED,
+                f"This document is {word_count} words. Each check can include up to {cap} words.",
+            )
+        return plan
     max_words = plan.max_words
     if user.is_guest:
         max_words = min(max_words, get_settings().guest_max_words)
@@ -137,6 +166,8 @@ def assert_can_analyze(db: Session, user: User, word_count: int, analysis_type: 
 
 
 def monthly_quota_exhausted(db: Session, user: User) -> bool:
+    if get_settings().features_fully_free:
+        return False
     plan = plan_for(db, user)
     used = _checks_used_this_period(db, user)
     limit = plan.checks_per_month if not user.is_guest else get_settings().guest_max_checks

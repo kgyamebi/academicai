@@ -30,7 +30,7 @@ const content: Record<string, { title: string; body: string }> = {
   },
   pricing: {
     title: "Pricing and credits",
-    body: "Public free launch: paid subscriptions and checkout are intentionally disabled. You can use the product under fair-use limits with no payment flow. Future paid tiers (when re-enabled) will unlock higher monthly limits; charges will only ever happen after verified server-side payment confirmation — never from the browser alone.",
+    body: "AcademicCheck is fully free right now. Full analysis, rubric feedback, coach, citations, PDF export, sharing, and draft comparison are open, with no monthly check cap and no checkout. Paid plans may return later. Any future charge will happen only after verified server-side payment confirmation — never from the browser alone.",
   },
   terms: {
     title: "Terms of use (summary)",

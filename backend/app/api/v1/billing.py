@@ -64,13 +64,15 @@ def my_billing(user: User = Depends(get_current_user), db: Session = Depends(get
         or (settings.paystack_secret_key or "").strip()
         or (settings.flutterwave_secret_key or "").strip()
     )
+    unlimited = settings.features_fully_free
     return {
         "plan": {
-            "slug": plan.slug,
-            "name": plan.name,
-            "checks_per_month": plan.checks_per_month,
-            "max_words": plan.max_words,
+            "slug": "free" if unlimited else plan.slug,
+            "name": "Free — all features" if unlimited else plan.name,
+            "checks_per_month": None if unlimited else plan.checks_per_month,
+            "max_words": settings.free_launch_max_words if unlimited else plan.max_words,
             "features": features_for(plan),
+            "unlimited": unlimited,
         },
         "subscription": {
             "id": str(sub.id) if sub else None,

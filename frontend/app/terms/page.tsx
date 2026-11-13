@@ -49,9 +49,9 @@ export default function TermsPage() {
           <section>
             <h2 className="font-serif text-2xl">Accounts and free launch</h2>
             <p className="mt-3 text-[var(--ink-muted)]">
-              During the public free launch, paid subscriptions and checkout are disabled. Fair-use limits may apply so
-              the service stays reliable. We may change limits or availability with reasonable notice when paid plans
-              return.
+              AcademicCheck is fully free for this growth period. Paid subscriptions and checkout are disabled, and product
+              features are not locked behind a plan. We may introduce limits or paid plans later, with notice on this
+              page.
             </p>
           </section>
 

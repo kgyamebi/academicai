@@ -48,6 +48,8 @@ def get_role(db: Session, name: str) -> Role:
 
 def assert_email_verified(user: User) -> None:
     """Invoice App pattern: signup/login stay open; gate privileged actions."""
+    if get_settings().features_fully_free:
+        return
     if user.is_guest:
         return
     if not get_settings().require_email_verification:

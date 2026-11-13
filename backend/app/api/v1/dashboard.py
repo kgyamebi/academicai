@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.core.crypto import decrypt_field
 from app.db.session import get_db_read
 from app.deps import get_current_user
@@ -268,9 +269,12 @@ def dashboard(user: User = Depends(get_current_user), db: Session = Depends(get_
         "assignments": assignments,
         "average_score": int(round(avg)) if avg else None,
         "checks_used": sub.checks_used if sub else 0,
-        "checks_remaining": max(0, plan.checks_per_month - (sub.checks_used if sub else 0)),
-        "checks_per_month": plan.checks_per_month,
-        "plan": plan.name,
+        "checks_remaining": None
+        if get_settings().features_fully_free
+        else max(0, plan.checks_per_month - (sub.checks_used if sub else 0)),
+        "checks_per_month": None if get_settings().features_fully_free else plan.checks_per_month,
+        "unlimited": get_settings().features_fully_free,
+        "plan": "Free — all features" if get_settings().features_fully_free else plan.name,
         "plan_slug": plan.slug,
         "improvement_trend": scores,
         "recent_reports": [

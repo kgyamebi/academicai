@@ -130,7 +130,7 @@ export default function SettingsPage() {
           ) : (
             <div className="mt-3 space-y-3">
               <StatusBanner tone="warn">
-                Verify your email to unlock PDF exports, sharing, advanced history, and future billing.
+                Confirm this inbox for password resets. Every product feature is already free.
               </StatusBanner>
               <Button type="button" variant="secondary" busy={resendBusy} onClick={resendVerification}>
                 Resend verification email

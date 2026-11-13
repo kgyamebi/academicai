@@ -45,8 +45,9 @@ type Dash = {
   assignments: number;
   average_score: number | null;
   checks_used: number;
-  checks_remaining: number;
-  checks_per_month?: number;
+  checks_remaining: number | null;
+  checks_per_month?: number | null;
+  unlimited?: boolean;
   plan: string;
   plan_slug?: string;
   improvement_trend: number[];
@@ -197,8 +198,11 @@ export default function DashboardPage() {
   const achievements = data.achievements || [];
   const coach = data.coach_suggestions || [];
   const features = data.features || {};
-  const checksCap = data.checks_per_month ?? Math.max(data.checks_used + data.checks_remaining, 1);
-  const usagePct = Math.min(100, Math.round((data.checks_used / checksCap) * 100));
+  const unlimited = Boolean(data.unlimited) || data.checks_remaining == null;
+  const checksCap = unlimited
+    ? null
+    : (data.checks_per_month ?? Math.max(data.checks_used + (data.checks_remaining ?? 0), 1));
+  const usagePct = checksCap ? Math.min(100, Math.round((data.checks_used / checksCap) * 100)) : 0;
   const hasWork = data.report_count ? data.report_count > 0 : data.recent_reports.length > 0;
   const continueHref = hasWork ? "/app/assignments" : "/check";
   const continueLabel = hasWork ? "Continue Improving" : "Start First Analysis";
@@ -724,21 +728,23 @@ export default function DashboardPage() {
         <SectionHeading
           id="usage-heading"
           title="Usage Overview"
-          subtitle="Free public launch — fair-use limits keep the service reliable."
+          subtitle="Every feature is free. There is no monthly check cap."
         />
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <UsageTile label="Checks remaining" value={String(data.checks_remaining)} />
-          <UsageTile label="Checks used" value={`${data.checks_used} / ${checksCap}`} />
+          <UsageTile label="Checks remaining" value={unlimited ? "Unlimited" : String(data.checks_remaining ?? 0)} />
+          <UsageTile label="Checks used" value={unlimited ? String(data.checks_used) : `${data.checks_used} / ${checksCap}`} />
           <UsageTile label="Credits" value={String(Math.round(data.credits ?? 0))} />
           <UsageTile label="Current plan" value={data.plan} />
         </div>
-        <div className="mt-5">
-          <div className="mb-2 flex justify-between text-xs text-[var(--ink-muted)]">
-            <span>Monthly check usage</span>
-            <span>{usagePct}%</span>
+        {unlimited ? null : (
+          <div className="mt-5">
+            <div className="mb-2 flex justify-between text-xs text-[var(--ink-muted)]">
+              <span>Monthly check usage</span>
+              <span>{usagePct}%</span>
+            </div>
+            <ProgressBar value={usagePct} tone="var(--teal)" />
           </div>
-          <ProgressBar value={usagePct} tone="var(--teal)" />
-        </div>
+        )}
         <div className="mt-5 flex flex-wrap gap-2">
           {(
             [
@@ -763,23 +769,12 @@ export default function DashboardPage() {
             </span>
           ))}
         </div>
-        {data.checks_remaining <= 2 ? (
-          <div className="mt-5 rounded-[var(--radius-sm)] border border-[var(--teal)]/30 bg-[var(--teal-soft)]/40 px-4 py-3 text-sm leading-6">
-            You have {data.checks_remaining} check{data.checks_remaining === 1 ? "" : "s"} left this period. Paid upgrades
-            are paused for the free launch — pace checks carefully, or{" "}
-            <Link href="/contact" className="font-medium text-[var(--teal)] underline-offset-4 hover:underline">
-              contact us
-            </Link>{" "}
-            if you hit the limit.
-          </div>
-        ) : (
-          <p className="mt-5 text-sm text-[var(--ink-muted)]">
-            Subscriptions are disabled for this release.{" "}
-            <Link href="/pricing" className="font-medium text-[var(--teal)] underline-offset-4 hover:underline">
-              Free launch details
-            </Link>
-          </p>
-        )}
+        <p className="mt-5 text-sm text-[var(--ink-muted)]">
+          Full analysis, coach, PDF export, sharing, and draft comparison are included.{" "}
+          <Link href="/pricing" className="font-medium text-[var(--teal)] underline-offset-4 hover:underline">
+            Free access details
+          </Link>
+        </p>
       </section>
 
       {/* Preserve recent documents + reports as progressive disclosure */}

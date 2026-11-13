@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     guest_retention_hours: int = 24
     guest_max_checks: int = 2
     guest_max_words: int = 2000
+    # Growth window: every guest and account gets full product features with no monthly check cap.
+    # Set FEATURES_FULLY_FREE=false later to restore plan quotas and email-gated exports.
+    features_fully_free: bool = True
+    # Safety ceiling while fully free. Upload size limits still apply separately.
+    free_launch_max_words: int = 80000
 
     max_upload_mb: int = 15
     max_pdf_pages: int = 80

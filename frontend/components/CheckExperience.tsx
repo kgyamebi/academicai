@@ -178,7 +178,7 @@ export function CheckExperience({ embedded = false }: { embedded?: boolean }) {
           tabIndex={embedded ? undefined : -1}
           className="mx-auto max-w-3xl px-4 py-12 md:py-16"
         >
-          <p className="text-sm font-medium tracking-wide text-[var(--teal)]">Free public check</p>
+          <p className="text-sm font-medium tracking-wide text-[var(--teal)]">Free check — all features</p>
           <h1 className="mt-3 font-serif text-4xl md:text-5xl">Check your assignment</h1>
           <p className="mt-4 max-w-2xl text-[var(--ink-muted)] leading-7">
             No account required for a first look. Create a free account later to save the full report and keep improving.
